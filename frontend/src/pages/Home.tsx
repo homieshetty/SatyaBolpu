@@ -14,6 +14,10 @@ import { buildAnimationProps } from '../constants/Animations';
 import { useNavigate } from 'react-router-dom';
 import { Marker, Popup } from 'react-leaflet';
 import SVGHeader2 from '../constants/SVGHeader2';
+import { RotatingCardProps } from '../types/globals';
+import useApi from '../hooks/useApi';
+import { toast } from 'react-toastify';
+import RotatingCard from '../components/RotatingCard';
 
 gsap.registerPlugin(useGSAP); 
 gsap.registerPlugin(ScrollTrigger);
@@ -21,12 +25,6 @@ gsap.registerPlugin(ScrollTrigger);
 type swiperDataType = {
   title : string;
   images : string[];
-  descr : string;
-}
-
-type landmarksDataType = {
-  title : string;
-  image : string;
   descr : string;
 }
 
@@ -41,15 +39,77 @@ const Home = () => {
   const overlayRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const swiperOverlayRef = useRef<HTMLDivElement>(null);
-  const landmarksRefs = useRef<HTMLDivElement[]>([]);
+  const recentPostRefs = useRef<HTMLDivElement[]>([]);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const [lineHeight, setLineHeight] = useState<number>(0);
   const bgRefs = useRef<HTMLDivElement[]>([]);
 
-  const [swiperData,setSwiperData] = useState<swiperDataType[]>([]);
-  const [landmarksData,setRecentData] = useState<landmarksDataType[]>([]);
+  const [swiperData, setSwiperData] = useState<swiperDataType[]>([]);
+  const [recentPosts, setRecentPosts] = useState<RotatingCardProps[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<RotatingCardProps[]>([]);
   const [isHovering,setHovering] = useState<boolean>(false);
 
+  const recentPostsApi = useApi('/posts?fields=shortTitle,description,image&limit=5');
+  const upcomingEventsApi = useApi('/events?fields=title,duration,docs&limit=5&sortBy=duration.start');
+
   const navigate = useNavigate();
-  const {state} = useAuth();
+  const { state } = useAuth();
+
+  useEffect(() => {
+    if(recentPostsApi.data) {
+      setRecentPosts(recentPostsApi.data.posts);
+    }
+
+    if(upcomingEventsApi.data) {
+      setUpcomingEvents(upcomingEventsApi.data);
+    }
+  }, [recentPostsApi.data, upcomingEventsApi.data]);
+
+  useEffect(() => {
+    if (recentPostsApi.error) {
+      toast.error(recentPostsApi.error);
+      console.error(recentPostsApi.error);
+    }
+
+    if (upcomingEventsApi.error) {
+      toast.error(upcomingEventsApi.error);
+      console.error(upcomingEventsApi.error);
+    }
+  }, [recentPostsApi.error, upcomingEventsApi.error]);
+
+  useEffect(() => {
+    if (!lineRef.current) return;
+
+    const elementTop =
+      lineRef.current.getBoundingClientRect().top + window.scrollY;
+
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const triggerPoint = elementTop - 500;
+
+          const newHeight = Math.max(
+            0,
+            window.scrollY - triggerPoint
+          );
+
+          setLineHeight(newHeight);
+
+          ticking = false;
+        });
+
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,7 +123,6 @@ const Home = () => {
         const data = await response.json();
         if (data.cultures && data.landmarks) {
           setSwiperData(data.cultures);
-          setRecentData(data.landmarks);
         } else {
           console.error('Invalid data format');
         }
@@ -92,7 +151,8 @@ const Home = () => {
           mapRef,
           swiperOverlayRef,
           bgRefs,
-          landmarksRefs,
+          recentPostRefs,
+          lineRef,
           buttonRefs,
           isMobile
         );
@@ -111,7 +171,7 @@ const Home = () => {
 
     return () => ctx.revert();
 
-  }, [landmarksData, swiperData]);
+  }, [swiperData, recentPosts]);
 
     return (
       <div className='home w-screen bg-black'>
@@ -244,8 +304,9 @@ const Home = () => {
           </div>
         </div>
   
-        <div className='w-full h-[200vh] top-0 flex flex-col lg:flex-row gap-5 items-center justify-center p-10'
-             ref={(el) => {if(el) scrollWatcherRef.current[2] = el }}>
+        <div 
+          className='map w-full h-[200vh] top-0 flex flex-col lg:flex-row gap-5 items-center justify-center p-10'
+          ref={(el) => {if(el) scrollWatcherRef.current[2] = el }}>
           <div 
             className='w-full lg:w-1/2 lg:h-full flex items-center justify-center text-center text-primary text-[1.5rem]
             md:text-[2rem] lg:text-[2.5rem] xl:text-[3rem] xl:p-20' 
@@ -268,9 +329,10 @@ const Home = () => {
           </div>
         </div>
 
-        <div className='cultures w-full h-[150vh] md:h-[200vh] flex flex-col gap-10 items-center justify-center' 
-             ref={(el) => {if(el) scrollWatcherRef.current[3] = el }}>
-
+        <div 
+          className='cultures w-full h-[200vh] flex flex-col gap-10 items-center justify-center' 
+          ref={(el) => {if(el) scrollWatcherRef.current[3] = el }}
+        >
           <div className='text-primary text-center text-[2.25rem]/[2.25rem] md:text-[3rem] xl:text-[5rem] '
                ref={(el) => {if(el) headingRefs.current[7] = el }}>
             Cultures And Traditions
@@ -369,19 +431,65 @@ const Home = () => {
         </div>
           
         <div 
-          className='w-screen'
+          className='recent w-screen h-[300vh] flex flex-col items-center justify-center'
           ref={(el) => { if(el) scrollWatcherRef.current[4] = el }}
         >
           <div 
             className='text-primary text-center text-[2.25rem]/[2.25rem] md:text-[3rem] xl:text-[5rem] '
-            ref={(el) => {if(el) headingRefs.current[7] = el }}
+            ref={(el) => {if(el) headingRefs.current[8] = el }}
           >
             Recent Posts
           </div>
-
+          <div
+            className='w-full flex flex-wrap items-center justify-center my-20 gap-5'
+          >
+            {
+              recentPosts.length && recentPosts.map((post, id) => (
+                <div
+                  className='w-1/4'
+                  key={id}
+                  ref={(el) => {
+                    if(el)
+                      recentPostRefs.current[id] = el
+                  }}
+                >
+                  <RotatingCard
+                    {...post}
+                  />
+                </div>
+              ))
+            }
+          </div>
         </div>
 
-        <div className='cta relative w-screen h-[350vh] mt-[50vh] mb-[50vh]' ref={(el) => {if(el) scrollWatcherRef.current[5] = el}}>
+        <div 
+          className='w-screen h-[300vh] flex flex-col items-center justify-center'
+          ref={(el) => { if(el) scrollWatcherRef.current[5] = el }}
+        >
+          <div 
+            className='text-primary text-center text-[2.25rem]/[2.25rem] md:text-[3rem] xl:text-[5rem] '
+            ref={(el) => {if(el) headingRefs.current[9] = el }}
+          >
+            Upcoming Events
+          </div>
+          <div
+            className='w-full flex flex-wrap items-center justify-center my-20 gap-5'
+          >
+            <div 
+              style={{
+                height: `${lineHeight}px`
+              }}
+              className='w-2 bg-primary rounded-lg' ref={lineRef}>
+            </div>
+          </div>
+        </div>
+
+        <div 
+          className='cta relative w-screen h-[350vh] mt-[50vh] mb-[50vh] transition-all' 
+          ref={(el) => {
+            if(el) scrollWatcherRef.current[6] = el
+          }}
+        >
           <div className="sticky top-0 w-full h-screen">
             <div className='overlay w-full h-screen absolute top-0 bg-[rgba(0,0,0,0.5)] z-10'></div>
             <div className="w-screen h-1/4 md:w-1/4 md:h-screen top-0 left-0 absolute
@@ -411,7 +519,16 @@ const Home = () => {
             }
             </h1>
             {
-                state.token ? <Button content='Go To Dashboard'/> : <Button content='Get Started'/>
+                state.token ?
+                <Button 
+                  content='Go To Dashboard'
+                  onClick={() => navigate('/dashboard')}
+                /> 
+                : 
+                <Button 
+                  content='Get Started'
+                  onClick={() => navigate('/signup')}
+                />
             }
           </div>
         </div>

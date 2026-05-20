@@ -49,6 +49,7 @@ const Drafts = () => {
         dataKey="drafts"
         orientation="column"
         pagination={false}
+        searchBar={false}
       />
 
       <Button 

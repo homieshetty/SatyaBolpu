@@ -30,13 +30,16 @@ export const NormalCard = ({ id, title, description, image, handleEdit }: Normal
         />
       </div>
       <div className="w-[60%] md:w-2/3 h-full p-5 flex flex-col gap-5 items-center justify-center">
-        <h1 className="text-primary text-center text-[1.5rem]">{title}</h1>
+        <h1 className="text-primary text-center text-[1.5rem]">{title.charAt(0).toUpperCase() + title.slice(1)}</h1>
         <p 
           style={{
             scrollbarWidth: 'none'
           }}
-          className="text-white w-full h-4/5 overflow-y-scroll text-[0.75rem] md:text-[1rem] text-justify"
-        >{description}</p>
+          className="text-white w-full h-4/5 overflow-y-scroll text-[0.75rem] md:text-[1rem] text-justify
+            overscroll-contain"
+        >
+          {description}
+        </p>
         <div className="flex items-center justify-center gap-2 relative">
           <Button content="View More" onClick={() => navigate(id)}/>
           {

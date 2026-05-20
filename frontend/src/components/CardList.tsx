@@ -89,6 +89,7 @@ const CardList = <T extends BaseCardProps>({
   handleEdit,
   handleDelete,
   pagination = true,
+  searchBar = true,
   filterGroups,
   sortOptions
 }: CardListProps<T>) => {
@@ -241,35 +242,45 @@ const CardList = <T extends BaseCardProps>({
   return (
     <div className="w-full flex flex-col gap-5">
       <div className="w-2/3 flex items-center justify-between mx-auto">
-        <div className="w-2/3 flex items-center gap-2">
-          <input
-            className="w-full rounded-2xl bg-white p-2"
-            placeholder="Search..."
-            type="text"
-          />
-        </div>
+
+        {
+          searchBar && 
+          <div className="w-2/3 flex items-center gap-2">
+            <input
+              className="w-full rounded-2xl bg-white p-2"
+              placeholder="Search..."
+              type="text"
+            />
+          </div>
+        }
         
         <div className="flex gap-2 items-center">
-          <div className="text-primary">
-            {
-              showFilters ?
-                <MdFilterAltOff
-                  className="hover:scale-110 transition-all cursor-pointer"
-                  size={"35px"}
-                  onClick={toggleFilters}
-                /> :
-                <MdFilterAlt
-                  className="hover:scale-110 transition-all cursor-pointer"
-                  size={"35px"}
-                  onClick={toggleFilters}
-                />
-            }
-          </div>
+          {
+            filterGroups && 
+            <div className="text-primary">
+              {
+                showFilters ?
+                  <MdFilterAltOff
+                    className="hover:scale-110 transition-all cursor-pointer"
+                    size={"35px"}
+                    onClick={toggleFilters}
+                  /> :
+                  <MdFilterAlt
+                    className="hover:scale-110 transition-all cursor-pointer"
+                    size={"35px"}
+                    onClick={toggleFilters}
+                  />
+              }
+            </div>
+          }
           <div className="text-primary cursor-pointer hover:scale-110 transition-all">
-            <FaSortAmountDown
-              size={"25px"}
-              onClick={toggleSortOptions}
-            />
+            {
+              sortOptions &&
+              <FaSortAmountDown
+                size={"25px"}
+                onClick={toggleSortOptions}
+              />
+            }
           </div>
         </div>
       </div>

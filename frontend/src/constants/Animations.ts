@@ -39,25 +39,11 @@ export const buildAnimationProps = (
   mapRef: React.RefObject<HTMLDivElement | null>,
   swiperOverlayRef: React.RefObject<HTMLDivElement | null>,
   bgRefs: React.RefObject<HTMLDivElement[]>,
-  landmarkRefs: React.RefObject<HTMLDivElement[]>,
+  recentPostRefs: React.RefObject<HTMLDivElement[]>,
+  lineRef: React.RefObject<HTMLDivElement | null>,
   buttonRefs: React.RefObject<HTMLButtonElement[]>,
   isMobile: boolean
 ): PropsType[] => {
-
-  const landmarksAnim: PropsType[] = landmarkRefs.current.map((ref, index) => ({
-    ref,
-    fromVars: {
-      clipPath: index%2 === 0 ? "inset(0% 100% 0% 0%)" : "inset(0% 0% 0% 100%)"
-    },
-    toVars: {
-      clipPath: "inset(0% 0% 0% 0%)",
-      duration: 0.5,
-      scrollTrigger: {
-        trigger: ref,
-        start: 'top center',
-      },
-    },
-  }));
 
   return [
     {
@@ -417,27 +403,41 @@ export const buildAnimationProps = (
         opacity: 1,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[4], 
-          start: '-20% top',
+          start: '10% top',
+          markers: true
         }
       } 
     },
-
-    ...landmarksAnim,
-
     {
-      ref: buttonRefs.current,
+      ref: recentPostRefs.current,
       fromVars: {
-        opacity: 0
+        opacity: 0,
+        scale: 0.75
       },
       toVars: {
+        scale: 1,
         opacity: 1,
-        duration: 0.25,
+        stagger: 0.2,
         scrollTrigger: {
-          trigger: buttonRefs.current,
-          start: 'top center',
+          trigger: scrollWatcherRef.current[4],
+          start: '15% top'
         }
       }
     },
+    // {
+    //   ref: buttonRefs.current,
+    //   fromVars: {
+    //     opacity: 0
+    //   },
+    //   toVars: {
+    //     opacity: 1,
+    //     duration: 0.25,
+    //     scrollTrigger: {
+    //       trigger: buttonRefs.current,
+    //       start: 'top center',
+    //     }
+    //   }
+    // },
     {
       ref: bgRefs.current,
       fromVars: {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import { RotatingCardProps } from "../types/globals";
+import { BASE_URL } from "../App";
 
 export const RotatingSkeletonCard = () => (
     <div className="w-1/5 bg-gray-700 animate-pulse h-120 flex items-center justify-center rounded-xl" >
@@ -20,7 +21,7 @@ const RotatingCard = ({ id, title, image, description }: RotatingCardProps) => {
   }
 
   return (
-    <div className="w-1/5 perspective-[1000px] hover:scale-[1.025] transition-all duration-200 ease-in-out" 
+    <div className="perspective-[1000px] hover:scale-[1.025] transition-all duration-200 ease-in-out" 
       onClick={() => setClicked(!clicked)}>
       <div
         className={`relative w-full h-120 transition-transform duration-700 ease-in-out cursor-pointer
@@ -28,15 +29,24 @@ const RotatingCard = ({ id, title, image, description }: RotatingCardProps) => {
       >
         <div className="absolute w-full h-full bg-black text-white backface-hidden z-10
           rounded-2xl overflow-hidden border border-white border-solid">
-          <img src={image} alt={title} className="w-full h-4/5 object-cover" />
-          <div className="h-1/5 flex items-center justify-center">
+          <img src={`${BASE_URL}${image}`} alt={title} className="w-full h-4/5 object-cover" />
+          <div className="h-1/5 flex items-center justify-center text-primary font-black
+            text-[2rem]">
             <h3>{title}</h3>
           </div>
         </div>
         <div className="absolute w-full h-full bg-zinc-800 text-white overflow-hidden
           rounded-2xl border border-white border-solid transform-[rotateY(180deg)] backface-hidden">
           <div className="p-4 flex flex-col items-center justify-center h-full">
-            <p className="h-3/4 flex items-center justify-center">{description || "No content provided"}</p>
+            <p className="h-3/4 flex items-center justify-center">
+              {
+                description ? 
+                  description.length > 500 ?
+                    `${description.slice(0, 500)}...` :
+                    description
+                : "No content provided"
+              }
+            </p>
             <Button content="View More" onClick={handleClick}/>
           </div>
         </div>

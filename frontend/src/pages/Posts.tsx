@@ -15,7 +15,9 @@ const Posts = () => {
   const culturesApi = useApi("/cultures?fields=title");
   const tagsApi = useApi("/others/tags?sortBy=tag");
   const postTypesApi = useApi("/others/post-types?sortBy=name");
-  const [displayType, setDisplayType] = useState<"posts" | "postGroups">((sessionStorage.getItem("displayType") ?? "posts") as "posts" | "postGroups");
+  const [displayType, setDisplayType] = useState<"posts" | "postGroups">((
+    sessionStorage.getItem("displayType") ?? "posts") as "posts" | "postGroups"
+  );
   const [filterGroups, setFilterGroups] = useState<FilterGroups>({});
 
   useEffect(() => {
@@ -84,7 +86,8 @@ const Posts = () => {
         />
       </div>
       {
-        displayType === "postGroups" ?
+        displayType === "postGroups" 
+          ?
           <CardList<PostGroupProps>
             key={displayType}
             Card={PostGroupCard}
@@ -92,7 +95,6 @@ const Posts = () => {
             cardsPerPage={10}
             apiEndpoint="posts/post-groups"
             dataKey="postGroups"
-            selectFields="fields=title,description,image"
             orientation="column"
             handleEdit={handleEdit}
             filterGroups={filterGroups}
@@ -100,7 +102,8 @@ const Posts = () => {
               "Name": "name",
               "Date": "createdAt"
             }}
-          /> :
+          /> 
+          :
           <CardList<NormalCardProps>
             key={displayType}
             Card={NormalCard}
@@ -108,11 +111,11 @@ const Posts = () => {
             cardsPerPage={10}
             apiEndpoint={"posts"}
             dataKey="posts"
-            selectFields="fields=title,description,image"
+            selectFields="fields=shortTitle,description,image"
             orientation="column"
             filterGroups={filterGroups}
             sortOptions={{
-              "Title": "title",
+              "Title": "shortTitle",
               "Date": "createdAt"
             }}
           /> 

@@ -31,7 +31,7 @@ const Post = () => {
       <Title title={post?.title ?? ''}/>
 
       <div 
-        className='text-white text-[1.5rem] w-[90%] p-5 wrap-break-word whitespace-pre-wrap'
+        className='text-white text-[1.5rem] w-[90%] p-5 wrap-break-word whitespace-pre-wrap mx-auto'
         dangerouslySetInnerHTML={{
           __html: post?.content ?? ''
         }}

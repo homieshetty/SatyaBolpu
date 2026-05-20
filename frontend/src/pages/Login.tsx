@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, SubmitEvent, useEffect, useRef, useState } from "react";
 import Button from "../components/Button";
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
 import useApi from "../hooks/useApi";
@@ -52,7 +52,7 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationErrors = validateForm();
     if (Object.values(validationErrors).some(err => err !== '')) {
@@ -108,7 +108,7 @@ const Login = () => {
     <div className="w-full min-h-screen text-primary flex items-center justify-center px-4 py-10">
       <form
         onSubmit={handleSubmit}
-        className="w-full sm:w-[90%] md:w-2/3 lg:w-2/5 xl:w-1/3 border-[1px] border-white border-solid rounded-2xl 
+        className="w-full sm:w-[90%] md:w-2/3 lg:w-2/5 xl:w-1/3 border border-white border-solid rounded-2xl 
         flex flex-col items-center gap-8 px-6 py-10 bg-white/5 backdrop-blur-md shadow-lg"
       >
         <h1 className="text-[2.5rem] sm:text-[3rem] font-bold">Login</h1>

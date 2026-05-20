@@ -70,8 +70,7 @@ export const CollapsingCard = ({ id, title, images, description }: CollapsingCar
             <img 
               key={idx}
               className="w-1/3 h-full object-center object-cover"
-              src={img.src}
-              alt={img.alt}
+              src={img}
             />
           ))
         }

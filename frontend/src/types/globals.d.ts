@@ -67,6 +67,7 @@ export type CardListProps<T> = {
   cardsPerPage?: number,
   handleEdit?: (id: string) => void,
   handleDelete?: (id: string) => void,
+  searchBar?: boolean,
   pagination?: boolean,
   filterGroups?: FilterGroups;
   sortOptions?: Record<string, string>
