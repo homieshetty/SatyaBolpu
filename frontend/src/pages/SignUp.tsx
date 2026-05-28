@@ -7,7 +7,7 @@ import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import useApi from "../hooks/useApi";
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
-import parsePhoneNumberFromString from 'libphonenumber-js/mobile';
+import parsePhoneNumberFromString from "libphonenumber-js/mobile";
 import { toast } from "react-toastify";
 import { SignUpProps } from "../types/globals";
 
@@ -39,7 +39,7 @@ const SignUp = () => {
     const { name, value } = e.target;
     setErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: ""
     }));
 
     setFormData((prev) => ({
@@ -51,7 +51,7 @@ const SignUp = () => {
   const handlePhoneNoChange = (phone: string, data: CountryData) => {
     setErrors((prev) => ({
       ...prev,
-      phone: ''
+      phone: ""
     }));
 
     setFormData((prev) => ({
@@ -100,7 +100,7 @@ const SignUp = () => {
   const handleNext = (step: number) => {
     const newErrors = validateForm(step);
     console.log(newErrors)
-    if (Object.values(newErrors).some(err => err !== '')) {
+    if (Object.values(newErrors).some(err => err !== "")) {
       setErrors(newErrors);
       return;
     }
@@ -111,7 +111,7 @@ const SignUp = () => {
     setButtonLoad(true);
     e.preventDefault();
     const newErrors = validateForm(3);
-    if (Object.values(newErrors).some(err => err != '')) {
+    if (Object.values(newErrors).some(err => err != "")) {
       setErrors(newErrors);
       setButtonLoad(false);
       return;
@@ -134,7 +134,7 @@ const SignUp = () => {
           token: data.accessToken,
         },
       });
-      const names: string[] = data.user.name.split(' ');
+      const names: string[] = data.user.name.split(" ");
       let finalName;
       if(names.length < 2) {
         finalName = names[0];

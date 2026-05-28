@@ -17,20 +17,20 @@ const NewEvent = () => {
   const [eventState, setEventState] = useState<EventState | null>(null);
 
   const dialog = useDialog();
-  const draftsApi = useApi('/drafts', { auto: false });
-  const uploadMultipleApi = useApi('/upload/multiple',{ auto: false });
-  const uploadSingleApi = useApi('/upload/single',{ auto: false });
-  const eventsApi = useApi('/events', { auto: false })
+  const draftsApi = useApi("/drafts", { auto: false });
+  const uploadMultipleApi = useApi("/upload/multiple",{ auto: false });
+  const uploadSingleApi = useApi("/upload/single",{ auto: false });
+  const eventsApi = useApi("/events", { auto: false })
   const { state: authState } = useAuth();
 
   const steps = {
-    'Event Details': 'details',
-    'Map': 'map'
+    "Event Details": "details",
+    "Map": "map"
   };
 
   useEffect(() => {
     const fetchDraft = async () => {
-      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: 'GET' });
+      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
       if (!res) return;
       setEventState({
         details: validateEventDetails(res.draft.details) ? res.draft.details : null,
@@ -44,7 +44,7 @@ const NewEvent = () => {
   const handleUpload = () => {
     const uploadCulture = async () => {
       if(!eventState) return;
-      const res = await eventsApi.refetch({ endpoint: '/events', method: 'POST', body: eventState });
+      const res = await eventsApi.refetch({ endpoint: "/events", method: "POST", body: eventState });
       if(res) {
         toast.success(`Event-${res.event.title} successfully uploaded.`)
         draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "DELETE" });
@@ -91,14 +91,14 @@ const NewEvent = () => {
     });
   }
   
-  if(!authState.token || authState.user?.role !== 'admin')
-    return <Navigate to={'/404'} replace/>
+  if(!authState.token || authState.user?.role !== "admin")
+    return <Navigate to={"/404"} replace/>
 
   if(!eventState) return;
 
   return (
     <div className="mt-20 mb-40 flex flex-col gap-20 items-center justify-center">
-      <Title title={eventState.details ? `New Event - ${eventState.details.title}` : 'New Draft Event'}/>
+      <Title title={eventState.details ? `New Event - ${eventState.details.title}` : "New Draft Event"}/>
       
       <div className="w-full flex flex-col items-center justify-center gap-20">
         <ProgressBar 

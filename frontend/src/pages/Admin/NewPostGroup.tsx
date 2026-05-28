@@ -10,7 +10,7 @@ type FormDataType = {
 };
 
 const initialFormData: FormDataType = {
-  postGroup: ''
+  postGroup: ""
 };
 
 const NewPostGroup = () => {
@@ -18,8 +18,8 @@ const NewPostGroup = () => {
   const [existingPostGroups, setExistingPostGroups] = useState<string[]>([]);
   const [errors, setErrors] = useState<FormDataType>(initialFormData);
 
-  const postGroupsApi = useApi('/others/post-groups');
-  const postGroupsPostApi = useApi('/others/post-groups', { auto: false });
+  const postGroupsApi = useApi("/others/post-groups");
+  const postGroupsPostApi = useApi("/others/post-groups", { auto: false });
   const { setLoading } = useLoading();
 
   useLayoutEffect(() => {
@@ -68,7 +68,7 @@ const NewPostGroup = () => {
       newErrors.postGroup = `PostGroup ${formData.postGroup} already exists.`
 
     setErrors(newErrors);
-    if (Object.values(newErrors).some(v => v !== '')) return;
+    if (Object.values(newErrors).some(v => v !== "")) return;
 
     const res = await postGroupsPostApi.post({ ...formData });
     if (!res) return;

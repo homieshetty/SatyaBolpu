@@ -7,32 +7,32 @@ import { MdCancel } from "react-icons/md";
 import Button from "../../components/Button";
 import { toast } from "react-toastify";
 import useApi from "../../hooks/useApi";
-import { CultureDetailsType, ICulture } from "../../types/globals";
+import { ICulture } from "../../types/globals";
 import { BASE_URL } from "../../App";
 import { validateCultureDetails } from "../../utils/validate";
 
+type CultureDetailsType = Omit<ICulture, "content" | "posts">;
+
 type FormErrorType = {
-  title: string;
-  descriptiveName: string;
-  description: string;
-  coverImages: string;
-  galleryImages: string;
+  [k in keyof CultureDetailsType]: string
 };
 
 const initialFormData: CultureDetailsType = {
-  title: '',
-  descriptiveName: '',
-  description: '',
-  coverImages: [],
-  galleryImages: []
+  title: "",
+  descriptiveName: "",
+  description: "",
+  coverImage: null,
+  galleryImages: [],
+  files: []
 };
 
 const initialFormErrors: FormErrorType = {
-  title: '',
-  descriptiveName: '',
-  description: '',
-  coverImages: '',
-  galleryImages: '',
+  title: "",
+  descriptiveName: "",
+  description: "",
+  coverImage: "",
+  galleryImages: "",
+  files: ""
 };
 
 const CultureDetails = () => {
@@ -44,9 +44,10 @@ const CultureDetails = () => {
   const [existingCultures, setExistingCultures] = useState<string[]>([]);
   const [saving, setSaving] = useState<boolean>(false);
 
-  const uploadMultipleApi = useApi('/upload/multiple', { auto: false });
-  const culturesApi = useApi('/cultures', { auto: false });
-  const draftsApi = useApi('/drafts', { auto: false });
+  const uploadSingleApi = useApi("/upload/single", { auto: false });
+  const uploadMultipleApi = useApi("/upload/multiple", { auto: false });
+  const culturesApi = useApi("/cultures", { auto: false });
+  const draftsApi = useApi("/drafts", { auto: false });
   const { state: authState } = useAuth();
   const navigate = useNavigate();
 
@@ -54,7 +55,7 @@ const CultureDetails = () => {
 
   useEffect(() => {
     const fetchCultures = async () => {
-      const res = await culturesApi.refetch({ endpoint: '/cultures', method: 'GET' });
+      const res = await culturesApi.refetch({ endpoint: "/cultures", method: "GET" });
       if (!res) return;
       if (res && res?.cultures?.length > 0) {
         setExistingCultures(res.cultures.map((c: ICulture) => c.title));
@@ -80,7 +81,12 @@ const CultureDetails = () => {
       console.error(uploadMultipleApi.error);
     }
 
-  }, [culturesApi.error, draftsApi.error, uploadMultipleApi.error]);
+    if (uploadSingleApi.error) {
+      toast.error(uploadSingleApi.error);
+      console.error(uploadSingleApi.error);
+    }
+
+  }, [culturesApi.error, draftsApi.error, uploadMultipleApi.error, uploadSingleApi.error]);
 
   useEffect(() => {
     const fetchDraft = async () => {
@@ -107,23 +113,21 @@ const CultureDetails = () => {
 
   useEffect(() => {
     return () => {
-      if (formData.coverImages.length > 0 && formData.galleryImages.length > 0) {
-        formData.coverImages.forEach((file) => {
-          if (file instanceof File) URL.revokeObjectURL(URL.createObjectURL(file));
-        });
+      if (formData.coverImage instanceof File) URL.revokeObjectURL(URL.createObjectURL(formData.coverImage));
+      if (formData.galleryImages.length > 0) {
         formData.galleryImages.forEach((file) => {
           if (file instanceof File) URL.revokeObjectURL(URL.createObjectURL(file));
         });
       }
     };
-  }, [formData.coverImages, formData.galleryImages]);
+  }, [formData.coverImage, formData.galleryImages]);
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
     setErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: ""
     }));
 
     setFormData((prev) => ({
@@ -138,7 +142,7 @@ const CultureDetails = () => {
 
     setErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: ""
     }));
 
     setFormData((prev) => ({
@@ -149,7 +153,7 @@ const CultureDetails = () => {
       ]
     }));
 
-    setTimeout(() => e.target.value = '', 0);
+    setTimeout(() => e.target.value = "", 0);
   };
 
   const handleRemoveImage = (key: keyof CultureDetailsType, index: number) => {
@@ -163,11 +167,12 @@ const CultureDetails = () => {
     setSaving(true);
     e.preventDefault();
     const newErrors: FormErrorType = {
-      title: '',
-      descriptiveName: '',
-      description: '',
-      coverImages: '',
-      galleryImages: ''
+      title: "",
+      descriptiveName: "",
+      description: "",
+      coverImage: "",
+      galleryImages: "",
+      files: ""
     };
 
     if (!formData.title.trim()) {
@@ -197,13 +202,12 @@ const CultureDetails = () => {
       newErrors.description = "Description is required.";
     }
 
-    if (formData.description && formData.description.split(' ').length < 100) {
+    if (formData.description && formData.description.split(" ").length < 100) {
       newErrors.description = "Description should be atleast 100 words long.";
     }
 
-    formData.coverImages.filter((f): f is File => f !== null);
-    if (formData.coverImages.length < 3) {
-      newErrors.coverImages = "Three cover images are required.";
+    if (!formData.coverImage) {
+      newErrors.coverImage = "A Cover image is required.";
     }
 
     formData.galleryImages.filter((f): f is File => f !== null);
@@ -211,37 +215,32 @@ const CultureDetails = () => {
       newErrors.galleryImages = "Atleast 15 gallery images are required.";
     }
 
+    formData.files.filter((f): f is File => f !== null);
+
     setErrors(newErrors);
-    const hasErrors = Object.values(newErrors).some(err => err !== '');
+    const hasErrors = Object.values(newErrors).some(err => err !== "");
     if (hasErrors) {
       setSaving(false)
       return;
     }
 
-    let coverImages = [];
+    let coverImage = formData.coverImage;
+    if(formData.coverImage instanceof File) {
+      const coverImageData = new FormData();
+      coverImageData.append('file', formData.coverImage);
+      const res = await uploadSingleApi.post(coverImageData);
+      coverImage = res.path;
+    }
+
     let galleryImages = [];
-    const coverImagesData = new FormData();
     const galleryImagesData = new FormData();
 
-    formData.coverImages.forEach(file => {
-      file instanceof File ?
-        coverImagesData.append("files", file as File) :
-        coverImages.push(file);
-    });
     formData.galleryImages.forEach(file => {
       file instanceof File ?
         galleryImagesData.append("files", file as File) :
         galleryImages.push(file)
     });
 
-    if (coverImagesData.getAll("files").length > 0) {
-      const res1 = await uploadMultipleApi.post(coverImagesData);
-      if (!res1) {
-        setSaving(false);
-        return;
-      }
-      coverImages.push(...res1.paths);
-    }
     if (galleryImagesData.getAll("files").length > 0) {
       const res2 = await uploadMultipleApi.post(galleryImagesData);
       if (!res2) {
@@ -253,7 +252,7 @@ const CultureDetails = () => {
 
     const details = {
       ...formData,
-      coverImages,
+      coverImage,
       galleryImages
     };
     const res = await culturesApi.refetch({ endpoint: `/cultures/draft/${id}/details`, method: "POST", body: { details } });
@@ -279,8 +278,8 @@ const CultureDetails = () => {
     }
   }
 
-  if (!authState.token || authState.user?.role !== 'admin') {
-    return <Navigate to={'/404'} replace />
+  if (!authState.token || authState.user?.role !== "admin") {
+    return <Navigate to={"/404"} replace />
   }
 
   return (
@@ -344,48 +343,45 @@ const CultureDetails = () => {
 
         <div className="flex flex-col w-full gap-3">
           <label className="text-primary font-semibold text-[1.5rem]">
-            Cover Images
+            Cover Image
           </label>
-          <label htmlFor="coverImages" className="w-fit">
+          <label htmlFor="coverImage" className="w-fit">
             <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
               justify-center border-3 border-solid border-primary  
-              ${submitted || formData.coverImages.length >= 4 ?
-                'bg-white/70 cursor-not-allowed' : 'bg-white hover:bg-white/70 cursor-pointer'}`}>
+              ${submitted || formData.coverImage ?
+                "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
               <FaUpload />
               <p>Upload Image</p>
             </div>
           </label>
           <input
             className="hidden"
-            disabled={submitted || formData.coverImages.length >= 4}
+            disabled={submitted || !!formData.coverImage}
             type="file"
             accept="image/*"
-            id="coverImages"
-            name="coverImages"
+            id="coverImage"
+            name="coverImage"
             multiple
             onChange={handleFileChange}
           />
           <div className="flex flex-wrap text-white">
             {
-              formData.coverImages.length > 0 && formData.coverImages.map((coverImage, index) => {
-                return (
-                  <div className="w-1/2 border-2 border-solid border-white flex relative" key={index}>
+              formData.coverImage && 
+                  <div className="w-1/2 border-2 border-solid border-white flex relative">
                     <img
                       className="w-full aspect-square object-cover object-center"
-                      src={coverImage instanceof File ? URL.createObjectURL(coverImage) : `${BASE_URL}${coverImage}`} alt="cover-image" />
+                      src={formData.coverImage instanceof File ? URL.createObjectURL(formData.coverImage) : `${BASE_URL}${formData.coverImage}`} alt="cover-image" />
                     {
                       !submitted &&
                       <MdCancel
                         className="absolute bg-black rounded-full text-[1.5rem] top-2 right-2 cursor-pointer hover:text-primary"
-                        onClick={() => handleRemoveImage('coverImages', index)}
+                        onClick={() => setFormData(prev => ({ ...prev, "coverImage": "" }))}
                       />
                     }
                   </div>
-                )
-              })
             }
           </div>
-          {errors.coverImages && <p className="text-red-500">{errors.coverImages}</p>}
+          {errors.coverImage && <p className="text-red-500">{errors.coverImage}</p>}
         </div>
 
         <div className="flex flex-col w-full gap-3">
@@ -395,9 +391,9 @@ const CultureDetails = () => {
           <label htmlFor="galleryImages" className="w-fit">
             <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
               justify-center border-3 border-solid border-primary  
-              ${submitted ? 'bg-white/70 cursor-not-allowed' : 'bg-white hover:bg-white/70 cursor-pointer'}`}>
+              ${submitted ? "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
               <FaUpload />
-              <p>Upload Image</p>
+              <p>Upload Images</p>
             </div>
           </label>
           <input
@@ -422,7 +418,7 @@ const CultureDetails = () => {
                       !submitted &&
                       <MdCancel
                         className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
-                        onClick={() => handleRemoveImage('galleryImages', index)}
+                        onClick={() => handleRemoveImage("galleryImages", index)}
                       />
                     }
                   </div>
@@ -433,13 +429,58 @@ const CultureDetails = () => {
           {errors.galleryImages && <p className="text-red-500">{errors.galleryImages}</p>}
         </div>
 
+        <div className="flex flex-col w-full gap-3">
+          <label className="text-primary font-semibold text-[1.5rem]">
+            Other related files
+          </label>
+          <label htmlFor="files" className="w-fit">
+            <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
+              justify-center border-3 border-solid border-primary  
+              ${submitted ? "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
+              <FaUpload />
+              <p>Upload Files</p>
+            </div>
+          </label>
+          <input
+            className="hidden"
+            disabled={submitted}
+            type="file"
+            accept="image/*"
+            id="files"
+            name="files"
+            multiple
+            onChange={handleFileChange}
+          />
+          <div className="flex flex-wrap text-white">
+            {
+              formData.files.length > 0 && formData.files.map((file, index) => {
+                return (
+                  <div className="w-1/6 border-2 border-solid border-white flex relative" key={index}>
+                    <img
+                      className="w-full aspect-square object-cover object-center"
+                      src={file instanceof File ? URL.createObjectURL(file) : `${BASE_URL}${file}`} alt={`gallery-${index}`} />
+                    {
+                      !submitted &&
+                      <MdCancel
+                        className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
+                        onClick={() => handleRemoveImage("files", index)}
+                      />
+                    }
+                  </div>
+                )
+              })
+            }
+          </div>
+          {errors.files && <p className="text-red-500">{errors.files}</p>}
+        </div>
+
         {
 
           submitted ?
             <FaEdit
               className={`text-[2.5rem] cursor-pointer m-5 bg-black 
                          text-white hover:scale-110 hover:text-primary z-50`}
-              id='edit'
+              id="edit"
               onClick={handleEditAgain} />
             :
             <Button
@@ -461,7 +502,7 @@ const CultureDetails = () => {
         </div>
         <div
           className={`text-[1.2rem] sm:text-[1.75rem]
-          ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
+          ${submitted ? "hover:text-primary text-white cursor-pointer" : "text-gray-500 cursor-not-allowed"}`}
           onClick={handleNext}>
           {`Editor >`}
         </div>

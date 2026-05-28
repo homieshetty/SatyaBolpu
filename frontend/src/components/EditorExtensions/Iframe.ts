@@ -1,22 +1,22 @@
-import { Node } from '@tiptap/core'
-import { ReactNodeViewRenderer } from '@tiptap/react'
-import IframeComponent from './IframeComponent'
+import { Node } from "@tiptap/core"
+import { ReactNodeViewRenderer } from "@tiptap/react"
+import IframeComponent from "./IframeComponent"
 
 export const Iframe = Node.create({
-  name: 'iframeEmbed',
-  group: 'block',
+  name: "iframeEmbed",
+  group: "block",
   atom: true,
 
   addAttributes() {
     return {
       html: {
-        default: '',
+        default: "",
       },
       caption: {
-        default: '',
+        default: "",
         parseHTML: (element: HTMLElement) => {
-          const captionElement = element.querySelector('p.caption')
-          return captionElement?.textContent ?? ''
+          const captionElement = element.querySelector("p.caption")
+          return captionElement?.textContent ?? ""
         },
         renderHTML: (attributes: Record<string, any>) => ({
           caption: attributes.caption,
@@ -28,7 +28,7 @@ export const Iframe = Node.create({
   parseHTML() {
     return [
       {
-        tag: 'div[data-iframe-embed]',
+        tag: "div[data-iframe-embed]",
         getAttrs: dom => ({
           html: dom.innerHTML,
         }),
@@ -41,23 +41,23 @@ renderHTML({ HTMLAttributes }) {
   const { caption, html } = HTMLAttributes;
 
   return [
-    'div',
+    "div",
     { 
-        class: 'w-fit mx-auto',
+        class: "w-fit mx-auto",
     },
     [
-      'div',
+      "div",
       {
-        'data-iframe-embed': 'true',
+        "data-iframe-embed": "true",
       },
       html
     ],
     [
-      'p',
+      "p",
       {
-        class: 'caption text-center text-[1rem] text-gray-300 mt-2'
+        class: "caption text-center text-[1rem] text-gray-300 mt-2"
       },
-      caption || ''
+      caption || ""
     ]
   ];
 },

@@ -21,9 +21,9 @@ type FormErrorType = {
 };
 
 const initialFormData: EventDetailsType = {
-  title: '',
-  description: '',
-  culture: '',
+  title: "",
+  description: "",
+  culture: "",
   duration: {
     start: null,
     end: null
@@ -32,12 +32,12 @@ const initialFormData: EventDetailsType = {
 };
 
 const initialFormErrors: FormErrorType = {
-  title: '',
-  description: '',
-  culture: '',
-  start: '',
-  end: '',
-  docs: ''
+  title: "",
+  description: "",
+  culture: "",
+  start: "",
+  end: "",
+  docs: ""
 };
 
 const EventDetails = () => {
@@ -49,10 +49,10 @@ const EventDetails = () => {
   const [saving, setSaving] = useState<boolean>(false);
   const [cultures, setCultures] = useState<{_id: string, title: string}[]>([]);
 
-  const culturesApi = useApi('/cultures');
-  const uploadMultipleApi = useApi('/upload/multiple', { auto: false });
-  const eventsApi = useApi('/events', { auto: false });
-  const draftsApi = useApi('/drafts', { auto: false });
+  const culturesApi = useApi("/cultures");
+  const uploadMultipleApi = useApi("/upload/multiple", { auto: false });
+  const eventsApi = useApi("/events", { auto: false });
+  const draftsApi = useApi("/drafts", { auto: false });
   const { setLoading } = useLoading();
   const { state: authState } = useAuth();
   const navigate = useNavigate();
@@ -108,7 +108,7 @@ const EventDetails = () => {
       const type = name.slice(8).toLowerCase();
       setErrors((prev) => ({
         ...prev,
-        [type]: ''
+        [type]: ""
       }));
 
       setFormData((prev) => ({
@@ -123,7 +123,7 @@ const EventDetails = () => {
 
     setErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: ""
     }));
 
     setFormData((prev) => ({
@@ -138,7 +138,7 @@ const EventDetails = () => {
 
     setErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: ""
     }));
 
     setFormData((prev) => ({
@@ -149,7 +149,7 @@ const EventDetails = () => {
       ]
     }));
 
-    setTimeout(() => e.target.value = '', 0);
+    setTimeout(() => e.target.value = "", 0);
   };
 
   const handleRemoveImage = (key: keyof EventDetailsType, index: number) => {
@@ -163,12 +163,12 @@ const EventDetails = () => {
     setSaving(true);
     e.preventDefault();
     const newErrors: FormErrorType = {
-      title: '',
-      description: '',
-      culture: '',
-      start: '',
-      end: '',
-      docs: ''
+      title: "",
+      description: "",
+      culture: "",
+      start: "",
+      end: "",
+      docs: ""
     };
 
     if (!formData.title.trim()) {
@@ -183,7 +183,7 @@ const EventDetails = () => {
       newErrors.description = "Description is required.";
     }
 
-    if (formData.description.split(' ').length < 5) {
+    if (formData.description.split(" ").length < 5) {
       newErrors.description = "Description should be atleast 5 words long.";
     }
 
@@ -207,7 +207,7 @@ const EventDetails = () => {
     }
 
     setErrors(newErrors);
-    const hasErrors = Object.values(newErrors).some(err => err !== '');
+    const hasErrors = Object.values(newErrors).some(err => err !== "");
     if (hasErrors) {
       setSaving(false)
       return
@@ -254,8 +254,8 @@ const EventDetails = () => {
     }
   }
 
-  if (!authState.token || authState.user?.role !== 'admin') {
-    return <Navigate to={'/404'} replace />
+  if (!authState.token || authState.user?.role !== "admin") {
+    return <Navigate to={"/404"} replace />
   }
 
   return (
@@ -310,7 +310,7 @@ const EventDetails = () => {
             name="culture"
             id="culture"
             className="p-2 cursor-pointer bg-white disabled:bg-gray-300"
-            value={formData.culture ?? ''}
+            value={formData.culture ?? ""}
             onChange={handleFormChange}
           >
             <option value="" hidden className="text-white">-- Choose a culture --</option>
@@ -362,7 +362,7 @@ const EventDetails = () => {
           <label htmlFor="docs" className="w-fit">
             <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
               justify-center border-3 border-solid border-primary  
-              ${submitted ? 'bg-white/70 cursor-not-allowed' : 'bg-white hover:bg-white/70 cursor-pointer'}`}>
+              ${submitted ? "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
               <FaUpload />
               <p>Upload Document</p>
             </div>
@@ -391,7 +391,7 @@ const EventDetails = () => {
                           /> :
                           <iframe
                             style={{
-                              scrollbarWidth: 'none'
+                              scrollbarWidth: "none"
                             }}
                             className="w-full aspect-square object-cover object-center"
                             src={URL.createObjectURL(doc)}
@@ -401,7 +401,7 @@ const EventDetails = () => {
                         !submitted &&
                         <MdCancel
                           className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
-                          onClick={() => handleRemoveImage('docs', index)}
+                          onClick={() => handleRemoveImage("docs", index)}
                         />
                       }
                     </div>
@@ -419,7 +419,7 @@ const EventDetails = () => {
             <FaEdit
               className={`text-[2.5rem] cursor-pointer m-5 bg-black 
                          text-white hover:scale-110 hover:text-primary z-50`}
-              id='edit'
+              id="edit"
               onClick={handleEditAgain}
             />
             :
@@ -442,7 +442,7 @@ const EventDetails = () => {
         </div>
         <div
           className={`text-[1.2rem] sm:text-[1.75rem]
-          ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
+          ${submitted ? "hover:text-primary text-white cursor-pointer" : "text-gray-500 cursor-not-allowed"}`}
           onClick={handleNext}>
           {`Map >`}
         </div>

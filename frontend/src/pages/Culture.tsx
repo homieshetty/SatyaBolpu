@@ -122,7 +122,7 @@ const Culture = () => {
   }, [cultureData]);
  
   if (culturesApi.error) {
-    return <Navigate to={'/404'} replace />;
+    return <Navigate to={"/404"} replace />;
   }
 
   return (
@@ -157,21 +157,21 @@ const Culture = () => {
             <div 
               className="w-screen h-screen text-center absolute left-0 flex flex-col justify-center items-center"
               style={{
-                background: 'url()' 
+                background: "url()" 
               }}>
                 <svg 
                   xmlns="http://www.w3.org/2000/svg" 
                 width="80vw" 
                 height="50vh" 
-                  style={{ strokeDasharray: '400', animation: 'showText 2s linear forwards' }}
+                  style={{ strokeDasharray: "400", animation: "showText 2s linear forwards" }}
                 >
                   <text 
-                    x='50%' 
-                    y='50%' 
+                    x="50%" 
+                    y="50%" 
                     textAnchor="middle" 
                     dominantBaseline="middle" 
                     className="stroke-primary"
-                    style={{ fontSize: 'clamp(2rem,10vw,10rem)' }}
+                    style={{ fontSize: "clamp(2rem,10vw,10rem)" }}
                   >
                     {cultureData.title}
                   </text>
@@ -200,9 +200,9 @@ const Culture = () => {
                 but believed to be one of the time-honored Dravidian cults. Daivas also plays an important role in the administration and 
                 judiciary system of Tulu Nadu.
 
-                Dravidians worship their ancestors. It is believed that there are more than 1000+ Daiva's in Tulu Nadu.
+                Dravidians worship their ancestors. It is believed that there are more than 1000+ Daiva"s in Tulu Nadu.
                 But only a few are more popular and worshipped in all parts of Tulu Nadu. while other spirits are worshipped by 
-                certain individual families or in certain regions only in a modest way. Each Daiva's has its own story and Reason for worshipping.
+                certain individual families or in certain regions only in a modest way. Each Daiva"s has its own story and Reason for worshipping.
               </div>
               <Button 
                 content="View More"

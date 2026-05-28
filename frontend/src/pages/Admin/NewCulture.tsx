@@ -18,22 +18,22 @@ const NewCulture = () => {
   const [cultureState, setCultureState] = useState<CultureState | null>(null);
 
   const dialog = useDialog();
-  const draftsApi = useApi('/drafts', { auto: false });
-  const culturesApi = useApi('/cultures', { auto: false })
+  const draftsApi = useApi("/drafts", { auto: false });
+  const culturesApi = useApi("/cultures", { auto: false })
   const { state: authState } = useAuth();
 
   const steps = {
-    'Culture Details': 'details',
-    'Editor': 'editor',
+    "Culture Details": "details",
+    "Editor": "editor",
   };
 
   useEffect(() => {
     const fetchDraft = async () => {
-      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: 'GET' });
+      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
       if (!res) return;
       setCultureState({
         details: validateCultureDetails(res.draft.details) ? res.draft.details : null,
-        content: res.draft.content ?? ''
+        content: res.draft.content ?? ""
       });
     }
 
@@ -43,7 +43,7 @@ const NewCulture = () => {
   const handleUpload = () => {
     const uploadCulture = async () => {
       if(!cultureState) return;
-      const res = await culturesApi.refetch({ endpoint: '/cultures', method: 'POST', body: cultureState });
+      const res = await culturesApi.refetch({ endpoint: "/cultures", method: "POST", body: cultureState });
       if(res) {
         toast.success(`Culture-${res.culture.title} successfully uploaded.`)
         draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "DELETE" });
@@ -77,14 +77,14 @@ const NewCulture = () => {
     setCultureState(null);
   }
   
-  if(!authState.token || authState.user?.role !== 'admin')
-    return <Navigate to={'/404'} replace/>
+  if(!authState.token || authState.user?.role !== "admin")
+    return <Navigate to={"/404"} replace/>
 
   if(!cultureState) return;
 
   return (
     <div className="mt-20 mb-40 flex flex-col gap-20 items-center justify-center">
-      <Title title={cultureState.details ? `New Culture - ${cultureState.details.title}` : 'New Draft Culture'}/>
+      <Title title={cultureState.details ? `New Culture - ${cultureState.details.title}` : "New Draft Culture"}/>
       
       <div className="w-full flex flex-col items-center justify-center gap-20">
         <ProgressBar 

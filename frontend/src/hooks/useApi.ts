@@ -30,7 +30,7 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
         abortControllerRef.current = new AbortController();
         
         const mergedOptions = {
-            method: 'GET' as Method,
+            method: "GET" as Method,
             ...initOptions,
             ...options,
         };
@@ -44,7 +44,7 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
                 ...mergedOptions,
                 method: mergedOptions.method,
                 signal: abortControllerRef.current.signal,
-                credentials: 'include'
+                credentials: "include"
             };
 
             const isFormData = mergedOptions.body instanceof FormData;
@@ -57,12 +57,12 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
               }
 
               requestOptions.body = mergedOptions.body;
-            } else if (mergedOptions.body && ['POST', 'PUT', 'PATCH'].includes(mergedOptions.method || 'GET')) {
+            } else if (mergedOptions.body && ["POST", "PUT", "PATCH"].includes(mergedOptions.method || "GET")) {
                 requestOptions.headers = {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                     ...(mergedOptions.headers || {})
                 };
-                requestOptions.body = typeof mergedOptions.body === 'string' 
+                requestOptions.body = typeof mergedOptions.body === "string" 
                     ? mergedOptions.body 
                     : JSON.stringify(mergedOptions.body);
             } else {
@@ -76,8 +76,8 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
             if (!res.ok) {
               let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
                 try {
-                    const contentType = res.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
                         const err = await res.json();
                         errorMessage = err.msg || err.message || errorMessage;
                     } else {
@@ -90,10 +90,10 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
                 throw new Error(errorMessage);
             }
 
-            const contentType = res.headers.get('content-type');
+            const contentType = res.headers.get("content-type");
             let data: T;
             
-            if (contentType && contentType.includes('application/json')) {
+            if (contentType && contentType.includes("application/json")) {
                 data = await res.json();
             } else {
                 data = (await res.text()) as unknown as T;
@@ -105,7 +105,7 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
             
             return data;
         } catch (err: any) {
-            if (err.name === 'AbortError') {
+            if (err.name === "AbortError") {
                 return null;
             }
             
@@ -127,19 +127,19 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
     }, [fetchData]);
 
     const post = useCallback((body: any, opts?: Partial<ApiOptions>) => {
-        return fetchData({ ...opts, body, method: 'POST' });
+        return fetchData({ ...opts, body, method: "POST" });
     }, [fetchData]);
 
     const put = useCallback((body: any, opts?: Partial<ApiOptions>) => {
-        return fetchData({ ...opts, body, method: 'PUT' });
+        return fetchData({ ...opts, body, method: "PUT" });
     }, [fetchData]);
 
     const patch = useCallback((body: any, opts?: Partial<ApiOptions>) => {
-        return fetchData({ ...opts, body, method: 'PATCH' });
+        return fetchData({ ...opts, body, method: "PATCH" });
     }, [fetchData]);
 
     const del = useCallback((opts?: Partial<ApiOptions>) => {
-        return fetchData({ ...opts, method: 'DELETE' });
+        return fetchData({ ...opts, method: "DELETE" });
     }, [fetchData]);
 
     const reset = useCallback(() => {

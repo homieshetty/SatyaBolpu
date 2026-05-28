@@ -1,6 +1,6 @@
-import { useRef } from 'react';
-import BaseComponent from './BaseComponent';
-import { NodeViewProps } from '@tiptap/react';
+import { useRef } from "react";
+import BaseComponent from "./BaseComponent";
+import { NodeViewProps } from "@tiptap/react";
 
 const VideoComponent = (props: NodeViewProps) => {
   const { node } = props;

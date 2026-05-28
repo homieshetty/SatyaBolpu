@@ -10,7 +10,7 @@ export const CollapsingSkeletonCard = () => (
     <div className="w-full flex h-100">
       {
         Array(3).fill(0).map((_, i) => (
-          <div key={i} className={`w-1/3 h-full ${i%2 === 0 ? 'bg-gray-500' : 'bg-gray-600'} `}></div>
+          <div key={i} className={`w-1/3 h-full ${i%2 === 0 ? "bg-gray-500" : "bg-gray-600"} `}></div>
         ))
       }
     </div>
@@ -37,8 +37,8 @@ export const CollapsingCard = ({ id, title, images, description }: CollapsingCar
       setOffset(descriptionRef.current!.getBoundingClientRect().height + 15);
     }
 
-    window.addEventListener('resize', calculateOffset);
-    return () => window.removeEventListener('resize', calculateOffset);
+    window.addEventListener("resize", calculateOffset);
+    return () => window.removeEventListener("resize", calculateOffset);
   }, [descriptionRef.current]);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export const CollapsingCard = ({ id, title, images, description }: CollapsingCar
       <div 
         className="w-full flex h-100"
         style={{
-          opacity: showMoreIdx === 0 ? '0.5' : '1'
+          opacity: showMoreIdx === 0 ? "0.5" : "1"
         }}
       >
         {
@@ -79,14 +79,14 @@ export const CollapsingCard = ({ id, title, images, description }: CollapsingCar
         className="w-full absolute p-5 flex flex-col items-center justify-center transition-all
         bg-black bottom-0"
         style={{
-          translate: showMoreIdx === 0 ? '0 0' : `0 ${offset}px`
+          translate: showMoreIdx === 0 ? "0 0" : `0 ${offset}px`
         }}
       >
         <div className="absolute bg-black p-2 bottom-full rounded-tl-2xl rounded-tr-2xl">
           <IoIosArrowUp 
             className="text-white hover:text-primary text-[30px] transition-all" 
             style={{
-              rotate: showMoreIdx === 0 ? '180deg' : '0deg'
+              rotate: showMoreIdx === 0 ? "180deg" : "0deg"
             }}
             /> 
         </div>

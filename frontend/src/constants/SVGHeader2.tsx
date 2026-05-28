@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react"
 
 const SVGHeader2 = React.forwardRef<SVGSVGElement>((_,ref) => {
   return (

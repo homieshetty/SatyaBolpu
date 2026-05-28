@@ -5,12 +5,12 @@ import useApi from "../../hooks/useApi";
 import { toast } from "react-toastify";
 
 const NewPostType = () => {
-  const [postType, setPostType] = useState<string>('');
+  const [postType, setPostType] = useState<string>("");
   const [existingPostTypes, setExistingPostTypes] = useState<string[]>([]);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
-  const postTypesApi = useApi('/others/post-types');
-  const postTypesPostApi = useApi('/others/post-types', { auto: false });
+  const postTypesApi = useApi("/others/post-types");
+  const postTypesPostApi = useApi("/others/post-types", { auto: false });
 
   useEffect(() => {
     if(postTypesApi.data) {
@@ -36,7 +36,7 @@ const NewPostType = () => {
 
   const handlePostTypeSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let newError: string = '';
+    let newError: string = "";
     if (!postType.trim())
       newError = "PostType is required.";
 
@@ -49,7 +49,7 @@ const NewPostType = () => {
     const res = await postTypesPostApi.post({ postType });
     if(!res) return;
     toast.success(`PostType ${res.postType} successfully added.`);
-    setPostType('');
+    setPostType("");
   }
 
   return (

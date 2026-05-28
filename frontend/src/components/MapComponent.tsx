@@ -8,11 +8,11 @@ import { GestureHandling } from "leaflet-gesture-handling";
 import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
 
 //this is beacuse icons dont load in prod, some bs idk
-import L from 'leaflet';
+import L from "leaflet";
 
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 
 //the below line is because someone caches something
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -75,8 +75,8 @@ const MapComponent = ({
       setMapInstance(map);
       if (onMapReady) onMapReady(map);
 
-      if (!map.hasEventListeners('gestureHandling')) {
-        map.addHandler('gestureHandling', GestureHandling);
+      if (!map.hasEventListeners("gestureHandling")) {
+        map.addHandler("gestureHandling", GestureHandling);
       }
 
       if (gestureHandling) {
@@ -117,11 +117,11 @@ const MapComponent = ({
         }
       };
 
-      window.addEventListener('keydown', handleKeyDown);
-      window.addEventListener('keyup', handleKeyUp);
+      window.addEventListener("keydown", handleKeyDown);
+      window.addEventListener("keyup", handleKeyUp);
       return () => {
-        window.removeEventListener('keydown', handleKeyDown);
-        window.removeEventListener('keyup', handleKeyUp);
+        window.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("keyup", handleKeyUp);
       };
     }, [map]);
 
@@ -151,16 +151,16 @@ const MapComponent = ({
     <div className={className} ref={ref}>
       {showControls && (
         <div className="z-10 absolute flex flex-col justify-center items-center gap-2 left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
-          <div className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md ${lock ? 'pointer-events-none' : ''}`}>
+          <div className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md ${lock ? "pointer-events-none" : ""}`}>
             <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(1)}>
-              <FaPlus className={`${lock ? 'text-slate-300' : 'text-black'}`} />
+              <FaPlus className={`${lock ? "text-slate-300" : "text-black"}`} />
             </div>
             <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(-1)}>
-              <FaMinus className={`${lock ? 'text-slate-300' : 'text-black'}`} />
+              <FaMinus className={`${lock ? "text-slate-300" : "text-black"}`} />
             </div>
           </div>
           <IoLocationSharp
-            className={`${lock ? 'text-slate-300 pointer-events-none' : 'text-red-500'}`}
+            className={`${lock ? "text-slate-300 pointer-events-none" : "text-red-500"}`}
             size={32}
             onClick={() => mapInstance && mapInstance.setView(center, initialZoom, { animate: true })}
           />
@@ -196,7 +196,7 @@ const MapComponent = ({
 
         <TileLayer
           url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-          attribution='&copy; <a class="pr-2" target="_blank" href="https://www.esri.com/">Esri</a>'
+          attribution="&copy; <a class='pr-2' target='_blank' href='https://www.esri.com/'>Esri</a>"
         />
 
         {geoJsonData?.districts && (

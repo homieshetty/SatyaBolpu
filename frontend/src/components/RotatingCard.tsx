@@ -25,7 +25,7 @@ const RotatingCard = ({ id, title, image, description }: RotatingCardProps) => {
       onClick={() => setClicked(!clicked)}>
       <div
         className={`relative w-full h-120 transition-transform duration-700 ease-in-out cursor-pointer
-          transform-3d ${clicked ? 'transform-[rotateY(180deg)]' : 'transform-[rotateY(0deg)]'}`}
+          transform-3d ${clicked ? "transform-[rotateY(180deg)]" : "transform-[rotateY(0deg)]"}`}
       >
         <div className="absolute w-full h-full bg-black text-white backface-hidden z-10
           rounded-2xl overflow-hidden border border-white border-solid">

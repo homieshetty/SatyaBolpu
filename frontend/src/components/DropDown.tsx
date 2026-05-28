@@ -40,8 +40,8 @@ const DropDown = <T extends string | number>({
         setDropped(false);
     }
 
-    window.addEventListener('mousedown', handleClickOutside);
-    return () => window.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleClick = (opt: Option<T>) => {
@@ -64,20 +64,20 @@ const DropDown = <T extends string | number>({
         onClick={() => setDropped(!dropped)}
       >
         <p 
-          className={`mx-auto ${placeholder && selected === null ? 'text-gray-400' : ''}`}
+          className={`mx-auto ${placeholder && selected === null ? "text-gray-400" : ""}`}
         >
           { selected?.name ?? placeholder ??  "Choose an option" }
         </p>
         <IoMdArrowDropdownCircle 
           style={{
-            rotate: dropped ? '180deg' : '0deg'
+            rotate: dropped ? "180deg" : "0deg"
           }}
           className="absolute right-1 transition-all"
         />
       </div>
       <div 
         style={{
-          height: dropped ? 'auto' : '0'
+          height: dropped ? "auto" : "0"
         }}
         className={`absolute w-full top-full text-primary overflow-hidden transition-all
           text-center cursor-pointer z-10`}

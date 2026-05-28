@@ -1,44 +1,52 @@
-import { ReactNodeViewRenderer } from '@tiptap/react'
-import { Image } from '@tiptap/extension-image'
-import ImageComponent from './ImageComponent'
+import { ReactNodeViewRenderer } from "@tiptap/react"
+import { Image } from "@tiptap/extension-image"
+import ImageComponent from "./ImageComponent"
 
 export const ResizableImage = Image.extend({
-  group: 'block',
+  name: "image",
+  group: "block",
   atom: true,
+
   addAttributes() {
     return {
       ...this.parent?.(),
-      idbKey: {
-        default: null,
-        parseHTML: (element: HTMLElement) => element.getAttribute('data-idbkey'),
-        renderHTML: (attributes: Record<string, any>) => ({
-          'data-idbkey': attributes.idbKey
-        })
-      },
+
       width: {
-        default: '300px',
-        parseHTML: (element: HTMLElement) => 
-          element.getAttribute('width') ?? '300px',
-        renderHTML: (attributes: Record<string, any>) => ({
-          width: attributes.width,
+        default: "300px",
+        parseHTML: (el: HTMLElement) =>
+          el.getAttribute("width") ?? el.style.width ?? "300px",
+        renderHTML: (attrs) => ({
+          width: attrs.width,
         }),
       },
+
       align: {
-        default: 'center',
-        parseHTML: (element: HTMLElement) =>
-          element.getAttribute('align') ?? 'center',
-        renderHTML: (attributes: Record<string, any>) => ({
-          align: attributes.align,
+        default: "center",
+        parseHTML: (el: HTMLElement) =>
+          el.getAttribute("align") ?? "center",
+        renderHTML: (attrs) => ({
+          align: attrs.align,
         }),
       },
+
+      // ✅ NEW ATTRIBUTE
+      mode: {
+        default: "block",
+        parseHTML: (el: HTMLElement) =>
+          el.getAttribute("mode") ?? "block",
+        renderHTML: (attrs) => ({
+          "mode": attrs.mode,
+        }),
+      },
+
       caption: {
-        default: '',
-        parseHTML: (element: HTMLElement) => {
-          const captionElement = element.querySelector('p.caption')
-          return captionElement?.textContent ?? ''
+        default: "",
+        parseHTML: (el: HTMLElement) => {
+          const captionEl = el.querySelector("p.caption")
+          return captionEl?.textContent ?? ""
         },
-        renderHTML: (attributes: Record<string, any>) => ({
-          caption: attributes.caption,
+        renderHTML: (attrs) => ({
+          caption: attrs.caption,
         }),
       },
     }
@@ -47,75 +55,49 @@ export const ResizableImage = Image.extend({
   parseHTML() {
     return [
       {
-        tag: 'div.file',
+        tag: "div.file",
         priority: 100,
-        getAttrs: (element: HTMLElement) => {
-          const img = element.querySelector('img');
-          if (!img) return false;
-          
-          const captionEl = element.querySelector('p.caption');
-          
+        getAttrs: (el: HTMLElement) => {
+          const img = el.querySelector("img")
+          if (!img) return false
+
           return {
-            src: img.getAttribute('src'),
-            alt: img.getAttribute('alt'),
-            idbKey: img.getAttribute('data-idbkey') || null,
-            width: element.getAttribute('width') || element.style.width || '300px',
-            align: element.classList.contains('mr-auto') ? 'left' : 
-                   element.classList.contains('ml-auto') ? 'right' : 'center',
-            caption: captionEl?.textContent || '',
-          };
-        }
+            src: img.getAttribute("src"),
+            alt: img.getAttribute("alt"),
+            width: el.getAttribute("width") || el.style.width || "300px",
+            align: el.getAttribute("align") ?? "center",
+            mode: el.getAttribute("mode") ?? "block",
+          }
+        },
       },
-      {
-        tag: 'img[src]',
-        getAttrs: (element: HTMLElement) => ({
-          src: element.getAttribute('src'),
-          alt: element.getAttribute('alt'),
-          idbKey: element.getAttribute('data-idbkey'),
-        })
-      }
-    ];
+    ]
   },
 
-  renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
-    const { src, alt, width, align, caption } = HTMLAttributes
-    const tailwindAlignClass =
-      align === 'left'
-        ? 'mr-auto'
-        : align === 'right'
-        ? 'ml-auto'
-        : 'mx-auto'
-    
-    const figureChildren = [
-      [
-        'img',
-        {
-          'data-idbkey': HTMLAttributes['data-idbkey'],
-          src,
-          alt,
-          class: 'w-full h-full object-cover',
-        },
-      ],
+  renderHTML({ HTMLAttributes }) {
+    const { src, alt, width, align, mode, caption } = HTMLAttributes
+
+
+    const children: any[] = [
+      ["img", { src, alt, class: "w-full h-full object-cover" }],
     ]
-    
-    if (caption) {
-      figureChildren.push([
-        'p',
-        {
-          class: 'caption w-full text-center text-[1rem] text-gray-300 mt-2',
-        },
+
+    if (mode === "block" && caption) {
+      children.push([
+        "p",
+        { class: "caption text-center text-sm text-gray-400 mt-2" },
         caption,
       ])
     }
-    
+
     return [
-      'div',
+      "div",
       {
+        class: "file",
         style: `width: ${width};`,
-        width,
-        class: `file relative max-w-full ${tailwindAlignClass}`,
+        mode,
+        align,
       },
-      ...figureChildren,
+      ...children,
     ]
   },
 

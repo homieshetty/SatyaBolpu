@@ -107,7 +107,7 @@ const CardList = <T extends BaseCardProps>({
   const endpoint = 
     `/${apiEndpoint}` +
     `${pagination ? `?page=${pageNo}&limit=${cardsPerPage}` : ""}` +
-    `${selectFields ? `${pagination ? '&' : '?'}${selectFields}` : '' }`;
+    `${selectFields ? `${pagination ? "&" : "?"}${selectFields}` : "" }`;
   const api = useApi(endpoint, { auto: false });
 
   useEffect(() => {
@@ -160,11 +160,11 @@ const CardList = <T extends BaseCardProps>({
         ).join(",")}`
       ).join("&");
 
-      queryString += (queryString ? '&' : '') + `sortBy=${selectedSortOption}&orderBy=${order}`;
+      queryString += (queryString ? "&" : "") + `sortBy=${selectedSortOption}&orderBy=${order}`;
       await api.refetch({
         endpoint: 
           endpoint +
-          `${queryString ? `${pagination ? '&' : `${selectFields ? '&' : '?'}`}${queryString}` : ""}`,
+          `${queryString ? `${pagination ? "&" : `${selectFields ? "&" : "?"}`}${queryString}` : ""}`,
         method: "GET"
       });
     }

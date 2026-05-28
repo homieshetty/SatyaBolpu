@@ -13,7 +13,7 @@ gsap.registerPlugin(useGSAP);
 gsap.registerPlugin(ScrollTrigger);
 
 const Cultures = () => {
-  const culturesApi = useApi('/cultures');
+  const culturesApi = useApi("/cultures");
   const [cultures,setCultures] = useState<ICulture[]>([]);
   const culturesRef = useRef<HTMLDivElement[]>([]);
   const { setLoading } = useLoading();
@@ -35,9 +35,9 @@ useLayoutEffect(() => {
             ease: "power2.inOut",
             scrollTrigger: {
               trigger: culture,
-              start: 'bottom center',
+              start: "bottom center",
               scrub: true,
-              toggleActions: 'play none none reverse'
+              toggleActions: "play none none reverse"
             },
           });
       });

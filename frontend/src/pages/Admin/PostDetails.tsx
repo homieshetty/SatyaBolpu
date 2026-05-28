@@ -9,42 +9,39 @@ import { toast } from "react-toastify";
 import { FaEdit } from "react-icons/fa";
 import useApi from "../../hooks/useApi";
 import { useLoading } from "../../context/LoadingContext";
-import { IPostGroup, IPostType, ITag, PostDetailsType } from "../../types/globals";
+import { IPost, IPostGroup, IPostType, ITag } from "../../types/globals";
 import { BASE_URL } from "../../App";
 import { validatePostDetails } from "../../utils/validate";
 
+type PostDetailsType = Omit<IPost, "content" | "location"> & { locationSpecific: boolean }
+
 type FormErrorType = {
-  title: string;
-  shortTitle: string;
-  culture: string;
-  postGroup: string;
-  postType: string;
-  description: string;
-  tags: string;
-  image: string;
+  [k in keyof Omit<PostDetailsType, "locationSpecific">]: string
 }
 
 const initialFormData: PostDetailsType = {
-  title: '',
-  shortTitle: '',
-  culture: '',
-  postGroup: '',
-  postType: '',
-  description: '',
+  title: "",
+  shortTitle: "",
+  culture: "",
+  postGroup: "",
+  postType: "",
+  description: "",
   tags: [],
   locationSpecific: false,
-  image: null
+  coverImage: null,
+  files: []
 }
 
 const initialFormErrors: FormErrorType = {
-  title: '',
-  shortTitle: '',
-  culture: '',
-  postGroup: '',
-  postType: '',
-  description: '',
-  tags: '',
-  image: ''
+  title: "",
+  shortTitle: "",
+  culture: "",
+  postGroup: "",
+  postType: "",
+  description: "",
+  tags: "",
+  coverImage: "",
+  files: ""
 }
 
 const PostDetails = () => {
@@ -56,7 +53,7 @@ const PostDetails = () => {
   const [cultures, setCultures] = useState<{_id: string, title: string}[]>([]);
   const [postGroups, setPostGroups] = useState<IPostGroup[]>([]);
   const [postTypes, setPostTypes] = useState<IPostType[]>([]);
-  const [activeTag, setActiveTag] = useState<string>('');
+  const [activeTag, setActiveTag] = useState<string>("");
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [visibleStart, setVisibleStart] = useState<number>(0);
   const [showTags, setShowTags] = useState<boolean>(false);
@@ -66,13 +63,13 @@ const PostDetails = () => {
   const { state: authState } = useAuth();
   const { setLoading } = useLoading();
   const navigate = useNavigate();
-  const tagsApi = useApi('/others/tags');
-  const culturesApi = useApi('/cultures');
-  const postGroupsApi = useApi('/others/post-groups');
-  const postTypesApi = useApi('/others/post-types');
-  const uploadApi = useApi('/upload/single', { auto: false });
-  const postsApi = useApi('/posts', { auto: false });
-  const draftsApi = useApi('/drafts', { auto: false });
+  const tagsApi = useApi("/others/tags");
+  const culturesApi = useApi("/cultures");
+  const postGroupsApi = useApi("/others/post-groups");
+  const postTypesApi = useApi("/others/post-types");
+  const uploadApi = useApi("/upload/single", { auto: false });
+  const postsApi = useApi("/posts", { auto: false });
+  const draftsApi = useApi("/drafts", { auto: false });
 
   const descrRef = useRef<HTMLTextAreaElement | null>(null);
   const tagRef = useRef<HTMLInputElement | null>(null);
@@ -162,7 +159,7 @@ const PostDetails = () => {
     const { name, value } = e.target;
     setErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: ""
     }));
 
     setFormData((prev) => ({
@@ -205,8 +202,8 @@ const PostDetails = () => {
           ...prev,
           tags: [...prev.tags, tag._id]
         }));
-        tagRef.current.value = '';
-        setActiveTag('');
+        tagRef.current.value = "";
+        setActiveTag("");
         const index = allowedTags.indexOf(tag);
         setAllowedTags(prev => prev.filter((_, i) => i !== index));
         setActiveIndex(0);
@@ -266,7 +263,7 @@ const PostDetails = () => {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     setErrors((prev) => ({
       ...prev,
-      image: ''
+      image: ""
     }));
 
     setFormData((prev) => ({
@@ -297,7 +294,7 @@ const PostDetails = () => {
     }
 
     if(!formData.culture?.trim()) 
-      newErrors.culture = 'Culture is required.';
+      newErrors.culture = "Culture is required.";
 
     if (!formData.postGroup) {
       newErrors.postGroup = "Please choose a post group.";
@@ -311,7 +308,7 @@ const PostDetails = () => {
       newErrors.description = "Description cannot be empty!";
     }
 
-    if (formData.description && formData.description.split(' ').length < 10) {
+    if (formData.description && formData.description.split(" ").length < 10) {
       newErrors.description = "Description should be atleast 10 words long.";
     }
 
@@ -319,26 +316,26 @@ const PostDetails = () => {
       newErrors.tags = "Add at least one tag.";
     }
 
-    if (!formData.image) {
-      newErrors.image = "Please upload a image.";
+    if (!formData.coverImage) {
+      newErrors.coverImage = "Please upload a cover image.";
     }
 
-    if (!(formData.image instanceof File) && typeof formData.image !== "string") {
-      newErrors.image = 'Uploaded image is not a file.';
+    if (!(formData.coverImage instanceof File) && typeof formData.coverImage !== "string") {
+      newErrors.coverImage = "Uploaded cover image is not a file.";
     }
 
     setErrors(newErrors);
-    const hasErrors = Object.values(newErrors).some(err => err !== '');
+    const hasErrors = Object.values(newErrors).some(err => err !== "");
     if (hasErrors) {
       setSaving(false);
       return;
     }
 
     let res;
-    if(formData.image instanceof File) {
-      const imageData = new FormData();
-      imageData.append("file", formData.image as File);
-      res = await uploadApi.post(imageData);
+    if(formData.coverImage instanceof File) {
+      const coverImageData = new FormData();
+      coverImageData.append("file", formData.coverImage as File);
+      res = await uploadApi.post(coverImageData);
       if (!res) {
         setSaving(false);
         return;
@@ -347,7 +344,7 @@ const PostDetails = () => {
 
     const details = {
       ...formData,
-      image: res ? res.path : formData.image
+      coverImage: res ? res.path : formData.coverImage
     };
     res = await postsApi.refetch({ endpoint: `/posts/draft/${id}/details`, method: "POST", body: { details } });
     if (!res) {
@@ -372,8 +369,8 @@ const PostDetails = () => {
     await postsApi.refetch({ endpoint: `/posts/draft/${id}/details`, method: "DELETE" });
   }
 
-  if (!authState.token || authState.user?.role !== 'admin')
-    return <Navigate to={'/404'} replace />
+  if (!authState.token || authState.user?.role !== "admin")
+    return <Navigate to={"/404"} replace />
 
   return (
     <div className="w-full mt-20">
@@ -593,12 +590,12 @@ const PostDetails = () => {
 
         <div className="flex flex-col w-full gap-3">
           <label className="text-primary font-semibold text-[1.5rem]">
-            Image
+            Cover image
           </label>
-          <label htmlFor="image" className="w-fit">
+          <label htmlFor="coverImage" className="w-fit">
             <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
               justify-center border-3 border-solid border-primary  
-              ${submitted ? 'bg-white/70 cursor-not-allowed' : 'bg-white hover:bg-white/70 cursor-pointer'}`}>
+              ${submitted ? "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
               <FaUpload />
               <p>Upload Image</p>
             </div>
@@ -608,23 +605,23 @@ const PostDetails = () => {
             disabled={submitted}
             type="file"
             accept="image/*"
-            id="image"
-            name="image"
+            id="coverImage"
+            name="coverImage"
             onChange={handleFileChange}
           />
           {
-            formData.image &&
+            formData.coverImage &&
             <div className="w-1/2 border-2 border-solid border-white flex">
               <img
                 className="w-full aspect-square object-cover object-center"
                 src={
-                  formData.image instanceof File ?
-                    URL.createObjectURL(formData.image) :
-                    `${BASE_URL}${formData.image}`
+                  formData.coverImage instanceof File ?
+                    URL.createObjectURL(formData.coverImage) :
+                    `${BASE_URL}${formData.coverImage}`
                 } alt="" />
             </div>
           }
-          {errors.image && <p className="text-red-500">{errors.image}</p>}
+          {errors.coverImage && <p className="text-red-500">{errors.coverImage}</p>}
         </div>
 
         {
@@ -633,7 +630,7 @@ const PostDetails = () => {
             <FaEdit
               className={`text-[2.5rem] cursor-pointer m-5 bg-black mx-auto 
               text-white hover:scale-110 hover:text-primary z-50`}
-              id='edit'
+              id="edit"
               onClick={handleEditAgain} />
             :
             <Button
@@ -655,7 +652,7 @@ const PostDetails = () => {
         </div>
         <div
           className={`text-[1.2rem] sm:text-[1.75rem]
-          ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
+          ${submitted ? "hover:text-primary text-white cursor-pointer" : "text-gray-500 cursor-not-allowed"}`}
           onClick={handleNext}>
           {`Editor >`}
         </div>

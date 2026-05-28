@@ -1,10 +1,10 @@
-import { Node, ReactNodeViewRenderer } from '@tiptap/react';
-import AudioComponent from './AudioComponent';
+import { Node, ReactNodeViewRenderer } from "@tiptap/react";
+import AudioComponent from "./AudioComponent";
 
 export const Audio = Node.create({
-  name: 'audio',
+  name: "audio",
 
-  group: 'block',
+  group: "block",
   selectable: true,
   draggable: true,
   atom: true,
@@ -13,42 +13,42 @@ export const Audio = Node.create({
     return {
         src: {
             default: null,
-            parseHTML: (element: HTMLElement) => element.getAttribute('src'),
+            parseHTML: (element: HTMLElement) => element.getAttribute("src"),
             renderHTML: (attributes: Record<string, any>) => ({
               src: attributes.src,
             }),
         },
         type: {
             default: null,
-            parseHTML: (element: HTMLElement) => element.getAttribute('type'),
+            parseHTML: (element: HTMLElement) => element.getAttribute("type"),
               renderHTML: (attributes: Record<string, any>) => ({
                 type: attributes.type,
             }),
         },
         controls : {
             default: true,
-            parseHtml: (element: HTMLElement) => element.getAttribute('controls'),
+            parseHtml: (element: HTMLElement) => element.getAttribute("controls"),
             renderHTML: (attributes: Record<string, any>) => ({
                 controls: attributes.controls
             })
         },
         width: {
-            default: '300px',
-            parseHTML: (element: HTMLElement) => element.getAttribute('width') || '300px',
+            default: "300px",
+            parseHTML: (element: HTMLElement) => element.getAttribute("width") || "300px",
               renderHTML: (attributes) => ({ width: attributes.width }),
         },
         align: {
-            default: 'center',
-            parseHTML: (element) => element.getAttribute('align') || 'center',
+            default: "center",
+            parseHTML: (element) => element.getAttribute("align") || "center",
               renderHTML: (attributes) => ({
-                'align': attributes.align,
+                "align": attributes.align,
             }),
         },
         caption: {
-            default: '',
+            default: "",
             parseHTML: (element: HTMLElement) => {
-                const captionElement = element.querySelector('p.caption')
-                return captionElement?.textContent ?? ''
+                const captionElement = element.querySelector("p.caption")
+                return captionElement?.textContent ?? ""
             },
             renderHTML: (attributes: Record<string, any>) => ({
                 caption: attributes.caption,
@@ -60,27 +60,27 @@ export const Audio = Node.create({
   parseHTML() {
     return [
       {
-        tag: 'div.file',
+        tag: "div.file",
         priority: 100,
         getAttrs: (element: HTMLElement) => {
-          const img = element.querySelector('audio');
+          const img = element.querySelector("audio");
           if (!img) return false;
           
-          const captionEl = element.querySelector('p.caption');
+          const captionEl = element.querySelector("p.caption");
           
           return {
-            src: img.getAttribute('src'),
-            type: img.getAttribute('type'),
-            width: element.getAttribute('width') || element.style.width || '300px',
-            caption: captionEl?.textContent || '',
+            src: img.getAttribute("src"),
+            type: img.getAttribute("type"),
+            width: element.getAttribute("width") || element.style.width || "300px",
+            caption: captionEl?.textContent || "",
           };
         }
       },
       {
-        tag: 'audio[src]',
+        tag: "audio[src]",
         getAttrs: (element: HTMLElement) => ({
-          src: element.getAttribute('src'),
-          type: element.getAttribute('type'),
+          src: element.getAttribute("src"),
+          type: element.getAttribute("type"),
         })
       }
     ];
@@ -91,28 +91,28 @@ export const Audio = Node.create({
 
     const audioChildren = [
       [
-        'audio',
+        "audio",
         {
           src,
           type,
           controls,
-          class: 'w-full',
+          class: "w-full",
         },
       ],
     ]
 
     if (caption) {
       audioChildren.push([
-        'p',
+        "p",
         {
-          class: 'caption text-center text-[1rem] text-gray-300 mt-2',
+          class: "caption text-center text-[1rem] text-gray-300 mt-2",
         },
         caption,
       ])
     }
 
     return [
-      'div',
+      "div",
       {
         class: `file relative max-w-full mx-auto`,
         style: `width: ${width}`

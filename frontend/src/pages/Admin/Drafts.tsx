@@ -11,7 +11,7 @@ import { MinimalCard, MinimalSkeletonCard } from "../../components/MinimalCard";
 
 const Drafts = () => {
   const { state: authState } = useAuth();
-  const draftsApi = useApi('/drafts');
+  const draftsApi = useApi("/drafts");
   const navigate = useNavigate();
 
   const handleEdit = async (id: string) => {
@@ -33,7 +33,7 @@ const Drafts = () => {
   }, [draftsApi.error]);
 
   if(!authState.token || !authState.user) {
-    return <Navigate to={'/404'} replace/>
+    return <Navigate to={"/404"} replace/>
   }
 
   return (
@@ -54,7 +54,7 @@ const Drafts = () => {
 
       <Button 
         content={"Add"}
-        onClick={() => navigate('/create')}
+        onClick={() => navigate("/create")}
       />
     </div>
   )

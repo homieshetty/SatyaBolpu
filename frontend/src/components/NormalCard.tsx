@@ -33,7 +33,7 @@ export const NormalCard = ({ id, title, description, image, handleEdit }: Normal
         <h1 className="text-primary text-center text-[1.5rem]">{title.charAt(0).toUpperCase() + title.slice(1)}</h1>
         <p 
           style={{
-            scrollbarWidth: 'none'
+            scrollbarWidth: "none"
           }}
           className="text-white w-full h-4/5 overflow-y-scroll text-[0.75rem] md:text-[1rem] text-justify
             overscroll-contain"

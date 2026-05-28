@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { FaTimes, FaUpload } from 'react-icons/fa';
-import Button from './Button';
-import { FormField, FormProps } from '../types/globals';
+import React, { useState } from "react";
+import { FaTimes, FaUpload } from "react-icons/fa";
+import Button from "./Button";
+import { FormField, FormProps } from "../types/globals";
 
 const Form: React.FC<FormProps> = ({
   onClose,
@@ -12,10 +12,10 @@ const Form: React.FC<FormProps> = ({
   onSubmit,
   error,
   loading = false,
-  submitText = 'Submit',
-  loadingText = 'Submitting',
-  className = '',
-  formClassName = ''
+  submitText = "Submit",
+  loadingText = "Submitting",
+  className = "",
+  formClassName = ""
 }) => {
 
   const [errors,setErrors] = useState<Record<string, string>>({});
@@ -25,13 +25,13 @@ const Form: React.FC<FormProps> = ({
     
     setErrors(prev => ({
       ...prev,
-      [name] : ''
+      [name] : ""
     }))
-    if (type === 'file') {
+    if (type === "file") {
       const fileInput = e.target as HTMLInputElement;
       const file = fileInput.files?.[0] || null;
       onChange(name, file);
-    } else if (type === 'radio') {
+    } else if (type === "radio") {
       const radioInput = e.target as HTMLInputElement;
       onChange(name, radioInput.value);
     } else {
@@ -45,7 +45,7 @@ const Form: React.FC<FormProps> = ({
     fields.forEach(field => {
       const value = formData[field.name];
       
-      if (field.required && (!value || (typeof value === 'string' && !value.trim()))) {
+      if (field.required && (!value || (typeof value === "string" && !value.trim()))) {
         newErrors[field.name] = `${field.label} is required`;
         return;
       }
@@ -75,10 +75,10 @@ const Form: React.FC<FormProps> = ({
 
   const renderField = (field: FormField) => {
     const fieldError = errors[field.name]
-    const fieldValue = formData[field.name] || '';
+    const fieldValue = formData[field.name] || "";
     
     switch (field.type) {
-      case 'textarea':
+      case "textarea":
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label htmlFor={field.name} className="text-primary font-semibold text-[1.5rem]">
@@ -100,7 +100,7 @@ const Form: React.FC<FormProps> = ({
           </div>
         );
 
-      case 'select':
+      case "select":
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label htmlFor={field.name} className="text-primary font-semibold text-[1.5rem]">
@@ -129,7 +129,7 @@ const Form: React.FC<FormProps> = ({
           </div>
         );
 
-      case 'file':
+      case "file":
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label className="text-primary font-semibold text-[1.5rem]">
@@ -138,7 +138,7 @@ const Form: React.FC<FormProps> = ({
             <label htmlFor={field.name} className="w-fit">
               <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
                 justify-center border-3 border-solid border-primary  
-                ${field.disabled ? 'bg-white/70 cursor-not-allowed' : 'bg-white hover:bg-white/70 cursor-pointer'}`}>
+                ${field.disabled ? "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
                 <FaUpload />
                 <p>Upload {field.label}</p>
               </div>
@@ -167,7 +167,7 @@ const Form: React.FC<FormProps> = ({
           </div>
         );
 
-      case 'radio':
+      case "radio":
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label className="text-primary font-semibold text-[1.5rem]">
@@ -197,7 +197,7 @@ const Form: React.FC<FormProps> = ({
           </div>
         );
 
-      case 'number':
+      case "number":
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label htmlFor={field.name} className="text-primary font-semibold text-[1.5rem]">
@@ -275,7 +275,7 @@ const Form: React.FC<FormProps> = ({
             loading={loading}
             loadingText={loadingText}
             type="submit"
-            className='w-fit mx-auto'
+            className="w-fit mx-auto"
           />
         </form>
       </div>

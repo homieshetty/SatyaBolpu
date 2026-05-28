@@ -98,7 +98,7 @@ export const buildAnimationProps = (
         delay: 4, 
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[0], 
-          start: '-10px top' 
+          start: "-10px top" 
         } 
       } 
     },
@@ -111,8 +111,8 @@ export const buildAnimationProps = (
         scale: 2, 
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '5% top', 
-          end: '20% top', 
+          start: "5% top", 
+          end: "20% top", 
           scrub: true
         } 
       } 
@@ -121,13 +121,13 @@ export const buildAnimationProps = (
       ref: overlayRef.current, 
       fromVars: {}, 
       toVars: { 
-        backgroundColor: 'rgba(0,0,0,0)', 
+        backgroundColor: "rgba(0,0,0,0)", 
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '5% top', 
-          end: '20% top', 
+          start: "5% top", 
+          end: "20% top", 
           scrub: true, 
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         } 
       } 
     },
@@ -141,8 +141,8 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '15% top',
-          toggleActions: 'play none none reverse'
+          start: "15% top",
+          toggleActions: "play none none reverse"
         }
       } 
     },
@@ -154,8 +154,8 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '15% top', 
-          toggleActions: 'play none none reverse'
+          start: "15% top", 
+          toggleActions: "play none none reverse"
         } 
       } 
     },
@@ -168,10 +168,10 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 100% 0% 0%)",
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '20% top',
-          end: '40% top',
+          start: "20% top",
+          end: "40% top",
           scrub: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         } 
       }
     },
@@ -184,10 +184,10 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 100% 0% 0%)",
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '20% top',
-          end: '40% top',
+          start: "20% top",
+          end: "40% top",
           scrub: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         }
       } 
     },
@@ -200,10 +200,10 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 0% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '20% top',
-          end: '40% top',
+          start: "20% top",
+          end: "40% top",
           scrub: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         } 
       }
     },
@@ -216,10 +216,10 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 0% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '20% top',
-          end: '40% top',
+          start: "20% top",
+          end: "40% top",
           scrub: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         }
       } 
     },
@@ -231,8 +231,8 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '45% top',
-          toggleActions: 'play none none reverse'
+          start: "45% top",
+          toggleActions: "play none none reverse"
         } 
       } 
     },
@@ -240,13 +240,13 @@ export const buildAnimationProps = (
       ref: overlayRef.current, 
       fromVars: {}, 
       toVars: { 
-        backgroundColor: 'rgba(0,0,0,0.5)', 
+        backgroundColor: "rgba(0,0,0,0.5)", 
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '50% top',
-          end: '60% top',
+          start: "50% top",
+          end: "60% top",
           scrub: true, 
-          toggleActions: 'play none none reverse' 
+          toggleActions: "play none none reverse" 
         } 
       } 
     },
@@ -257,10 +257,10 @@ export const buildAnimationProps = (
         scale: 1,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '50% top',
-          end: '60% top',
+          start: "50% top",
+          end: "60% top",
           scrub: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         } 
       } 
     },
@@ -272,8 +272,8 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '50% top',
-          toggleActions: 'play none none reverse'
+          start: "50% top",
+          toggleActions: "play none none reverse"
         }
       } 
     },
@@ -284,10 +284,10 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 100% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '60% top',
-          end: '80% top',
+          start: "60% top",
+          end: "80% top",
           scrub: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         } 
       }
     },
@@ -298,10 +298,10 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 100% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '60% top',
-          end: '80% top',
+          start: "60% top",
+          end: "80% top",
           scrub: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         } 
       } 
     },
@@ -314,10 +314,10 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 0% 0%)" ,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1],
-          start: '60% top',
-          end: '80% top',
+          start: "60% top",
+          end: "80% top",
           scrub: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         } 
       }
     },
@@ -330,10 +330,10 @@ export const buildAnimationProps = (
         clipPath: "inset(0% 0% 0% 0%)",
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[1], 
-          start: '60% top',
-          end: '80% top',
+          start: "60% top",
+          end: "80% top",
           scrub: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: "play none none reverse"
         }
       } 
     },
@@ -347,21 +347,21 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[2], 
-          start: '-10% top',
+          start: "-10% top",
         }
       } 
     },
     { 
       ref: mapRef.current, 
       fromVars: { 
-        height: '0' 
+        height: "0" 
       }, 
       toVars: { 
-        height: '100%',
+        height: "100%",
         duration: 0.5, 
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[2],
-          start: '-10% top'
+          start: "-10% top"
         } 
       } 
     },
@@ -375,7 +375,7 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[3], 
-          start: '-20% top',
+          start: "-20% top",
         }
       } 
     },
@@ -390,7 +390,7 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[3],
-          start: '-10% top',
+          start: "-10% top",
         } 
       } 
     },
@@ -403,7 +403,7 @@ export const buildAnimationProps = (
         opacity: 1,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[4], 
-          start: '10% top',
+          start: "10% top",
           markers: true
         }
       } 
@@ -420,7 +420,7 @@ export const buildAnimationProps = (
         stagger: 0.2,
         scrollTrigger: {
           trigger: scrollWatcherRef.current[4],
-          start: '15% top'
+          start: "15% top"
         }
       }
     },
@@ -434,7 +434,7 @@ export const buildAnimationProps = (
     //     duration: 0.25,
     //     scrollTrigger: {
     //       trigger: buttonRefs.current,
-    //       start: 'top center',
+    //       start: "top center",
     //     }
     //   }
     // },
@@ -449,9 +449,9 @@ export const buildAnimationProps = (
         stagger: 0.1, 
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[5],
-          start: 'top top',
-          end: 'center top',
-          toggleActions: 'play none none reverse'
+          start: "top top",
+          end: "center top",
+          toggleActions: "play none none reverse"
         }
       }
     }

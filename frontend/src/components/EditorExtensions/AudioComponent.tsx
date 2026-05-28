@@ -1,9 +1,9 @@
-import { useRef } from 'react';
-import BaseComponent from './BaseComponent';
-import { NodeViewProps } from '@tiptap/react';
+import { useRef } from "react";
+import BaseComponent from "./BaseComponent";
+import { NodeViewProps } from "@tiptap/react";
 
 const AudioComponent = (props: NodeViewProps) => {
-  const { node } = props;
+  const { node, editor } = props;
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const audioEl = (
@@ -16,7 +16,14 @@ const AudioComponent = (props: NodeViewProps) => {
     </audio>
   );
 
-  return <BaseComponent {...props} enableCaption mediaRef={audioRef} mediaElement={audioEl} customStyles='w-1/4'/>;
+  return <BaseComponent
+   {...props}
+    
+   enableCaption 
+   mediaRef={audioRef} 
+   mediaElement={audioEl} 
+   customStyles="w-1/4"
+  />;
 };
 
 export default AudioComponent;

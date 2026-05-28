@@ -1,66 +1,56 @@
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import { TextStyle } from '@tiptap/extension-text-style'
-import { FontSize } from '../../components/EditorExtensions/FontSize'
-import { Placeholder } from '@tiptap/extension-placeholder'
-import { RiAttachmentLine } from 'react-icons/ri';
+import { useEditor, EditorContent, useEditorState } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { FontSize } from "../../components/EditorExtensions/FontSize";
+import { Placeholder } from "@tiptap/extension-placeholder";
+import { RiAttachmentLine } from "react-icons/ri";
 import { GrBlockQuote } from "react-icons/gr";
 import { MdCancel, MdPreview } from "react-icons/md";
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo, FaSave } from 'react-icons/fa';
-import { ResizableImage } from '../../components/EditorExtensions/Image';
-import { Video } from '../../components/EditorExtensions/Video';
-import { Audio } from '../../components/EditorExtensions/Audio';
-import Button from '../../components/Button';
-import { Iframe } from '../../components/EditorExtensions/Iframe';
-import { useAuth } from '../../context/AuthContext';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import Title from '../../components/Title';
-import { Mode } from '../../types/enums';
-import useApi from '../../hooks/useApi';
-import { validateCultureDetails, validatePostDetails } from '../../utils/validate';
-import { CultureState, PostState } from '../../types/globals';
-import { BASE_URL } from '../../App';
-
-type clickedType = {
-  bold: boolean;
-  italic: boolean;
-  underline: boolean;
-};
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo, FaSave } from "react-icons/fa";
+import { ResizableImage } from "../../components/EditorExtensions/Image";
+import { Video } from "../../components/EditorExtensions/Video";
+import { Audio } from "../../components/EditorExtensions/Audio";
+import Button from "../../components/Button";
+import { Iframe } from "../../components/EditorExtensions/Iframe";
+import { useAuth } from "../../context/AuthContext";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import Title from "../../components/Title";
+import { Mode } from "../../types/enums";
+import useApi from "../../hooks/useApi";
+import { validateCultureDetails, validatePostDetails } from "../../utils/validate";
+import { CultureState, PostState } from "../../types/globals";
+import { BASE_URL } from "../../App";
+import DOMPurify from "dompurify";
+import { CustomKeyboardExtensions } from "../../components/EditorExtensions/CustomKeyboardExtensions";
 
 const Editor = ({ mode }: { mode: Mode }) => {
   const { id } = useParams();
   const { state: authState } = useAuth();
   const navigate = useNavigate();
-  const culturesApi = useApi('/cultures', { auto: false });
-  const postsApi = useApi('/posts', { auto: false });
-  const draftsApi = useApi('/drafts', { auto: false });
-  const uploadApi = useApi('/upload/single', { auto: false });
+  const culturesApi = useApi("/cultures", { auto: false });
+  const postsApi = useApi("/posts", { auto: false });
+  const draftsApi = useApi("/drafts", { auto: false });
+  const uploadApi = useApi("/upload/single", { auto: false });
 
-  const [clicked, setClicked] = useState<clickedType>({
-    bold: false,
-    italic: false,
-    underline: false,
-  });
   const [cultureState, setCultureState] = useState<CultureState | null>(null);
   const [postState, setPostState] = useState<PostState | null>(null);
-  const [editorState, setEditorState] = useState<'editing' | 'preview'>('editing');
-  const [title, setTitle] = useState<string>('Title');
-  const [body, setBody] = useState<string>('');
-  const [fontSize, setFontSize] = useState<string>('normal');
+  const [editorMode, setEditorMode] = useState<"editing" | "preview">("editing");
+  const [title, setTitle] = useState<string>("Title");
+  const [body, setBody] = useState<string>("");
+  const [fontSize, setFontSize] = useState<string>("normal");
   const [showAttachmentMenu, setShowAttachmentMenu] = useState<boolean>(false);
   const [askEmbedUrl, setAskEmbedUrl] = useState<boolean>(false);
-  const [embedUrl, setEmbedUrl] = useState<string>('');
+  const [embedUrl, setEmbedUrl] = useState<string>("");
 
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const attachmentRef = useRef<HTMLDivElement | null>(null);
-  const objectUrls = useRef<string[]>([]);
 
   useEffect(() => {
     const fetchDetails = async () => {
-      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: 'GET' });
+      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
       if (!res) return;
       setTitle(res.draft.details.title);
       if (mode === Mode.CULTURE) {
@@ -68,7 +58,7 @@ const Editor = ({ mode }: { mode: Mode }) => {
           navigate(`/create/culture/${id}/details`);
         } else {
           setCultureState({
-            content: res.draft.content ?? '',
+            content: res.draft.content ?? "",
             details: res.draft.details
           });
         }
@@ -77,7 +67,7 @@ const Editor = ({ mode }: { mode: Mode }) => {
           navigate(`/create/post/${id}/details`);
         } else {
           setPostState({
-            content: res.draft.content ?? '',
+            content: res.draft.content ?? "",
             details: res.draft.details,
             location: res.draft.location
           });
@@ -95,58 +85,65 @@ const Editor = ({ mode }: { mode: Mode }) => {
       }
     }
 
-    window.addEventListener('mousedown', handleClick);
+    window.addEventListener("mousedown", handleClick);
 
-    return () => window.removeEventListener('mousedown', handleClick);
-  }, [])
+    return () => window.removeEventListener("mousedown", handleClick);
+  }, []);
 
   const editor = useEditor({
+    parseOptions: {
+      preserveWhitespace: 'full'
+    },
     extensions: [
       StarterKit,
       TextStyle,
       FontSize,
       ResizableImage,
+      CustomKeyboardExtensions,
       Video,
       Audio,
       Iframe,
       Placeholder.configure({
-        placeholder: '...',
-        emptyEditorClass: 'is-editor-empty',
+        placeholder: "...",
+        emptyEditorClass: "is-editor-empty",
         showOnlyWhenEditable: true,
       })
     ],
-    content: '',
-    onCreate: async ({ editor }) => {
-      const content = (() => {
-        if (mode === Mode.POST) {
-          return postState?.content || '';
-        } else {
-          return cultureState?.content || '';
-        }
-      })();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(content, 'text/html');
-      editor.commands.setContent(doc.documentElement.outerHTML);
-    },
+    content: "",
     onUpdate: ({ editor }) => {
-      setClicked({
-        bold: editor.isActive('bold'),
-        italic: editor.isActive('italic'),
-        underline: editor.isActive('underline')
-      });
       setFontSize(
-        editor.getAttributes('textStyle').fontSize || 'normal'
+        editor.getAttributes("textStyle").fontSize || "normal"
       );
     }
-  }, [cultureState?.content, postState?.content]);
+  }, []);
 
+  const editorState = useEditorState({
+    editor,
+    selector: ({ editor }) => ({
+      bold: editor.isActive("bold"),
+      italic: editor.isActive("italic"),
+      underline: editor.isActive("underline")
+    })
+  })
+
+  useEffect(() => {
+    if(!editor) return;
+
+    const content = 
+      mode === Mode.CULTURE ? 
+        cultureState?.content :
+        postState?.content;
+    
+    editor.commands.setContent(content ?? "");
+
+  }, [postState?.content, cultureState?.content, editor, mode]);
 
   useEffect(() => {
     if (titleRef.current) {
-      titleRef.current.style.height = 'auto';
+      titleRef.current.style.height = "auto";
       titleRef.current.style.height = `${titleRef.current.scrollHeight}px`;
     }
-  }, [title, editorState]);
+  }, [title, editorMode]);
 
   const handleFontSize = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (editor) {
@@ -155,43 +152,37 @@ const Editor = ({ mode }: { mode: Mode }) => {
     }
   }
 
-  const handleClick = useCallback((button: keyof clickedType) => {
-    const chain = editor?.chain().focus();
-    if (!chain) {
-      setClicked({ bold: false, italic: false, underline: false });
-      return;
-    }
+  const actions = useMemo(() => ({
+    bold: () => editor?.chain().focus().toggleBold().run(),
+    italic: () => editor?.chain().focus().toggleItalic().run(),
+    underline: () => editor?.chain().focus().toggleUnderline().run(),
+  }), [editor]);
 
-    setClicked(prev => {
-      const newState = {
-        ...prev,
-        [button]: !prev[button],
-      };
+  const handleChangeTitle = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    if(!titleRef.current) return;
+    titleRef.current.style.height = 'auto';
+    titleRef.current.style.height = titleRef.current.scrollHeight + 'px';
+    setTitle(e.target.value);
+  }
 
-      if (newState[button]) {
-        chain.setMark(button).run();
-      } else {
-        chain.unsetMark(button).run();
-      }
-
-      return newState;
-    });
+  const handleClick = useCallback((button: "bold" | "italic" | "underline") => {
+    actions[button]();
   }, [editor]);
 
   const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const type = file.type.split('/')[0];
+      const type = file.type.split("/")[0];
       const url = URL.createObjectURL(file);
-      objectUrls.current.push(url);
-      if (type === 'image') {
+      if (type === "image") {
         editor?.commands.insertContent({
           type: "image",
           attrs: {
-            src: url
+            src: url,
+            mode: "block"
           }
         })
-      } else if (type === 'video') {
+      } else if (type === "video") {
         editor?.commands.insertContent({
           type: "video",
           attrs: {
@@ -199,7 +190,7 @@ const Editor = ({ mode }: { mode: Mode }) => {
             controls: true
           }
         })
-      } else if (type == 'audio') {
+      } else if (type == "audio") {
         editor?.commands.insertContent({
           type: "audio",
           attrs: {
@@ -210,12 +201,6 @@ const Editor = ({ mode }: { mode: Mode }) => {
       }
     }
   }
-
-  useEffect(() => {
-    return () => {
-      objectUrls.current?.forEach(URL.revokeObjectURL);
-    };
-  }, []);
 
   const handleEmbedUrl = () => {
     if (embedUrl) {
@@ -229,50 +214,45 @@ const Editor = ({ mode }: { mode: Mode }) => {
     }
   }
 
-  // const formatHtml = (html: string) => {
-  //   return html
-  //     .replace(/<p>(.*?)<\/p>/gi, (_, content) => content.trim() === '' ? '<br>' : `${content}<br>`)
-  //     .replace(/(<br>\s*)+$/g, '');
-  // };
+  const formatHtml = (html: string) => {
+    return html
+      .replace(/<p>(.*?)<\/p>/gi, (_, content) => content.trim() === "" ? "<br>" : `${content}<br>`)
+      .replace(/(<br>\s*)+$/g, "");
+  };
 
-  const decodeHtml = (html: string) => {
-    const txt = document.createElement('textarea')
-    txt.innerHTML = html;
-    return txt.value;
-  }
+  // const decodeHtml = (html: string) => {
+  //   const txt = document.createElement("textarea")
+  //   txt.innerHTML = html;
+  //   return txt.value;
+  // }
 
   const uploadFiles = async (content: string): Promise<string> => {
-    if (!content) return '';
+    if (!content.trim()) return "";
+    if(content === "<p></p>") return "";
 
     const parser = new DOMParser();
-    const doc = parser.parseFromString(content, 'text/html');
-    const body = doc.body;
+    const doc = parser.parseFromString(content, "text/html");
+    if(!doc.body.innerText.trim()) return "";
 
-    for (let i = 0; i < body.children.length; i++) {
-      const child = body.children[i];
-
-      if (child.className.includes('file')) {
-        const fileEl = child.querySelector('[src]');
-        
-        if (fileEl) {
-          const src = fileEl.getAttribute("src");
-          if(!src?.startsWith("blob:") && !src?.startsWith("data:")) continue;
-          const blob = await fetch(src).then(res => res.blob());
-          const formData = new FormData();
-          formData.append("file", blob);
-          const res = await uploadApi.post(formData);
-          fileEl.setAttribute("src", `${BASE_URL}${res.path}`);
-        }
-      }
+    const elements = doc.querySelectorAll("img, video, audio");
+    for(const el of elements) {
+      const src = el.getAttribute("src");
+      if (!src?.startsWith("blob:") && !src?.startsWith("data:")) continue;
+      const blob = await fetch(src).then(res => res.blob());
+      const formData = new FormData();
+      formData.append("file", blob);
+      const res = await uploadApi.post(formData);
+      el.setAttribute("src", `${BASE_URL}${res.path}`);
     }
 
-    return doc.documentElement.outerHTML;
+    return doc.body.innerHTML;
   }
 
   const handleSave = useCallback(async () => {
   if (!editor) return;
 
   const content = await uploadFiles(editor.getHTML());
+  console.log(content)
 
   const isPost = mode === Mode.POST;
   const state = isPost ? postState : cultureState;
@@ -282,7 +262,7 @@ const Editor = ({ mode }: { mode: Mode }) => {
 
   if (title !== state.details?.title) {
     await api.refetch({
-      endpoint: `/${isPost ? 'posts' : 'cultures'}/draft/${id}/details`,
+      endpoint: `/${isPost ? "posts" : "cultures"}/draft/${id}/details`,
       method: "POST",
       body: {
         details: {
@@ -294,7 +274,7 @@ const Editor = ({ mode }: { mode: Mode }) => {
   }
 
   const res = await api.refetch({
-    endpoint: `/${isPost ? 'posts' : 'cultures'}/draft/${id}/content`,
+    endpoint: `/${isPost ? "posts" : "cultures"}/draft/${id}/content`,
     method: "POST",
     body: { content }
   });
@@ -316,7 +296,7 @@ const Editor = ({ mode }: { mode: Mode }) => {
 
   const handlePreview = useCallback(() => {
     if (editor) {
-      setEditorState((prev) => prev === 'editing' ? 'preview' : 'editing');
+      setEditorMode((prev) => prev === "editing" ? "preview" : "editing");
       setBody(editor.getHTML());
     }
   }, [editor]);
@@ -326,99 +306,99 @@ const Editor = ({ mode }: { mode: Mode }) => {
       if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
         const key = e.key.toLowerCase();
 
-        if (['b', 'i', 'u'].includes(key)) {
-          e.preventDefault();
-          editor.chain().focus();
-          const keyToButton: Record<string, keyof clickedType> = {
-            b: "bold",
-            i: "italic",
-            u: "underline",
-          };
-          const button = keyToButton[key] || "underline";
-          handleClick(button)
-          return
-        }
-
-        editor.chain().blur()
-        if (key === 'p') {
+        if (key === "p") {
           e.preventDefault()
           handlePreview()
-        } else if (key === 's') {
+        } else if (key === "s") {
           e.preventDefault();
           handleSave();
         }
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [editor, handleSave, handlePreview, handleClick, editorState]);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [editor, handleSave, handlePreview, handleClick, editorMode]);
 
   useEffect(() => {
-    const videos = document.querySelectorAll('video');
+    const videos = document.querySelectorAll("video");
     videos.forEach((vid) => {
       vid.pause();
       vid.currentTime = 0;
     });
 
-    const audios = document.querySelectorAll('audio');
+    const audios = document.querySelectorAll("audio");
     audios.forEach((aud) => {
       aud.pause();
       aud.currentTime = 0;
     });
 
-    const iframes = document.querySelectorAll('iframe');
+    const iframes = document.querySelectorAll("iframe");
     iframes.forEach((iframe) => {
       const src = iframe.src;
-      iframe.src = '';
+      iframe.src = "";
       iframe.src = src;
     });
-  }, [editorState]);
+  }, [editorMode]);
 
   if (!authState.token || authState.user?.role !== "admin")
-    return <Navigate to={'/404'} replace />
+    return <Navigate to={"/404"} replace />
 
   return (
     <div className="w-full relative">
-      <div className={`w-full relative flex-col items-center justify-center gap-10 py-20 bg-black
-               ${askEmbedUrl ? 'pointer-events-none' : ''} 
-               ${editorState === 'preview' ? 'hidden' : 'flex'}`}>
-        <div className={`w-full h-full absolute top-0 z-10 bg-white bg-opacity-50 overflow-hidden
-                   pointer-events-none ${askEmbedUrl ? '' : 'hidden'}`}
+      <div 
+        className={`w-full relative flex-col items-center justify-center py-20 bg-black
+          ${askEmbedUrl ? "pointer-events-none" : ""} 
+          ${editorMode === "preview" ? "hidden" : "flex"}`}
+      >
+        <div 
+          className={`w-full h-full absolute top-0 z-10 bg-white bg-opacity-50 overflow-hidden
+            pointer-events-none ${askEmbedUrl ? "" : "hidden"}`}
         ></div>
         {
           askEmbedUrl &&
           <div 
-            className='fixed w-2/3 md:w-1/2 lg:w-1/3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+            className="fixed w-2/3 md:w-1/2 lg:w-1/3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
               flex flex-col gap-5 items-center justify-center bg-black text-primary text-center p-5
-              rounded-xl pointer-events-auto z-50'
+              rounded-xl pointer-events-auto z-50"
           >
             <MdCancel
               className={`absolute text-[2rem] right-0 top-0 cursor-pointer m-5 bg-black 
                 text-primary rounded-full hover:scale-110 z-50`}
               onClick={() => {
                 setAskEmbedUrl(false);
-              }} />
-            <label htmlFor="url" className='font-black text-[1.5rem]'>Enter Embed Url</label>
+              }} 
+            />
+            <label htmlFor="url" className="font-black text-[1.5rem]">Enter Embed Url</label>
             <input
               type="url"
-              name='url'
-              className='w-4/5 p-2 text-black'
-              onInput={(e) => setEmbedUrl((e.target as HTMLInputElement).value)} />
+              name="url"
+              className="w-4/5 p-2 text-black"
+              onInput={(e) => setEmbedUrl((e.target as HTMLInputElement).value)}
+            />
             <Button
-              content='Submit'
-              className='text-[1.2rem]'
-              onClick={handleEmbedUrl} />
+              content="Submit"
+              className="text-[1.2rem]"
+              onClick={handleEmbedUrl} 
+            />
           </div>
         }
-        <div className="w-full flex flex-col justify-center items-center gap-10 mb-10">
+        <div className="w-full flex flex-col justify-center items-center">
           <textarea
+            style={{
+              padding: 0,
+              margin: 0,
+              border: 'none',
+              outline: 'none',
+              boxSizing: 'content-box',
+              lineHeight: 1
+            }}
             className="text-primary w-4/5 text-4xl sm:text-6xl text-center font-bold bg-black overflow-hidden
-              text-wrap focus:outline-none resize-none"
+              text-wrap focus:outline-none resize-none whitespace-pre-wrap wrap-break-word"
             value={title}
             rows={1}
             ref={titleRef}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={handleChangeTitle}
           />
 
           <div className="flex items-center justify-center w-4/5 sm:w-2/3 lg:w-1/2 mx-auto">
@@ -430,40 +410,42 @@ const Editor = ({ mode }: { mode: Mode }) => {
 
         <EditorContent
           editor={editor}
-          className='text-white text-[1.5rem] w-[90%] p-5 wrap-break-word text-justify'
+          className="text-white text-[1.5rem]/[1.75rem] w-[90%] p-5 wrap-break-word text-justify whitespace-pre-wrap"
         />
 
-        <div className='flex md:flex-row flex-col gap-5 sticky bottom-10 items-center justify-center'>
+        <div className="flex md:flex-row flex-col gap-5 sticky bottom-10 items-center justify-center">
           <div className="flex items-center justify-center gap-2 bg-white p-3 rounded-full">
 
-            <div className='relative flex flex-col items-center justify-center' ref={attachmentRef}>
+            <div className="relative flex flex-col items-center justify-center" ref={attachmentRef}>
               <button
-                className={`text-[1.2rem] sm:text-[2rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
+                className={`text-[1.2rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
                 onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}>
                 <RiAttachmentLine />
                 <input
                   type="file"
+                  multiple
                   ref={fileRef}
                   onChange={handleFileInput}
-                  accept='video/*,image/*,audio/*'
-                  className='hidden'
+                  accept="video/*,image/*,audio/*"
+                  className="hidden"
                 />
               </button>
-              <ul className={`list-none text-nowrap absolute left-0 bg-white text-center bottom-full 
-                            mb-5 rounded-xl overflow-hidden transition-all duration-200 ${showAttachmentMenu ? 'h-auto' : 'h-0'}`}>
+              <ul 
+                className={`list-none text-nowrap absolute left-0 bg-white text-center bottom-full 
+                  mb-5 rounded-xl overflow-hidden transition-all duration-200 ${showAttachmentMenu ? "h-auto" : "h-0"}`}>
                 <li
-                  className='p-2 border border-solid border-t-2 hover:bg-primary cursor-pointer'
+                  className="p-2 border border-solid border-t-2 hover:bg-primary cursor-pointer"
                   onClick={() => { setShowAttachmentMenu(false); fileRef.current?.click() }}
                 >Upload File</li>
                 <li
-                  className='p-2 border border-solid border-t-2 hover:bg-primary cursor-pointer'
+                  className="p-2 border border-solid border-t-2 hover:bg-primary cursor-pointer"
                   onClick={() => { setShowAttachmentMenu(false); setAskEmbedUrl(true) }}
                 >Embed</li>
               </ul>
             </div>
 
             <select
-              className='text-center outline-none cursor-pointer'
+              className="text-center outline-none cursor-pointer"
               name="size"
               value={fontSize}
               onChange={handleFontSize}
@@ -475,62 +457,62 @@ const Editor = ({ mode }: { mode: Mode }) => {
             </select>
 
             <button
-              className={`sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${clicked.bold ? 'text-primary scale-110' : 'text-black'
+              className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${editorState.bold ? "text-primary scale-110" : "text-black"
                 }`}
-              onClick={() => handleClick('bold')}
+              onClick={() => handleClick("bold")}
             >
               <FaBold />
             </button>
 
             <button
-              className={`sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${clicked.italic ? 'text-primary scale-110' : 'text-black'
+              className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${editorState.italic ? "text-primary scale-110" : "text-black"
                 }`}
-              onClick={() => handleClick('italic')}
+              onClick={() => handleClick("italic")}
             >
               <FaItalic />
             </button>
 
             <button
-              className={`sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${clicked.underline ? 'text-primary scale-110' : 'text-black'
+              className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${editorState.underline ? "text-primary scale-110" : "text-black"
                 }`}
-              onClick={() => handleClick('underline')}
+              onClick={() => handleClick("underline")}
             >
               <FaUnderline />
             </button>
 
             <button
-              className={`sm:text-[2rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
+              className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
               onClick={() => editor?.commands.toggleBlockquote()}
             >
               <GrBlockQuote />
             </button>
 
             <button
-              className="sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
+              className="cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
               onClick={() => editor.chain().focus().undo().run()}
             >
               <FaUndo />
             </button>
 
             <button
-              className="sm:text-[1.5rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
+              className="cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
               onClick={() => editor.chain().focus().redo().run()}
             >
               <FaRedo />
             </button>
           </div>
 
-          <div className='bg-white p-3 rounded-full flex gap-3 items-center justify-center'>
+          <div className="bg-white p-3 rounded-full flex gap-3 items-center justify-center">
             <button
-              className={`text-[2.5rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
-                                 ${editorState === 'preview' ? 'text-primary' : ''}`}
+              className={`text-[1.25rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
+                ${editorMode === "preview" ? "text-primary" : ""}`}
               onClick={() => handlePreview()}>
               <MdPreview />
             </button>
 
             <button
-              className={`text-[2rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
-                        ${editorState === 'preview' ? 'text-primary' : ''}`}
+              className={`cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
+                ${editorMode === "preview" ? "text-primary" : ""}`}
               onClick={() => handleSave()}>
               <FaSave />
             </button>
@@ -541,23 +523,23 @@ const Editor = ({ mode }: { mode: Mode }) => {
 
       <div
         className={`w-full relative flex-col
-         items-center justify-center gap-10 bg-black py-20 
-          ${editorState === 'preview' ? 'flex' : 'hidden'}`}>
+         items-center justify-center bg-black py-20 
+          ${editorMode === "preview" ? "flex" : "hidden"}`}>
         {
           <MdCancel
             className={`absolute text-[2.5rem] right-0 top-0 cursor-pointer m-5 bg-black 
             text-primary rounded-full hover:scale-110 z-50`}
-            id='cancel'
+            id="cancel"
             onClick={() => {
-              setEditorState('editing');
+              setEditorMode("editing");
             }} />
         }
         <Title title={title} />
 
         <div
-          className='text-white text-[1.5rem] w-[90%] p-5 wrap-break-word whitespace-pre-wrap text-justify'
+          className="text-white text-[1.5rem]/[1.75rem] w-[90%] p-5 wrap-break-word whitespace-pre-wrap text-justify"
           dangerouslySetInnerHTML={{
-            __html: decodeHtml(body)
+            __html: DOMPurify.sanitize(formatHtml(body))
           }}
         >
         </div>
@@ -585,7 +567,7 @@ const Editor = ({ mode }: { mode: Mode }) => {
             <div
               className="text-white text-[1.2rem] sm:text-[1.75rem] cursor-pointer hover:text-primary"
               onClick={() => navigate(postState?.details?.locationSpecific ? `/create/post/${id}/map` : `/create/post/${id}`)}>
-              {postState?.details?.locationSpecific ? `Map >` : 'Upload Post >'}
+              {postState?.details?.locationSpecific ? `Map >` : "Upload Post >"}
             </div>
           )
         }

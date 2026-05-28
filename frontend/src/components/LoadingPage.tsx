@@ -42,7 +42,7 @@ const LoadingPage = () => {
   return (
     <div className={`w-screen h-screen flex flex-col items-center bottom-0 overflow-hidden z-[9997] bg-black`}>
       <svg 
-        className='w-60' 
+        className="w-60" 
         id="e6RLSVEilXC1" 
         xmlns="http://www.w3.org/2000/svg" 
         xmlnsXlink="http://www.w3.org/1999/xlink" 
@@ -52,7 +52,7 @@ const LoadingPage = () => {
         project-id="e2297cd059194b72af4d010f5799bad9" 
         export-id="68df0f43f2ef477cbde5cec0945adf61">
         <g 
-          fill='#FF6700' 
+          fill="#FF6700" 
           transform="matrix(.225936 0 0 0.192842 265.277218 76.789268)">
           <path 
             ref={flameRef} 
@@ -71,7 +71,7 @@ const LoadingPage = () => {
         <path d="M298.582678,321.259846h72.440946" transform="matrix(1 0 0 3 0-642.519692)" fill="none" stroke="#3f5787" strokeWidth="1.44"/>
         <path d="" fill="none" stroke="#3f5787" strokeWidth="1.44"/>
         <rect width="72.440946" height="144.881892" rx="0" ry="0" transform="matrix(1 0 0 0.592284 298.97638 206.72977)" fill="#b3b8b2" strokeWidth="0"/>
-        <rect width="72.440946" height="52.461448" rx="8" ry="8" transform="matrix(1.182344 0 0 1 291.978092 180.499046)" stroke='#fff' strokeWidth="3px"/>
+        <rect width="72.440946" height="52.461448" rx="8" ry="8" transform="matrix(1.182344 0 0 1 291.978092 180.499046)" stroke="#fff" strokeWidth="3px"/>
         <rect width="72.047244" height="7.880889" rx="0" ry="0" transform="translate(298.97638 292.540995)" fill="#fafafa" strokeWidth="0"/>
       </svg>
     </div>
@@ -85,7 +85,7 @@ const LoadingPage = () => {
         <div className={`w-screen h-screen flex flex-col fixed items-center justify-center 
             bottom-0 overflow-hidden z-9997 bg-black`}>
           <img 
-           className='w-1/3'
+           className="w-1/3"
            src="/assets/loading/gitige.gif" alt="loader" />
         </div>
     )

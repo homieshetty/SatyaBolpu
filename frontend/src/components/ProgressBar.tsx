@@ -35,10 +35,10 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, state 
         <div 
           className="absolute z-10 h-10 bg-primary transition-all duration-300" 
           style={{
-            borderTopLeftRadius: '9999px',
-            borderBottomLeftRadius: '9999px',
-            borderTopRightRadius: progress >= 100 ? '9999px' : '',
-            borderBottomRightRadius: progress >= 100 ? '9999px' : '',
+            borderTopLeftRadius: "9999px",
+            borderBottomLeftRadius: "9999px",
+            borderTopRightRadius: progress >= 100 ? "9999px" : "",
+            borderBottomRightRadius: progress >= 100 ? "9999px" : "",
             width: `${Math.min(progress,100)}%`
           }}
           ></div>
@@ -51,8 +51,8 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, state 
                 <div 
                   className={`outline-primary outline rounded-full w-9 h-9 text-center transition-all flex items-center justify-center 
                     ${isDisabled ? 
-                      'cursor-not-allowed bg-gray-400' :
-                      'cursor-pointer hover:scale-110 hover:bg-primary hover:text-black hover:outline-black bg-black'}`} 
+                      "cursor-not-allowed bg-gray-400" :
+                      "cursor-pointer hover:scale-110 hover:bg-primary hover:text-black hover:outline-black bg-black"}`} 
                   onClick={() => {
                     if(!isDisabled) 
                       navigate(`${step}`) 

@@ -16,12 +16,12 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
         gsap.fromTo(
           bgRef.current,
           {
-            backdropFilter: 'blur(0px)'
+            backdropFilter: "blur(0px)"
           },
           {
-            backdropFilter: 'blur(10px)',
+            backdropFilter: "blur(10px)",
             duration: 0.5,
-            ease: 'power2.inOut'
+            ease: "power2.inOut"
           }
         )
         gsap.fromTo(
@@ -32,7 +32,7 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
           {
             scale: 1,
             duration: 0.5,
-            ease: 'power2.inOut'
+            ease: "power2.inOut"
           }
         )
       }
@@ -44,13 +44,13 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
   const handleClick = (call? : () => void) => {
     call?.();
     if(bgRef.current && dialogRef.current) {
-      dialogRef.current.style.pointerEvents = 'none';
+      dialogRef.current.style.pointerEvents = "none";
       gsap.to(
         bgRef.current,
         {
-          backdropFilter: 'blur(0px)',
+          backdropFilter: "blur(0px)",
           duration: 0.5,
-          ease: 'power2.inOut'
+          ease: "power2.inOut"
         }
       );
 
@@ -59,7 +59,7 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
         {
           scale: 0,
           duration: 0.5,
-          ease: 'power2.inOut'
+          ease: "power2.inOut"
         }
       );
     }
@@ -78,9 +78,9 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
             <div className="flex items-center justify-center flex-col">
                 <p className="text-[2rem]">
                 {
-                    props.severity === 'irreversible' ?
+                    props.severity === "irreversible" ?
                         <IoIosWarning className="text-red-500"/> :
-                        props.severity === 'risky' ?
+                        props.severity === "risky" ?
                         <IoIosWarning className="text-yellow-500"/> :
                         <FaInfoCircle className="text-gray-400"/>
                 }

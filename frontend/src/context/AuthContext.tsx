@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useReducer, useRef } from "react";
 import useApi from "../hooks/useApi";
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 import { AuthAction, AuthContextType, AuthState } from "../types/globals";
 
 const initialState: AuthState = {
@@ -11,23 +11,23 @@ const initialState: AuthState = {
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
-    case 'LOGIN':
+    case "LOGIN":
       return { 
         user: action.payload.user, 
         token: action.payload.token, 
         isRefreshing: false 
       };
-    case 'LOGOUT':
+    case "LOGOUT":
       return { ...initialState };
-    case 'REFRESH_START':
+    case "REFRESH_START":
       return { ...state, isRefreshing: true };
-    case 'REFRESH_SUCCESS':
+    case "REFRESH_SUCCESS":
       return { 
         user: action.payload.user, 
         token: action.payload.token, 
         isRefreshing: false 
       };
-    case 'REFRESH_FAILED':
+    case "REFRESH_FAILED":
       return { ...initialState };
     default:
       return state;
@@ -42,10 +42,10 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { data, error, post } = useApi('/auth/refresh', { auto: false });
+  const { data, error, post } = useApi("/auth/refresh", { auto: false });
    const [state, dispatch] = useReducer(authReducer, initialState, () => {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user") || "null");
     
     if (token) {
       try {
@@ -53,13 +53,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const currentTime = Date.now() / 1000;
         
         if (exp <= currentTime) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
           return initialState;
         }
       } catch (err) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         return initialState;
       }
     }
@@ -77,12 +77,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       isRefreshingRef.current = true;
-      dispatch({ type: 'REFRESH_START' });
+      dispatch({ type: "REFRESH_START" });
       
       await post({});
     } catch (err) {
-      console.error('Token refresh failed:', err);
-      dispatch({ type: 'REFRESH_FAILED' });
+      console.error("Token refresh failed:", err);
+      dispatch({ type: "REFRESH_FAILED" });
     } finally {
       isRefreshingRef.current = false;
     }
@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const refreshThreshold = 60;
 
       if (timeUntilExpiry <= 0) {
-        dispatch({ type: 'LOGOUT' });
+        dispatch({ type: "LOGOUT" });
         return;
       }
 
@@ -111,8 +111,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         refreshToken().catch(() => {});
       }, refreshTime);    } 
     catch (err) {
-      console.error('Invalid token:', err);
-      dispatch({ type: 'LOGOUT' });
+      console.error("Invalid token:", err);
+      dispatch({ type: "LOGOUT" });
     }
   }, [refreshToken]);
 
@@ -131,26 +131,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (data?.accessToken && state.isRefreshing) {
-      console.log('Token refreshed successfully');
+      console.log("Token refreshed successfully");
       dispatch({
-        type: 'REFRESH_SUCCESS',
+        type: "REFRESH_SUCCESS",
         payload: { user: data.user, token: data.accessToken },
       });
     }
     
     if (error && state.isRefreshing) {
-      console.error('Refresh error:', error);
-      dispatch({ type: 'REFRESH_FAILED' });
+      console.error("Refresh error:", error);
+      dispatch({ type: "REFRESH_FAILED" });
     }
   }, [data, error, state.isRefreshing]);
 
   useEffect(() => {
     if (state.token && state.user) {
-      localStorage.setItem('token', state.token);
-      localStorage.setItem('user', JSON.stringify(state.user));
+      localStorage.setItem("token", state.token);
+      localStorage.setItem("user", JSON.stringify(state.user));
     } else {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
     }
   }, [state.token, state.user]);
 

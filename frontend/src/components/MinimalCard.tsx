@@ -13,7 +13,7 @@ export const MinimalCard = ({ id, title, handleEdit, handleDelete }: MinimalCard
   return (
     <div className="w-[90%] lg:w-1/2 flex items-cente justify-between">
       <div className="text-primary text-[2rem] font-bold">
-        {title || 'Empty Draft'}
+        {title || "Empty Draft"}
       </div>
       <div className="flex gap-2">
         <div

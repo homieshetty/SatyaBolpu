@@ -15,7 +15,7 @@ const initialLoginData = {
 const Login = () => {
   const [formData, setFormData] = useState<LoginProps>(initialLoginData);
   const [errors, setErrors] = useState<LoginProps>(initialLoginData);
-  const [apiError,setApiError] = useState<string>('');
+  const [apiError,setApiError] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [buttonLoad, setButtonLoad] = useState<boolean>(false);
   const passwordRef = useRef<HTMLInputElement | null>(null);
@@ -43,7 +43,7 @@ const Login = () => {
 
     setErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: ""
     }));
 
     setFormData((prev) => ({
@@ -55,7 +55,7 @@ const Login = () => {
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationErrors = validateForm();
-    if (Object.values(validationErrors).some(err => err !== '')) {
+    if (Object.values(validationErrors).some(err => err !== "")) {
       setErrors(validationErrors);
       return;
     }
@@ -75,7 +75,7 @@ const Login = () => {
     }
 
     if (data && !loading) {
-      setApiError('');
+      setApiError("");
       dispatch({
         type: "LOGIN",
         payload: {
@@ -83,7 +83,7 @@ const Login = () => {
           token: data.accessToken,
         },
       });
-      const names: string[] = data.user.name.split(' ');
+      const names: string[] = data.user.name.split(" ");
       let finalName;
       if(names.length < 2) {
         finalName = names[0];

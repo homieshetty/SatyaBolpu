@@ -48,6 +48,15 @@ export type RotatingCardProps = BaseCardProps & {
   image: string
 }
 
+export type BlogCardProps = BaseCardProps & {
+  title: string;
+  type: string;
+  subtitle: string;
+  image: string;
+  userId: string;
+  createdAt: Date;
+}
+
 export type PostGroupProps = BaseCardProps & {
   name: string;
   posts: {
@@ -165,31 +174,9 @@ export type AuthContextType = {
   dispatch: React.Dispatch<AuthAction>;
 };
 
-export type CultureDetailsType = {
-  title: string;
-  descriptiveName: string;
-  description: string;
-  coverImages: string[] | File[];
-  galleryImages: string[] | File[];
-};
-
 export type CultureState = {
   details: CultureDetailsType | null;
   content: string; 
-};
-
-export type CultureAction = 
-  | { type: "SAVE_CULTURE_DETAILS", payload: { details: CultureDetailsType }  }
-  | { type: "CLEAR_CULTURE_DETAILS" }
-  | { type: "SAVE_EDITOR_CONTENT", payload: { content: string } }
-  | { type: "CLEAR_EDITOR_CONTENT" }
-  | { type: "CLEAR_CULTURE" };
-
-export type CultureDispatch = React.Dispatch<CultureAction>;
-
-export type CultureContextType = {
-  state: CultureState;
-  dispatch: CultureDispatch;
 };
 
 export type DialogBoxOptions = {
@@ -210,74 +197,16 @@ export type LoadingContextType = {
   setLoading: (loading: boolean) => void;
 };
 
-export type PostDetailsType = {
-  title: string;
-  shortTitle: string;
-  culture: string;
-  postGroup: string;
-  postType: string;
-  description: string;
-  tags: string[];
-  locationSpecific: boolean;
-  image: File | string | null;
-};
-
 export type PostState = {
   details: PostDetailsType | null;
   content: string;
   location: Location | null;
 };
 
-export type PostAction =
-  | { type: "SAVE_POST_DETAILS" , payload: { details: PostDetailsType } }
-  | { type: "CLEAR_POST_DETAILS" }
-  | { type: "SAVE_EDITOR_CONTENT", payload: { content: string } }
-  | { type: "CLEAR_EDITOR_CONTENT" }
-  | { type: "SAVE_LOCATION", payload: { location: Location } }
-  | { type: "CLEAR_LOCATION" }
-  | { type: "SAVE_POST", payload: { post: PostState } }
-  | { type: "CLEAR_POST" };
-
-export type PostDispatch = React.Dispatch<PostAction>;
-
-export type PostContextType = {
-  state: PostState;
-  dispatch: PostDispatch;
-};
-
-export type EventDetailsType = {
-  title: string;
-  description: string;
-  duration: {
-    start: Date | null,
-    end: Date | null
-  },
-  culture: string;
-  docs: string[] | File[]
-}
-
 export type EventState = {
   details: EventDetailsType | null;
   location: Location | null;
 };
-
-export type EventAction =
-  | { type: "SAVE_EVENT_DETAILS" , payload: { details: EventDetailsType } }
-  | { type: "CLEAR_EVENT_DETAILS" }
-  | { type: "SAVE_LOCATION", payload: { location: Location } }
-  | { type: "CLEAR_LOCATION" }
-  | { type: "CLEAR_EVENT" }
-
-export type EventDispatch = React.Dispatch<EventAction>;
-
-export type EventContextType = {
-  state: EventState;
-  dispatch: EventDispatch;
-};
-
-export type Entity = "culture" | "post" | "event";
-
-export type ImageType = "editor" | "details";
 
 export type SignUpProps = {
   name: string;
@@ -300,8 +229,9 @@ export interface ICulture {
   title: string;
   descriptiveName: string;
   description: string;
-  coverImages: string[];
-  galleryImages: string[];
+  coverImage: string | File | null;
+  galleryImages: string[] | File[];
+  files: string[] | File[],
   content: string;
   posts: number;
 };
@@ -322,7 +252,8 @@ export interface IPost {
   postType: string;
   description: string;
   tags: string[];
-  image: string;
+  coverImage: string | File | null;
+  files: string[] | File[];
   content: string;
   location?: ILocation;
 };
@@ -335,8 +266,9 @@ export interface IEvent {
     end: Date
   };
   culture: string;
-  docs: string[];
-  location: ILocation
+  coverImage: string | File | null;
+  files: string[] | File[];
+  location: ILocation;
 };
 
 export interface ITag {

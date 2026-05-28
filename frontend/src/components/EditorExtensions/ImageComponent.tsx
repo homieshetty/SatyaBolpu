@@ -1,6 +1,6 @@
-import { useRef } from 'react';
-import BaseComponent from './BaseComponent';
-import { NodeViewProps } from '@tiptap/react';
+import { useRef } from "react";
+import BaseComponent from "./BaseComponent";
+import { NodeViewProps } from "@tiptap/react";
 
 const ImageComponent = (props: NodeViewProps) => {
   const { node } = props;
@@ -8,7 +8,6 @@ const ImageComponent = (props: NodeViewProps) => {
 
   const imageEl = (
     <img
-      data-idbkey={node.attrs.idbKey}
       src={node.attrs.src}
       ref={imgRef}
       alt="image"
@@ -16,7 +15,15 @@ const ImageComponent = (props: NodeViewProps) => {
     />
   );
 
-  return <BaseComponent {...props} enableAlign enableResize enableCaption mediaRef={imgRef} mediaElement={imageEl} />;
+  return <BaseComponent 
+    {...props}
+    enableAlign={!!node.attrs.align}
+    enableResize 
+    enableCaption 
+    mediaRef={imgRef} 
+    mediaElement={imageEl} 
+  />;
+
 };
 
 export default ImageComponent;

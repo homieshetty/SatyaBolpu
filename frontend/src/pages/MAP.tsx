@@ -15,11 +15,11 @@ import { Mode } from "../types/enums";
 import { FaChevronCircleLeft } from "react-icons/fa";
 
 //this is beacuse icons dont load in prod, some bs idk
-import L from 'leaflet';
+import L from "leaflet";
 
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import useApi from "../hooks/useApi";
 import { validateEventDetails, validatePostDetails } from "../utils/validate";
 
@@ -37,9 +37,9 @@ type coordinatesErrorType = {
 };
 
 const initialLocation = {
-  district: '',
-  taluk: '',
-  village: '',
+  district: "",
+  taluk: "",
+  village: "",
   lat: null,
   lng: null
 };
@@ -55,7 +55,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const [activeVillage, setActiveVillage] = useState<GeoJSON.Feature | null>(null);
   const [askForCoordinates, setAskForCoordinates] = useState<boolean>(false);
-  const [coordinateErrors, setCoordinateErrors] = useState<coordinatesErrorType>({ lat: '', lng: '' });
+  const [coordinateErrors, setCoordinateErrors] = useState<coordinatesErrorType>({ lat: "", lng: "" });
   const [location, setLocation] = useState<Location>(initialLocation);
   const [showMenu, setShowMenu] = useState<boolean>(true);
   const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
@@ -66,15 +66,15 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
 
   const { setLoading } = useLoading();
   const navigate = useNavigate();
-  const draftsApi = useApi('/drafts', { auto: false });
-  const postsApi = useApi('/posts', { auto: false });
-  const eventsApi = useApi('/events', { auto: false });
+  const draftsApi = useApi("/drafts", { auto: false });
+  const postsApi = useApi("/posts", { auto: false });
+  const eventsApi = useApi("/events", { auto: false });
 
   useEffect(() => {
     if(editMode === undefined) return;
 
     const fetchDraft = async () => {
-      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: 'GET' });
+      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
       if (!res) return;
       if (editMode === Mode.EVENT) {
         console.log(res.draft)
@@ -92,7 +92,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
           navigate(`/create/post/${id}/details`);
         } else {
           // setPostState({
-          //   content: res.draft.content ?? '',
+          //   content: res.draft.content ?? "",
           //   details: res.draft.details,
           //   location: res.draft.location
           // });
@@ -125,7 +125,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
   useEffect(() => {
     return () => {
       if (toolTipPane.current) {
-        toolTipPane.current.innerHTML = '';
+        toolTipPane.current.innerHTML = "";
       }
     };
   }, [map]);
@@ -141,8 +141,8 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
       setFullScreen(isFs);
     };
 
-    document.addEventListener('fullscreenchange', handleFullScreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
+    document.addEventListener("fullscreenchange", handleFullScreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullScreenChange);
   }, []);
 
   useEffect(() => {
@@ -165,7 +165,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
 
     mapInstance.on("zoomstart", () => {
       if (toolTipPane.current) {
-        toolTipPane.current.innerHTML = '';
+        toolTipPane.current.innerHTML = "";
       }
     });
   };
@@ -200,7 +200,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
         mouseover: (e: LeafletMouseEvent) => {
           if (feature.properties?.VILLAGE && layer !== activeLayerRef.current) {
             if (toolTipPane.current) {
-              const existingTooltips = toolTipPane.current.querySelectorAll('.leaflet-tooltip:not(.permanent-tooltip)');
+              const existingTooltips = toolTipPane.current.querySelectorAll(".leaflet-tooltip:not(.permanent-tooltip)");
               existingTooltips.forEach((tooltip: Element) => tooltip.remove());
             }
 
@@ -230,7 +230,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
 
         click: (e: LeafletMouseEvent) => {
           if (toolTipPane.current) {
-            toolTipPane.current.innerHTML = '';
+            toolTipPane.current.innerHTML = "";
           }
 
           if (activeLayerRef.current && activeLayerRef.current !== layer) {
@@ -338,7 +338,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
   const handleCoordinateChange = (e: ChangeEvent<HTMLInputElement>) => {
     setCoordinateErrors((prev) => ({
       ...prev,
-      [name]: ''
+      [name]: ""
     }))
 
     const { name, value } = e.target;
@@ -381,7 +381,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
 
         const { geometry } = feature;
 
-        if (geometry.type === 'Polygon') {
+        if (geometry.type === "Polygon") {
           const coordinates = geometry.coordinates[0];
           if (pointInPolygon(point, coordinates)) {
             return {
@@ -390,7 +390,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
               properties: feature.properties
             };
           }
-        } else if (geometry.type === 'MultiPolygon') {
+        } else if (geometry.type === "MultiPolygon") {
           for (const polygon of geometry.coordinates) {
             const coordinates = polygon[0];
             if (pointInPolygon(point, coordinates)) {
@@ -412,16 +412,16 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
     e.preventDefault();
 
     const newErrors = {
-      lat: '',
-      lng: ''
+      lat: "",
+      lng: ""
     }
 
     if (!location.lat) {
-      newErrors.lat = 'Latitude is required.'
+      newErrors.lat = "Latitude is required."
     }
 
     if (!location.lng) {
-      newErrors.lng = 'Longitude is required.'
+      newErrors.lng = "Longitude is required."
     }
 
     const maxBounds = [
@@ -430,15 +430,15 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
     ];
 
     if (location.lat && (location.lat! > maxBounds[0][0] || location.lat! < maxBounds[1][0])) {
-      newErrors.lat = 'Latitude exceeds max bounds.'
+      newErrors.lat = "Latitude exceeds max bounds."
     }
 
     if (location.lng && (location.lng! > maxBounds[1][1] || location.lng! < maxBounds[0][1])) {
-      newErrors.lng = 'Longitude exceeds max bounds.'
+      newErrors.lng = "Longitude exceeds max bounds."
     }
 
     setCoordinateErrors(newErrors);
-    const hasError = Object.values(newErrors).some(err => err !== '');
+    const hasError = Object.values(newErrors).some(err => err !== "");
     if (hasError)
       return
 
@@ -449,7 +449,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
     );
 
     if (!containingLayer) {
-      toast.error('Somethig went wrong! Try again later');
+      toast.error("Somethig went wrong! Try again later");
     }
 
     map?.flyTo([location.lat!, location.lng!], 18);
@@ -530,7 +530,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
           editMode !== undefined && location &&
           <IoMdDoneAll
             className={`text-[2.5rem] 
-                ${location.district ? 'text-white hover:scale-110' : 'cursor-not-allowed text-gray-400'}`}
+                ${location.district ? "text-white hover:scale-110" : "cursor-not-allowed text-gray-400"}`}
             onClick={handleSubmit}
           />
         }
@@ -555,7 +555,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
                   p-6 rounded-xl text-back cursor-pointer"
                 onSubmit={handleCoordinatesSubmit}>
                 <MdCancel
-                  size={'25px'}
+                  size={"25px"}
                   className="absolute top-3 right-3 fill-white hover:fill-primary"
                   onClick={() => setAskForCoordinates(false)}
                 />
@@ -567,7 +567,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
                     id="lat"
                     name="lat"
                     autoComplete="off"
-                    value={location?.lat ?? ''}
+                    value={location?.lat ?? ""}
                     onChange={handleCoordinateChange}
                   />
                   {coordinateErrors.lat && <p className="text-red-500">{coordinateErrors.lat}</p>}
@@ -580,7 +580,7 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
                     id="lng"
                     name="lng"
                     autoComplete="off"
-                    value={location?.lng ?? ''}
+                    value={location?.lng ?? ""}
                     onChange={handleCoordinateChange}
                   />
                   {coordinateErrors.lng && <p className="text-red-500">{coordinateErrors.lng}</p>}
@@ -596,20 +596,20 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
           <div className="absolute bottom-0 bg-black m-5 p-5 text-white z-1000
              flex flex-col gap-2 rounded-2xl transition-all"
             style={{
-              translate: showMenu ? '0 0 ' : '-100% 0'
+              translate: showMenu ? "0 0 " : "-100% 0"
             }}
           >
             <FaChevronCircleLeft
-              size={'20px'}
+              size={"20px"}
               style={{
-                rotate: showMenu ? '0deg' : '180deg'
+                rotate: showMenu ? "0deg" : "180deg"
               }}
               className="absolute top-1/2 -translate-y-1/2 -right-2 cursor-pointer hover:fill-primary
               transition-all"
               onClick={() => setShowMenu(!showMenu)} />
             <p className="text-center text-primary font-bold">{activeVillage.properties?.VILLAGE}</p>
             <p className="text-sm">District: {activeVillage.properties?.DISTRICT}</p>
-            <p className="text-sm">Taluk: {activeVillage.properties?.TALUK || 'Unknown'}</p>
+            <p className="text-sm">Taluk: {activeVillage.properties?.TALUK || "Unknown"}</p>
             <p className="text-sm">No of covered locations: {0}</p>
             <Button content="View More" className="mx-auto text-sm" onClick={handleView} />
           </div>

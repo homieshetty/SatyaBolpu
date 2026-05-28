@@ -39,8 +39,8 @@ const SortOptions = ({
             className="text-primary flex gap-1 items-center justify-center p-1 rounded-lg
               cursor-pointer"
             style={{
-              backgroundColor: selectedSortOption === entry[1] ? 'var(--primary)' : '',
-              color: selectedSortOption === entry[1] ? 'black' : 'var(--primary)'
+              backgroundColor: selectedSortOption === entry[1] ? "var(--primary)" : "",
+              color: selectedSortOption === entry[1] ? "black" : "var(--primary)"
             }}
             onClick={() => setSelectedSortOption(entry[1])}
           >

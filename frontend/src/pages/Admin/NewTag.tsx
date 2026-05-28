@@ -5,12 +5,12 @@ import useApi from "../../hooks/useApi";
 import { toast } from "react-toastify";
 
 const NewTag = () => {
-  const [tag, setTag] = useState<string>('');
+  const [tag, setTag] = useState<string>("");
   const [existingTags, setExistingTags] = useState<string[]>([]);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
 
-  const tagsApi = useApi('/others/tags');
-  const tagsPostApi = useApi('/others/tags', { auto: false });
+  const tagsApi = useApi("/others/tags");
+  const tagsPostApi = useApi("/others/tags", { auto: false });
 
   useEffect(() => {
     if(tagsApi.data) {
@@ -36,7 +36,7 @@ const NewTag = () => {
 
   const handleTagSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    let newError: string = '';
+    let newError: string = "";
     if (!tag.trim())
       newError = "Tag is required.";
 
@@ -49,7 +49,7 @@ const NewTag = () => {
     const res = await tagsPostApi.post({ tag });
     if(!res) return;
     toast.success(`Tag ${res.tag} successfully added.`);
-    setTag('');
+    setTag("");
   }
 
   return (

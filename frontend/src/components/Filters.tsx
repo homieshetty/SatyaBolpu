@@ -37,8 +37,8 @@ const FilterGroup = ({
       }
     }
 
-    window.addEventListener('mousedown', handleClickOutside);
-    return () => window.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener("mousedown", handleClickOutside);
+    return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleCheck = (e: ChangeEvent<HTMLInputElement>) => {
@@ -69,16 +69,16 @@ const FilterGroup = ({
         <MdArrowDropDown
           className="transition-all z-0"
           style={{
-            rotate: dropped ? '180deg' : '0deg'
+            rotate: dropped ? "180deg" : "0deg"
           }}
-          size={'25px'}
+          size={"25px"}
         />
       </div>
       <div
         className="transition-all text-white overflow-y-scroll max-h-60 overscroll-none"
         style={{
-          height: dropped ? 'auto' : '0',
-          scrollbarWidth: 'none'
+          height: dropped ? "auto" : "0",
+          scrollbarWidth: "none"
         }}
       >
         {
@@ -125,7 +125,7 @@ const Filters = ({ filterGroups, selectedFilters, setSelectedFilters, ref }: Fil
       <div
         className="w-full mx-auto text-black flex flex-wrap gap-2 overflow-hidden transition-all"
         style={{
-          height: Object.values(selectedFilters).some(f => f.length > 0) ? 'auto' : '0'
+          height: Object.values(selectedFilters).some(f => f.length > 0) ? "auto" : "0"
         }}
       >
         {

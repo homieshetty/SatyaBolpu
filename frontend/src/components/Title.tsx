@@ -2,9 +2,10 @@
 const Title = ({title} : {title: string}) => {
   
   return (
-    <div className="w-full flex flex-col justify-center items-center gap-5 md:gap-[3.2rem] mb-10">
+    <div className="w-full flex flex-col justify-center items-center">
         <div
-          className="text-primary w-full text-4xl sm:text-6xl text-center font-bold bg-black whitespace-pre-line wrap-break-word">
+          className="text-primary w-4/5 text-4xl sm:text-6xl text-center font-bold bg-black whitespace-pre-wrap wrap-break-word
+            text-wrap leading-none mb-3">
             {title}
         </div>
 

@@ -28,7 +28,7 @@ const PostGroupCard = ({ name, posts } : PostGroupProps) => {
         <IoIosArrowDown 
           className="transition-all absolute right-5"
           style={{
-            rotate: dropped ? '180deg' : '0deg'
+            rotate: dropped ? "180deg" : "0deg"
           }}
         />
       </div>
@@ -36,7 +36,7 @@ const PostGroupCard = ({ name, posts } : PostGroupProps) => {
       <div
         className="transition-all overflow-hidden border border-primary"
         style={{
-          height: dropped ? 'auto' : '0'
+          height: dropped ? "auto" : "0"
         }}
       >
         {

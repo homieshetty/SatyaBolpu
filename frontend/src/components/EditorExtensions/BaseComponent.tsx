@@ -1,21 +1,25 @@
-import { NodeViewWrapper } from '@tiptap/react';
-import { useRef, useState, useEffect, ReactNode } from 'react';
+import { NodeViewWrapper } from "@tiptap/react";
+import { useRef, useState, useEffect, ReactNode } from "react";
 
 interface BaseComponentProps {
   node: {
+    type: {
+      name: string
+    },
     attrs: {
       src?: string;
       type?: string;
       html?: string;
       width?: string | number;
       height?: string | number;
-      align?: 'left' | 'center' | 'right';
+      mode?: "block" | "float";
+      align?: "left" | "center" | "right";
       caption?: string;
-    };
+    },
   };
   updateAttributes: (attrs: Record<string, any>) => void;
   selected: boolean;
-  deleteNode: () => void;
+  deleteNode?: () => void;
   mediaElement: ReactNode;
   mediaRef: React.RefObject<HTMLElement | null>;
   enableResize?: boolean;
@@ -34,7 +38,7 @@ const BaseComponent = ({
   enableResize = false,
   enableCaption = false,
   enableAlign = false,
-  customStyles = '',
+  customStyles = "",
 }: BaseComponentProps) => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [showMenu, setShowMenu] = useState(false);
@@ -46,8 +50,8 @@ const BaseComponent = ({
         setShowMenu(false);
       }
     };
-    document.addEventListener('click', closeMenu);
-    return () => document.removeEventListener('click', closeMenu);
+    document.addEventListener("click", closeMenu);
+    return () => document.removeEventListener("click", closeMenu);
   }, [showMenu]);
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -75,14 +79,14 @@ const BaseComponent = ({
     const maxWidthStr = computedStyle.maxWidth;
     let maxWidth = parseFloat(maxWidthStr);
 
-    if (maxWidthStr.endsWith('%') && wrapperRef.current) {
+    if (maxWidthStr.endsWith("%") && wrapperRef.current) {
       const parentWidth = wrapperRef.current.parentElement?.offsetWidth || window.innerWidth;
       maxWidth = (parseFloat(maxWidthStr) / 100) * parentWidth;
-    } else if (maxWidthStr === 'none' || maxWidthStr === 'auto' || isNaN(maxWidth)) {
+    } else if (maxWidthStr === "none" || maxWidthStr === "auto" || isNaN(maxWidth)) {
       maxWidth = wrapperRef.current.parentElement?.offsetWidth || mediaRef.current.clientWidth;
     }
 
-    const doResize = (moveEvent: MouseEvent) => {
+    const startResize = (moveEvent: MouseEvent) => {
       let newWidth = Math.max(50, startWidth + (moveEvent.clientX - startX));
       newWidth = Math.min(newWidth, maxWidth);
 
@@ -92,34 +96,53 @@ const BaseComponent = ({
     };
 
     const stopResize = () => {
-      window.removeEventListener('mousemove', doResize);
-      window.removeEventListener('mouseup', stopResize);
+      window.removeEventListener("mousemove", startResize);
+      window.removeEventListener("mouseup", stopResize);
     };
 
-    window.addEventListener('mousemove', doResize);
-    window.addEventListener('mouseup', stopResize);
+    window.addEventListener("mousemove", startResize);
+    window.addEventListener("mouseup", stopResize);
   };
 
-  const handleMenuAction = (action: 'left' | 'center' | 'right' | 'delete') => {
-    if (action === 'delete') deleteNode();
-    else updateAttributes({ align: action });
+  const handleMenuAction = (
+    action: "left" | "center" | "right" | "delete" | "float" | "block"
+  ) => {
+    if (action === "delete") deleteNode?.();
+    else if (action === "float" || action === "block") {
+      updateAttributes({ mode: action });
+      updateAttributes({ align: action === "block" ? "center" : "left" });
+    } else 
+      updateAttributes({ align: action });
     setShowMenu(false);
   };
 
-  const alignClass =
-    node.attrs.align === 'center' ? 'mx-auto' :
-    node.attrs.align === 'right' ? 'ml-auto' :
-    node.attrs.align === 'left' ? 'mr-auto' : '';
+  const isFloat = node.attrs.mode === "float";
+  const isLeft = node.attrs.align === "left";
+  const isRight = node.attrs.align === "right";
+  const wrapperStyle: React.CSSProperties = {
+    display: "block",
+    float:
+      isFloat && node.attrs.align !== "center"
+        ? node.attrs.align
+        : "none",
+    marginLeft: !isFloat && !isLeft ? "auto" : "8px",
+    marginRight: !isFloat && !isRight ? "auto" : "8px",
+    marginTop: isFloat ? "8px" : "",
+    marginBottom: isFloat ? "8px" : ""
+  };
 
   return (
-    <NodeViewWrapper className="relative">
+    <NodeViewWrapper 
+      className="relative"
+    >
       <div
         ref={wrapperRef}
         style={{
-            width: node.attrs.width
+            width: node.attrs.width,
+            ...wrapperStyle
         }}
-        className={`relative max-w-full ${enableAlign && selected ? 'border border-solid border-blue-500' : ''} 
-            ${enableAlign ? alignClass : 'mx-auto'} ${customStyles}`}
+        className={`relative ${enableResize && selected ? "border border-solid border-blue-500" : ""} 
+            ${customStyles}`}
         onContextMenu={handleContextMenu}
       >
 
@@ -128,7 +151,7 @@ const BaseComponent = ({
         {enableCaption && (
           <input
             type="text"
-            value={node.attrs.caption || ''}
+            value={node.attrs.caption || ""}
             className="bg-black w-full text-gray-300 text-[1rem] text-center mt-1"
             placeholder="Caption..."
             onInput={(e) => updateAttributes({ caption: e.currentTarget.value })}
@@ -138,9 +161,9 @@ const BaseComponent = ({
         {showMenu && (
           <div
             className="absolute bg-white text-black border z-50 text-sm text-center"
-            style={{ top: menuPosition.y, left: menuPosition.x, minWidth: '100px' }}
+            style={{ top: menuPosition.y, left: menuPosition.x, minWidth: "100px" }}
           >
-            {['left', 'center', 'right'].map((dir) => (
+            {["left", node.attrs.mode === "block" ? "center" : "", "right"].filter(dir => dir !== "").map((dir) => (
               <div
                 key={dir}
                 className="cursor-pointer hover:bg-gray-100 p-1"
@@ -149,9 +172,22 @@ const BaseComponent = ({
                 Align {dir.charAt(0).toUpperCase() + dir.slice(1)}
               </div>
             ))}
+
+            {
+              node.type.name === "image" &&
+              <div
+                className="cursor-pointer hover:bg-red-200 text-black p-1"
+                onClick={() => handleMenuAction(node.attrs.mode === "block" ? "float" : "block")}
+              >
+                {
+                  node.attrs.mode === "block" ? "Inline" : "Block"
+                }
+              </div>
+            }
+
             <div
               className="cursor-pointer hover:bg-red-200 text-red-500 p-1"
-              onClick={() => handleMenuAction('delete')}
+              onClick={() => handleMenuAction("delete")}
             >
               Delete
             </div>
@@ -170,4 +206,3 @@ const BaseComponent = ({
 };
 
 export default BaseComponent;
-
