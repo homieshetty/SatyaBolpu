@@ -33,8 +33,8 @@ const userSchema = new Schema<IUser>({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
+    enum: ["user", "admin"],
+    default: "user"
   },
   verified: {
     type: Boolean,
@@ -46,4 +46,4 @@ const userSchema = new Schema<IUser>({
   },
 },{ timestamps: true });
 
-export const User = mongoose.model<IUser>('User',userSchema);
+export const User = mongoose.model<IUser>("User",userSchema);

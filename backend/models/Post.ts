@@ -28,7 +28,7 @@ export const locationSchema = new Schema({
 const postSchema = new Schema<IPost>({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true
   },
   title: {
@@ -41,17 +41,17 @@ const postSchema = new Schema<IPost>({
   },
   culture: {
     type: Schema.Types.ObjectId,
-    ref: 'Culture',
+    ref: "Culture",
     required: true
   },
   postGroup: {
     type: Schema.Types.ObjectId,
-    ref: 'PostGroup',
+    ref: "PostGroup",
     required: true
   },
   postType: {
     type: Schema.Types.ObjectId,
-    ref: 'PostType',
+    ref: "PostType",
     required: true
   },
   description: {
@@ -59,18 +59,21 @@ const postSchema = new Schema<IPost>({
     required: true
   },
   tags: {
-    type: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
+    type: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
     required: true,
     validate: {
       validator: function (val: Schema.Types.ObjectId[]) {
         return val && val.length > 0;
       },
-      message: 'At least one tag required'
+      message: "At least one tag required"
     }
   },
-  image: {
+  coverImage: {
     type: String,
     required: true
+  },
+  files: {
+    type: [String]
   },
   content: {
     type: String,
@@ -87,4 +90,4 @@ postSchema.index({ tags: 1 });
 postSchema.index({ createdAt: -1 });
 postSchema.index({ location: "2dsphere" });
 
-export const Post = mongoose.model<IPost>('Post',postSchema);
+export const Post = mongoose.model<IPost>("Post",postSchema);

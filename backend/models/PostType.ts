@@ -9,4 +9,4 @@ const postTypeSchema = new Schema<IPostType>({
   }
 }, { timestamps: true });
 
-export const PostType = mongoose.model('PostType', postTypeSchema);
+export const PostType = mongoose.model("PostType", postTypeSchema);

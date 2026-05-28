@@ -16,13 +16,13 @@ export const getDrafts = async (req: AuthRequest, res: Response) => {
       }));
 
     if (!drafts) {
-      return res.status(500).json({ msg: 'No posts found.' });
+      return res.status(500).json({ msg: "No posts found." });
     }
 
     return res.status(200).json({ drafts });
   } catch (err: any) {
-    console.error('Error while fetching drafts: ', err.message);
-    return res.status(500).json({ msg: 'Internal Server error while fetching drafts.' });
+    console.error("Error while fetching drafts: ", err.message);
+    return res.status(500).json({ msg: "Internal Server error while fetching drafts." });
   }
 }
 
@@ -53,8 +53,9 @@ export const getDraft = async (req: Request, res: Response) => {
           title: d?.title ?? "",
           description: d?.description ?? "",
           descriptiveName: d?.descriptiveName ?? "",
-          coverImages: d?.coverImages ?? [],
-          galleryImages: d?.galleryImages ?? []
+          coverImage: d?.coverImage ?? [],
+          galleryImages: d?.galleryImages ?? [],
+          files: d?.files ?? []
         },
         content: d.content ?? ""
       };
@@ -85,7 +86,8 @@ export const getDraft = async (req: Request, res: Response) => {
                   end: null
                 },
 
-          docs: d?.docs ?? []
+          coverImage: d?.coverImage ?? "",
+          files: d?.files ?? []
         },
 
         location: d?.location ? {
@@ -111,7 +113,8 @@ export const getDraft = async (req: Request, res: Response) => {
           postType: d?.postType ?? "",
           description: d?.description ?? "",
           tags: d?.tags ?? [],
-          image: d?.image ?? "",
+          coverImage: d?.coverImage ?? "",
+          files: d?.files ?? [],
           locationSpecific: d?.locationSpecific
         },
 
@@ -144,7 +147,7 @@ export const createDraft = async (req: AuthRequest, res: Response) => {
     return res.status(201).json({ id: _id });
   } catch(err: any) {
     console.error("Error while creating culture draft: " + err.message);
-    return res.status(500).json({ msg: 'Internal Server Error while creating culture draft.' });
+    return res.status(500).json({ msg: "Internal Server Error while creating culture draft." });
   }
 }
 
@@ -152,13 +155,13 @@ export const deleteDraft = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     if (!id) {
-      return res.status(400).json({ msg: 'Missing required field.' });
+      return res.status(400).json({ msg: "Missing required field." });
     }
 
     await Draft.deleteOne({ _id: id });
     res.status(200).json({ success: true });
   } catch (err: any) {
     console.error("Error while deleting draft: " + err.message);
-    return res.status(500).json({ msg: 'Internal Server Error while deleting draft.' });
+    return res.status(500).json({ msg: "Internal Server Error while deleting draft." });
   }
 }

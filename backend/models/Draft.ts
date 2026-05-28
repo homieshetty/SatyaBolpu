@@ -6,19 +6,19 @@ import { durationSchema } from "./Event.js";
 const draftSchema = new Schema<IDraft & ((IPost & { locationSpecific: boolean }) | ICulture | IEvent)>({
   userId: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true
   },
   type: {
     type: String,
-    enum: ['post', 'culture', 'event'],
+    enum: ["post", "culture", "event"],
     required: true
   }
 }, {
-  discriminatorKey: 'type', 
+  discriminatorKey: "type", 
   timestamps: true 
 });
-export const Draft = mongoose.model<IDraft & ((IPost & { locationSpecific: boolean }) | ICulture | IEvent)>('Draft', draftSchema);
+export const Draft = mongoose.model<IDraft & ((IPost & { locationSpecific: boolean }) | ICulture | IEvent)>("Draft", draftSchema);
 draftSchema.index({ userId: 1, type: 1 });
 
 export const postDraftSchema = new Schema<IPost & { locationSpecific: boolean }>({
@@ -30,27 +30,30 @@ export const postDraftSchema = new Schema<IPost & { locationSpecific: boolean }>
   },
   culture: {
     type: Schema.Types.ObjectId,
-    ref: 'Culture'
+    ref: "Culture"
   },
   postGroup: {
     type: Schema.Types.ObjectId,
-    ref: 'PostGroup'
+    ref: "PostGroup"
   },
   postType: {
     type: Schema.Types.ObjectId,
-    ref: 'PostType'
+    ref: "PostType"
   },
   description: {
     type: String
   },
   tags: {
-    type: [{ type: Schema.Types.ObjectId, ref: 'Tag' }]
+    type: [{ type: Schema.Types.ObjectId, ref: "Tag" }]
   },
   locationSpecific: {
     type: Boolean
   },
-  image: {
+  coverImage: {
     type: String
+  },
+  files: {
+    type: [String]
   },
   content: {
     type: String
@@ -70,12 +73,15 @@ const eventSchema = new Schema<IEvent>({
   },
   culture: {
     type: Schema.Types.ObjectId,
-    ref: 'Culture'
+    ref: "Culture"
   },
   duration: {
     type: durationSchema
   },
-  docs: {
+  coverImage: {
+    type: String
+  },
+  files: {
     type: [String]
   },
   location: {
@@ -94,10 +100,13 @@ const cultureSchema = new Schema<ICulture>({
   description: {
     type: String
   },
-  coverImages: {
-    type: [String]
+  coverImage: {
+    type: String
   },
   galleryImages: {
+    type: [String]
+  },
+  files: {
     type: [String]
   },
   content: {

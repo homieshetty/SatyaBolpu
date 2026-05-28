@@ -1,15 +1,17 @@
-import express from 'express';
-import authRoutes from './routes/AuthRoutes.js';
-import uploadRoutes from './routes/UploadRoutes.js';
-import postRoutes from './routes/PostRoutes.js';
-import otherRoutes from './routes/OtherRoutes.js';
-import cultureRoutes from './routes/CultureRoutes.js';
-import eventRoutes from './routes/EventRoutes.js';
-import draftRoutes from './routes/DraftRoutes.js';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { connectDB } from './utils/db.js';
-import cookieParser from 'cookie-parser';
+import express from "express";
+import authRoutes from "./routes/AuthRoutes.js";
+import uploadRoutes from "./routes/UploadRoutes.js";
+import postRoutes from "./routes/PostRoutes.js";
+import otherRoutes from "./routes/OtherRoutes.js";
+import cultureRoutes from "./routes/CultureRoutes.js";
+import eventRoutes from "./routes/EventRoutes.js";
+import draftRoutes from "./routes/DraftRoutes.js";
+import feedRoutes from "./routes/FeedRoutes.js";
+import blogRoutes from "./routes/BlogRoutes.js";
+import cors from "cors";
+import dotenv from "dotenv";
+import { connectDB } from "./utils/db.js";
+import cookieParser from "cookie-parser";
 import path, { dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -40,13 +42,15 @@ app.use((req, res, next) => {
 app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
 connectDB()
 
-app.get('/api', (req, res) => res.send('Hello World!'));
-app.use('/api/auth', authRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/posts', postRoutes);
-app.use('/api/cultures', cultureRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/others', otherRoutes);
-app.use('/api/drafts', draftRoutes);
+app.get("/api", (req, res) => res.send("Hello World!"));
+app.use("/api/auth", authRoutes);
+app.use("/api/upload", uploadRoutes);
+app.use("/api/feed", feedRoutes);
+app.use("/api/blogs", blogRoutes);
+app.use("/api/posts", postRoutes);
+app.use("/api/cultures", cultureRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/others", otherRoutes);
+app.use("/api/drafts", draftRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

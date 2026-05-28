@@ -9,13 +9,13 @@ export const getTags = async (req: Request, res: Response) => {
     const sortBy = req.query?.sortBy?.toString() ?? "tag";
     const tags = await Tag.find({}, "tag").sort({ [sortBy]: 1 });
     if (!tags) {
-      res.status(404).json({ msg: 'No tags found' });
+      res.status(404).json({ msg: "No tags found" });
     }
 
     return res.status(200).json({ tags })
   } catch (err: any) {
     console.error("Error while fetching tags: " + err);
-    return res.status(500).json({ msg: 'Internal server error while fetching tags' });
+    return res.status(500).json({ msg: "Internal server error while fetching tags" });
   }
 }
 
@@ -45,13 +45,13 @@ export const getPostTypes = async (req: Request, res: Response) => {
     const sortBy = req.query?.sortBy?.toString() ?? "name";
     const postTypes = await PostType.find({}, "name").sort({ [sortBy]: 1 });
     if (!postTypes) {
-      res.status(404).json({ msg: 'No post types found.' });
+      res.status(404).json({ msg: "No post types found." });
     }
 
     return res.status(200).json({ postTypes });
   } catch (err: any) {
     console.error("Error while fetching post types: " + err);
-    return res.status(500).json({ msg: 'Internal server error while fetching post types.' });
+    return res.status(500).json({ msg: "Internal server error while fetching post types." });
   }
 }
 
@@ -81,13 +81,13 @@ export const getPostGroups = async (req: Request, res: Response) => {
     const sortBy = req.query?.sortBy?.toString() ?? "name";
     const postGroups = await PostGroup.find({}, "name").sort({ [sortBy]: 1 });
     if (!postGroups) {
-      res.status(404).json({ msg: 'No post groups found.' });
+      res.status(404).json({ msg: "No post groups found." });
     }
 
     return res.status(200).json({ postGroups });
   } catch (err: any) {
     console.error("Error while fetching post groups: " + err);
-    return res.status(500).json({ msg: 'Internal server error while fetching post groups.' });
+    return res.status(500).json({ msg: "Internal server error while fetching post groups." });
   }
 }
 

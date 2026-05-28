@@ -1,47 +1,64 @@
-import { Request, Response} from 'express';
-import { Event } from '../models/Event.js';
-import { AuthRequest, CardDataType, IEvent } from '../types/globals.js';
-import { Culture } from '../models/Culture.js';
-import { EventDraft } from '../models/Draft.js';
+import { Request, Response} from "express";
+import { Event } from "../models/Event.js";
+import { AuthRequest, CardDataType, IEvent } from "../types/globals.js";
+import { Culture } from "../models/Culture.js";
+import { EventDraft } from "../models/Draft.js";
+import { Types } from "mongoose";
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
     const limit = Number(req.query.limit) || 10;
-    const skip = ((Number(req.query.page) || 1) - 1) * limit;
+    const page = Number(req.query.page) || 1;
+    const skip = (page - 1) * limit;
 
-    const events: CardDataType[] =
-      (await Event
-        .find()
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .populate('culture')
-      ).map(d => ({
-        id: d._id as string,
-        title: d.title,
-        description: d.description,
-        culture: (d.culture as any).title,
-        images: d.docs
-      }));
-    const total = await Event.countDocuments();
+    const sortBy = req.query.sortBy?.toString() ?? "createdAt";
+    const orderBy = req.query.orderBy === "asc" ? 1 : -1;
+
+    const fields = req.query.fields?.toString().split(",").join(" ");
+    const cultures = req.query.cultures ? req.query.cultures.toString().split(",") : [];
+
+    const filterOptions: Record<string, any> = {};
+    if (cultures.length) filterOptions.culture = { $in: cultures.map(c => new Types.ObjectId(c)) }; 
+
+    let query = Event.find(filterOptions)
+      .select(fields ?? "")
+      .sort({ [sortBy]: orderBy })
+      .skip(skip)
+      .limit(limit);
+
+    if(fields?.includes(" userId ")) {
+      query  = query.populate('userId');
+    }
+
+    const [eventsData, total] = await Promise.all([
+      query,
+      Event.countDocuments(filterOptions),
+    ]);
+
+    const events = eventsData.map(d => ({
+      id: d._id as string,
+      title: d.title,
+      culture: d.culture,
+      image: d.coverImage
+    }));
 
     if (!events) {
-      return res.status(500).json({ msg: 'No posts found.' });
+      return res.status(500).json({ msg: "No posts found." });
     }
 
     return res.status(200).json({ events, total, totalPages: Math.ceil(total / limit) });
   } catch(err: any) {
     console.error("Get Events Error: " + err.message);
-    return res.status(500).json({ msg: 'Internal Server Error while fetching events.' });
+    return res.status(500).json({ msg: "Internal Server Error while fetching events." });
   }
 }
 
 export const getEvent = async (req: Request, res: Response) => {
   try {
     let { id } = req.params;
-    const event: IEvent | null = await Event.findOne({ _id: id }).populate('culture', 'title');
+    const event: IEvent | null = await Event.findOne({ _id: id }).populate("culture", "title");
     if(!event) {
-      return res.status(404).json({ msg: 'No event found.' });
+      return res.status(404).json({ msg: "No event found." });
     }
 
     return res.status(200).json({ event : { 
@@ -54,7 +71,7 @@ export const getEvent = async (req: Request, res: Response) => {
     }});
   } catch(err: any) {
     console.error("Get Events Error: " + err.message);
-    return res.status(500).json({ msg: 'Internal Server Error while fetching events.' });
+    return res.status(500).json({ msg: "Internal Server Error while fetching events." });
   }
 }
 
@@ -63,12 +80,12 @@ export const saveEventDetails = async (req: Request, res: Response) => {
     const id = req.params.id;
     const { details } = req.body;
     if (!id || !details) {
-      return res.status(400).json({ msg: 'Missing required field.' });
+      return res.status(400).json({ msg: "Missing required field." });
     }
 
     const culture = await Culture.findById(details.culture);
     if(!culture) {
-      return res.status(400).json({ msg: 'Culture not found.' });
+      return res.status(400).json({ msg: "Culture not found." });
     }
 
     const draft = await EventDraft.findByIdAndUpdate(
@@ -82,7 +99,7 @@ export const saveEventDetails = async (req: Request, res: Response) => {
 
   } catch (err: any) {
     console.error("Error while saving event details: " + err.message);
-    return res.status(500).json({ msg: 'Internal Server Error while saving event details.' });
+    return res.status(500).json({ msg: "Internal Server Error while saving event details." });
   }
 }
 
@@ -90,7 +107,7 @@ export const deleteEventDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     if(!id) {
-      return res.status(400).json({ msg: 'Missing required field.' });
+      return res.status(400).json({ msg: "Missing required field." });
     }
 
     await EventDraft.findByIdAndUpdate(
@@ -108,7 +125,7 @@ export const deleteEventDetails = async (req: Request, res: Response) => {
     res.status(200).json({ success: true });
   } catch (err: any) {
     console.error("Error while deleting event details: " + err.message);
-    return res.status(500).json({ msg: 'Internal Server Error while deleting event details.' });
+    return res.status(500).json({ msg: "Internal Server Error while deleting event details." });
   }
 }
 
@@ -118,7 +135,7 @@ export const saveEventLocation = async (req: Request, res: Response) => {
     const { location } = req.body;
 
     if (!location || !id) {
-      return res.status(400).json({ msg: 'Missing Required Field' });
+      return res.status(400).json({ msg: "Missing Required Field" });
     }
 
     let draft;
@@ -140,8 +157,8 @@ export const saveEventLocation = async (req: Request, res: Response) => {
     return res.status(201).json({ post: { id: _id, ...rest } });
 
   } catch (err: any) {
-    console.error('Error while saving event location: ', err.message);
-    return res.status(500).json({ msg: 'Internal Server error while saving event location.' });
+    console.error("Error while saving event location: ", err.message);
+    return res.status(500).json({ msg: "Internal Server error while saving event location." });
   }
 }
 
@@ -149,7 +166,7 @@ export const deleteEventLocation = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     if(!id) {
-      return res.status(400).json({ msg: 'Missing required field.' });
+      return res.status(400).json({ msg: "Missing required field." });
     }
 
     await EventDraft.findByIdAndUpdate(
@@ -163,7 +180,7 @@ export const deleteEventLocation = async (req: Request, res: Response) => {
     res.status(200).json({ success: true });
   } catch (err: any) {
     console.error("Error while deleting event location: " + err.message);
-    return res.status(500).json({ msg: 'Internal Server Error while deleting event location.' });
+    return res.status(500).json({ msg: "Internal Server Error while deleting event location." });
   }
 }
 
@@ -180,8 +197,8 @@ export const createDraft = async (req: Request, res: Response) => {
     return res.status(201).json({ _id });
 
   } catch (err: any) {
-    console.error('Error while creating post draft: ', err.message);
-    return res.status(500).json({ msg: 'Internal Server error while creating post draft.' });
+    console.error("Error while creating post draft: ", err.message);
+    return res.status(500).json({ msg: "Internal Server error while creating post draft." });
   }
 }
 
@@ -189,12 +206,12 @@ export const uploadEvent = async (req: Request, res: Response) => {
   try {
     const { details, location } = req.body;
     if(!details || !location) {
-      return res.status(400).json({ msg: 'Missing required field.' });
+      return res.status(400).json({ msg: "Missing required field." });
     }
 
     const culture = await Culture.findById(details.culture);
     if(!culture) {
-      return res.status(400).json({ msg: 'Culture not found.' });
+      return res.status(400).json({ msg: "Culture not found." });
     }
 
     const newEvent = await Event.create({
@@ -206,6 +223,6 @@ export const uploadEvent = async (req: Request, res: Response) => {
 
   } catch(err: any) {
     console.error("Upload Events Error: " + err.message);
-    return res.status(500).json({ msg: 'Internal Server Error while uploading event.' });
+    return res.status(500).json({ msg: "Internal Server Error while uploading event." });
   }
 }

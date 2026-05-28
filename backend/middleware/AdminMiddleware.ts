@@ -17,7 +17,7 @@ export const adminMiddleware = async (req: AuthRequest, res: Response, next: Nex
       return res.status(404).json({ msg: "User not found, go home." });
     }
 
-    if(user.role !== 'admin') {
+    if(user.role !== "admin") {
       return res.status(401).json({ msg: "User not an admin!" });
     }
 

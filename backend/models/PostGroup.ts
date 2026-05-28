@@ -13,4 +13,4 @@ const postGroupSchema = new Schema<IPostGroup>({
   }
 }, { timestamps: true });
 
-export const PostGroup = mongoose.model('PostGroup', postGroupSchema);
+export const PostGroup = mongoose.model("PostGroup", postGroupSchema);

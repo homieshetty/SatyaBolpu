@@ -1,5 +1,5 @@
-import mongoose, { Schema } from 'mongoose';
-import { ICulture } from '../types/globals.js';
+import mongoose, { Schema } from "mongoose";
+import { ICulture } from "../types/globals.js";
 
 const cultureSchema = new Schema<ICulture>({
   title: {
@@ -14,13 +14,16 @@ const cultureSchema = new Schema<ICulture>({
     type: String,
     required: true,
   },
-  coverImages: {
-    type: [String],
+  coverImage: {
+    type: String,
     required: true
   },
   galleryImages: {
     type: [String],
     required: true
+  },
+  files: {
+    type: [String],
   },
   content: {
     type: String,
@@ -28,4 +31,4 @@ const cultureSchema = new Schema<ICulture>({
   }
 }, { timestamps: true });
 
-export const Culture = mongoose.model<ICulture>('Culture',cultureSchema);
+export const Culture = mongoose.model<ICulture>("Culture",cultureSchema);

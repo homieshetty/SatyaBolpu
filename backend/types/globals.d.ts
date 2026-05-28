@@ -11,7 +11,7 @@ export interface IUser extends Document {
   uname: string;
   email: string;
   phone: IPhone;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
   verified: boolean;
   password: string;
 };
@@ -20,8 +20,9 @@ export interface ICulture extends Document {
   title: string;
   descriptiveName: string;
   description: string;
-  coverImages: string[];
+  coverImage: string;
   galleryImages: string[];
+  files?: string[],
   content: string;
 };
 
@@ -42,7 +43,8 @@ export interface IPost extends Document {
   postType: Schema.Types.ObjectId,
   description: string,
   tags: Schema.Types.ObjectId[],
-  image: string,
+  coverImage: string,
+  files?: string[],
   content: string,
   location?: ILocation
 };
@@ -57,9 +59,19 @@ export interface IEvent extends Document {
   description: string;
   duration: IDuration;
   culture: Schema.Types.ObjectId;
-  docs: string[];
+  coverImage?: string;
+  files?: string[];
   location: ILocation
 };
+
+export interface IBlog extends Document {
+  title: string;
+  description?: string;
+  coverImage?: string;
+  files?: string;
+  content: string;
+  location?: ILocation;
+}
 
 export interface ITag extends Document {
   tag: string;
@@ -76,7 +88,7 @@ export interface IPostType extends Document {
 
 export interface IDraft extends Document  {
   userId: Schema.Types.ObjectId,
-  type: 'post' | 'culture' | 'event'
+  type: "post" | "culture" | "event"
 }
 
 export type CardDataType = {

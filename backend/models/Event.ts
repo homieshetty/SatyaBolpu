@@ -1,6 +1,6 @@
-import mongoose, { Schema } from 'mongoose';
-import { IDuration, IEvent } from '../types/globals.js';
-import { locationSchema } from './Post.js';
+import mongoose, { Schema } from "mongoose";
+import { IDuration, IEvent } from "../types/globals.js";
+import { locationSchema } from "./Post.js";
 
 export const durationSchema = new Schema<IDuration>({
   start: {
@@ -24,14 +24,17 @@ const eventSchema = new Schema<IEvent>({
   },
   culture: {
     type: Schema.Types.ObjectId,
-    ref: 'Culture',
+    ref: "Culture",
     required: true
   },
   duration: {
     type: durationSchema,
     required: true
   },
-  docs: {
+  coverImage: {
+    type: String
+  },
+  files: {
     type: [String]
   },
   location: {
@@ -40,4 +43,4 @@ const eventSchema = new Schema<IEvent>({
   }
 }, { timestamps: true });
 
-export const Event = mongoose.model<IEvent>('Event', eventSchema);
+export const Event = mongoose.model<IEvent>("Event", eventSchema);

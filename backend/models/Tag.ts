@@ -9,4 +9,4 @@ const tagSchema = new Schema<ITag>({
   }
 }, { timestamps: true });
 
-export const Tag = mongoose.model('Tag',tagSchema);
+export const Tag = mongoose.model("Tag",tagSchema);
