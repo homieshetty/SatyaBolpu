@@ -1,14 +1,14 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { FaPencilAlt, FaStar, FaHandsHelping, FaRegCalendar, FaRegBookmark } from "react-icons/fa";
-import Button from "../components/Button";
+import { FaHandsHelping, FaRegCalendar, FaRegBookmark } from "react-icons/fa";
 import { TfiWrite } from "react-icons/tfi";
 import { BsFilePost } from "react-icons/bs";
 import { FaArrowUpLong, FaLocationDot, FaPeopleGroup } from "react-icons/fa6";
 import { MdOutlineExplore } from "react-icons/md";
 import { VscFileSubmodule } from "react-icons/vsc";
 import FilterTable from "../components/FilterTable";
+import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from 'recharts';
+import Map from "./Map";
 
 const data = [
   { month: "Jan 2025", posts: 4 },
@@ -26,18 +26,10 @@ const Dashboard = () => {
   
   return (
     <div
-      className="w-full flex flex-col items-center justify-center my-10"
+      className="w-full flex items-center justify-around my-10"
     >
 
-      <div 
-        className="w-1/5"
-      >
-
-      </div>
-
-      <div
-        className="w-3/5"
-      >
+      <div className="w-[70%] px-10">
         {/* Greetings */}
         <div className="w-full flex gap-1 text-[2rem] mb-5">
           <p className="text-primary">Hello,</p>
@@ -204,10 +196,10 @@ const Dashboard = () => {
 
       </div>
 
-      <div
-        className="w-1/5"
-      >
-
+      <div className="w-[30%] h-screen">
+        <Map
+          minimal
+        />
       </div>
 
     </div>

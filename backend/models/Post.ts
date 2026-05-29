@@ -1,30 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { IPost } from "../types/globals.js";
 
-export const locationSchema = new Schema({
-  type: {
-    type: String,
-    enum: ["Point"],
-    required: true,
-    default: "Point"
-  },
-
-  coordinates: {
-    type: [Number],
-    required: true
-  },
-
-  district: {
-    type: String,
-    required: true
-  },
-  taluk: String,
-  village: {
-    type: String,
-    required: true
-  }
-}, { _id: false });
-
 const postSchema = new Schema<IPost>({
   userId: {
     type: Schema.Types.ObjectId,
@@ -80,7 +56,8 @@ const postSchema = new Schema<IPost>({
     required: true
   },
   location: {
-    type: locationSchema
+    type: Schema.Types.ObjectId,
+    ref: "Location"
   }
 }, { timestamps: true });
 
@@ -90,4 +67,4 @@ postSchema.index({ tags: 1 });
 postSchema.index({ createdAt: -1 });
 postSchema.index({ location: "2dsphere" });
 
-export const Post = mongoose.model<IPost>("Post",postSchema);
+export const Post = mongoose.model<IPost>("Post" ,postSchema);

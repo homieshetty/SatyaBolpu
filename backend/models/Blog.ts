@@ -1,6 +1,5 @@
 import mongoose, { Schema } from "mongoose";
 import { IBlog } from "../types/globals.js";
-import { locationSchema } from "./Post.js";
 
 const blogSchema = new Schema<IBlog>({
   title: {
@@ -21,7 +20,8 @@ const blogSchema = new Schema<IBlog>({
     required: true
   },
   location: {
-    type: locationSchema
+    type: Schema.Types.ObjectId,
+    ref: "Location"
   }
 }, { timestamps: true });
 

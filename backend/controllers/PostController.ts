@@ -7,6 +7,7 @@ import { PostGroup } from "../models/PostGroup.js";
 import { PostType } from "../models/PostType.js";
 import { Types } from "mongoose";
 import { Culture } from "../models/Culture.js";
+import { Location } from "../models/Location.js";
 
 export const getPosts = async (req: Request, res: Response) => {
   try {
@@ -179,7 +180,14 @@ export const getPostGroups = async (req: Request, res: Response) => {
 export const getPost = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const postRes = await Post.findOne({ _id: id }).populate("culture").populate("postType").populate("postGroup").populate("tags", "tag");
+    const postRes = await Post
+      .findOne({ _id: id })
+      .populate("culture")
+      .populate("postType")
+      .populate("postGroup")
+      .populate("tags", "tag")
+      .populate("location");
+
     if (!postRes) {
       return res.status(500).json({ msg: "No posts found." });
     }
@@ -429,17 +437,19 @@ export const uploadPost = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ msg: "Post type not found." });
     }
 
+    const { _id: locationId } = await Location.create({
+      type: "Point",
+      district: location.district,
+      taluk: location.taluk,
+      village: location.village,
+      coordinates: [location.lat, location.lng]
+    });
+
     const newPost = await Post.create({
       userId,
       ...details,
       content,
-      location: {
-        type: "Point",
-        district: location.district,
-        taluk: location.taluk,
-        village: location.village,
-        coordinates: [location.lat, location.lng]
-      }
+      location: locationId
     });
 
     await PostGroup.updateOne(

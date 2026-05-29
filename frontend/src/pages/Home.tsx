@@ -8,7 +8,7 @@ import { Autoplay, EffectCoverflow, Keyboard, Navigation, Pagination } from "swi
 import Button from "../components/Button";
 import { GrFormNextLink, GrFormPreviousLink } from "react-icons/gr";
 import "swiper/swiper-bundle.css";
-import MapComponent from "../components/MapComponent";
+import MAP from "./Map";
 import { useAuth } from "../context/AuthContext";
 import { buildAnimationProps } from "../constants/Animations";
 import { useNavigate } from "react-router-dom";
@@ -315,7 +315,7 @@ const Home = () => {
             The Spiritual Hub is Spread Across Two States And Three Districts
           </div>
           <div className="w-full lg:w-2/3 xl:w-1/2 h-[40%]">
-            <MapComponent ref={mapRef}>
+            <MAP minimal ref={mapRef}>
               <Marker position={[13.3409, 74.7421]}>
                   <Popup>Udupi - The Heart of Tulunadu</Popup>
               </Marker>
@@ -325,7 +325,7 @@ const Home = () => {
               <Marker position={[12.4996,74.9869]}>
                   <Popup>Kasargod - The Heart of Tulunadu</Popup>
               </Marker>
-            </MapComponent>
+            </MAP>
           </div>
         </div>
 

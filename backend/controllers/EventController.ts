@@ -4,6 +4,7 @@ import { AuthRequest, CardDataType, IEvent } from "../types/globals.js";
 import { Culture } from "../models/Culture.js";
 import { EventDraft } from "../models/Draft.js";
 import { Types } from "mongoose";
+import { Location } from "../models/Location.js";
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
@@ -56,7 +57,7 @@ export const getEvents = async (req: Request, res: Response) => {
 export const getEvent = async (req: Request, res: Response) => {
   try {
     let { id } = req.params;
-    const event: IEvent | null = await Event.findOne({ _id: id }).populate("culture", "title");
+    const event: IEvent | null = await Event.findOne({ _id: id }).populate("culture", "title").populate("loaction");
     if(!event) {
       return res.status(404).json({ msg: "No event found." });
     }
@@ -214,9 +215,16 @@ export const uploadEvent = async (req: Request, res: Response) => {
       return res.status(400).json({ msg: "Culture not found." });
     }
 
+    const { _id: locationId } = await Location.create({ 
+      type: "Point",
+      district: location.district,
+      taluk: location.taluk,
+      village: location.village,
+      coordinates: [location.lat, location.lng]
+    });
     const newEvent = await Event.create({
       ...details,
-      location
+      location: locationId
     });
     const { _id, __v, ...rest } = newEvent.toObject();
     return res.status(201).json({ event: { id: _id, ...rest } });

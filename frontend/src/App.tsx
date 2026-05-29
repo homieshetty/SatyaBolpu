@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom"
 import NotFound from "./components/NotFound"
 import Home from "./pages/Home"
 import Explore from "./pages/Explore"
-import MAP from "./pages/MAP"
+import Map from "./pages/Map"
 import Editor from "./pages/Admin/Editor"
 import Login from "./pages/Login"
 import SignUp from "./pages/SignUp"
@@ -97,17 +97,17 @@ function App() {
         <Route path="/create/post/:id" element={<NewPost />} />
         <Route path="/create/post/:id/details" element={<PostDetails />} />
         <Route path="/create/post/:id/editor" element={<Editor mode={Mode.POST} />} />
-        <Route path="/create/post/:id/map" element={<MAP editMode={Mode.POST} />} />
+        <Route path="/create/post/:id/map" element={<Map editMode={Mode.POST} />} />
         <Route path="/create/culture/:id" element={<NewCulture />} />
         <Route path="/create/culture/:id/details" element={<CultureDetails />} />
         <Route path="/create/culture/:id/editor" element={<Editor mode={Mode.CULTURE} />} />
         <Route path="/create/event/:id" element={<NewEvent />} />
         <Route path="/create/event/:id/details" element={<EventDetails />} />
-        <Route path="/create/event/:id/map" element={<MAP editMode={Mode.EVENT} />} />
+        <Route path="/create/event/:id/map" element={<Map editMode={Mode.EVENT} />} />
         <Route path="/create/tag" element={<NewTag />} />
         <Route path="/create/post-type" element={<NewPostType />} />
         <Route path="/create/post-group" element={<NewPostGroup />} />
-        <Route path="/map" element={<MAP />} />
+        <Route path="/map" element={<Map />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

@@ -1,18 +1,21 @@
-import { Marker, GeoJSON } from "react-leaflet";
-import { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import { MapContainer, TileLayer, GeoJSON, Marker, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
+import React, { ChangeEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Layer, LeafletMouseEvent, Map, Polygon, Tooltip } from "leaflet";
+import { GestureHandling } from "leaflet-gesture-handling";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 import { useLoading } from "../context/LoadingContext";
-import MapComponent from "../components/MapComponent";
 import Button from "../components/Button";
 import { MdCancel } from "react-icons/md";
 import { FaMagnifyingGlassLocation } from "react-icons/fa6";
 import { IoMdDoneAll } from "react-icons/io";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
-import { Location } from "../types/globals";
+import { ILocation, Location } from "../types/globals";
 import { Mode } from "../types/enums";
-import { FaChevronCircleLeft } from "react-icons/fa";
+import { FaChevronCircleLeft, FaLock, FaLockOpen, FaPlus, FaMinus } from "react-icons/fa";
+import { IoLocationSharp } from "react-icons/io5";
 
 //this is beacuse icons dont load in prod, some bs idk
 import L from "leaflet";
@@ -44,14 +47,30 @@ const initialLocation = {
   lng: null
 };
 
-const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
+const MAP_CENTER: [number, number] = [13.006995870591474, 75.07172913896241];
+const MAP_MAX_BOUNDS: [[number, number], [number, number]] = [
+  [14.025289007277138, 73.94617968510107],
+  [11.98870273390581, 76.19727859282375],
+];
+const MAP_MIN_ZOOM = 9;
+const MAP_INITIAL_ZOOM = 9;
+
+const MAP = ({
+  minimal = false,
+  children,
+  ref,
+  editMode
+}: {
+  minimal?: boolean;
+  children?: ReactNode;
+  ref?: React.RefObject<HTMLDivElement | null>;
+  editMode?: Mode.EVENT | Mode.POST;
+}) => {
   const { id } = useParams();
 
-  // const [postState, setPostState] = useState<PostState | null>(null);
-  // const [eventState, setEventState] = useState<EventState | null>(null);
   const [map, setMap] = useState<Map | null>(null);
   const [lock, setLock] = useState<boolean>(false);
-  const [zoom, setZoom] = useState<number>(9);
+  const [zoom, setZoom] = useState<number>(MAP_INITIAL_ZOOM);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const [activeVillage, setActiveVillage] = useState<GeoJSON.Feature | null>(null);
   const [askForCoordinates, setAskForCoordinates] = useState<boolean>(false);
@@ -59,43 +78,36 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
   const [location, setLocation] = useState<Location>(initialLocation);
   const [showMenu, setShowMenu] = useState<boolean>(true);
   const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
-  
+  const [existingLocations, setExistingLocations] = useState<ILocation[]>([]);
+
   const mapRef = useRef<HTMLDivElement | null>(null);
   const toolTipPane = useRef<Element>(null);
   const activeLayerRef = useRef<Polygon | null>(null);
 
   const { setLoading } = useLoading();
   const navigate = useNavigate();
+
+  const locationsApi = useApi("/locations?fields=coordinates,district,taluk,village", { auto: !minimal });
   const draftsApi = useApi("/drafts", { auto: false });
   const postsApi = useApi("/posts", { auto: false });
   const eventsApi = useApi("/events", { auto: false });
 
   useEffect(() => {
-    if(editMode === undefined) return;
+    if (editMode === undefined) return;
 
     const fetchDraft = async () => {
       const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
       if (!res) return;
       if (editMode === Mode.EVENT) {
-        console.log(res.draft)
         if (!validateEventDetails(res.draft.details)) {
           navigate(`/create/event/${id}/details`);
         } else {
-          // setEventState({
-          //   details: res.draft.details,
-          //   location: res.draft.location ?? null
-          // });
           setLocation(res.draft.location ?? initialLocation);
         }
       } else if (editMode === Mode.POST) {
         if (!validatePostDetails(res.draft.details)) {
           navigate(`/create/post/${id}/details`);
         } else {
-          // setPostState({
-          //   content: res.draft.content ?? "",
-          //   details: res.draft.details,
-          //   location: res.draft.location
-          // });
           setLocation(res.draft.location ?? initialLocation);
         }
       }
@@ -103,6 +115,43 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
 
     fetchDraft();
   }, [id]);
+
+  useEffect(() => {
+    setLoading(
+      draftsApi.loading 
+      || postsApi.loading 
+      || eventsApi.loading 
+      || locationsApi.loading
+    );
+  }, [draftsApi.loading, postsApi.loading, eventsApi.loading, locationsApi.loading]);
+
+  useEffect(() => {
+    if(draftsApi.error) {
+      console.error(draftsApi.error);
+      toast.error(draftsApi.error);
+    }
+
+    if(postsApi.error) {
+      console.error(postsApi.error);
+      toast.error(postsApi.error);
+    }
+
+    if(eventsApi.error) {
+      console.error(eventsApi.error);
+      toast.error(eventsApi.error);
+    }
+
+    if(locationsApi.error) {
+      console.error(locationsApi.error);
+      toast.error(locationsApi.error);
+    }
+  }, [draftsApi.error, postsApi.error, eventsApi.error, locationsApi.error]);
+
+  useEffect(() => {
+    if(locationsApi.data) {
+      setExistingLocations(locationsApi.data.locations);
+    }
+  }, [locationsApi.data]);
 
   useEffect(() => {
     const fetchGeoJson = async (name: string) => {
@@ -119,7 +168,10 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
       }
     };
 
-    ["districts", "dakshina_kannada", "udupi", "kasaragod"].forEach(fetchGeoJson);
+    const geoJsonFiles = minimal
+      ? ["districts"]
+      : ["districts", "dakshina_kannada", "udupi", "kasaragod"];
+    geoJsonFiles.forEach(fetchGeoJson);
   }, []);
 
   useEffect(() => {
@@ -319,14 +371,6 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
     </>
   ), [geoJsonData]);
 
-  // const handleVillageExit = () => {
-  //   if(map && activeVillage) {
-  //     setActiveVillage(null);
-  //     activeLayerRef.current?.setStyle(styles.default);
-  //     activeLayerRef.current = null;
-  //   }
-  // }
-
   const handleView = () => {
     if (map && activeVillage) {
       console.log(activeVillage)
@@ -424,16 +468,11 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
       newErrors.lng = "Longitude is required."
     }
 
-    const maxBounds = [
-      [14.025289007277138, 73.94617968510107],
-      [11.98870273390581, 76.19727859282375],
-    ];
-
-    if (location.lat && (location.lat! > maxBounds[0][0] || location.lat! < maxBounds[1][0])) {
+    if (location.lat && (location.lat! > MAP_MAX_BOUNDS[0][0] || location.lat! < MAP_MAX_BOUNDS[1][0])) {
       newErrors.lat = "Latitude exceeds max bounds."
     }
 
-    if (location.lng && (location.lng! > maxBounds[1][1] || location.lng! < maxBounds[0][1])) {
+    if (location.lng && (location.lng! > MAP_MAX_BOUNDS[1][1] || location.lng! < MAP_MAX_BOUNDS[0][1])) {
       newErrors.lng = "Longitude exceeds max bounds."
     }
 
@@ -477,172 +516,289 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
     toast.success("Location stored successfully.");
   }
 
-  // if (editMode === Mode.EVENT && !eventState?.details) {
-  //   return <Navigate to={`/create/event/${id}/details`} replace />
-  // } else if (editMode === Mode.POST && (!postState?.content || !postState.details?.locationSpecific)) {
-  //   return <Navigate to={`/create/post/${id}/editor`} replace />
-  // }
+  const handleZoomChange = (delta: number) => map && map.setZoom(zoom + delta);
+
+  const MapEvents = () => {
+    const leafletMap = useMap();
+
+    useEffect(() => {
+      setMap(leafletMap);
+      handleMapReady(leafletMap);
+
+      if (!leafletMap.hasEventListeners("gestureHandling")) {
+        leafletMap.addHandler("gestureHandling", GestureHandling);
+      }
+
+      if (minimal || !fullScreen) {
+        (leafletMap as any).gestureHandling?.enable();
+      } else {
+        (leafletMap as any).gestureHandling?.disable();
+      }
+
+      return () => {
+        (leafletMap as any).gestureHandling?.disable();
+      };
+    }, [leafletMap, fullScreen]);
+
+    useEffect(() => {
+      if (leafletMap) {
+        const handleZoom = () => setZoom(leafletMap.getZoom());
+        leafletMap.on("zoomend", handleZoom);
+        return () => {
+          leafletMap.off("zoomend", handleZoom);
+        };
+      }
+    }, [leafletMap]);
+
+    useEffect(() => {
+      if (!leafletMap) return;
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.ctrlKey) {
+          leafletMap.scrollWheelZoom.enable();
+        } else {
+          leafletMap.scrollWheelZoom.disable();
+        }
+      };
+
+      const handleKeyUp = () => {
+        if (leafletMap) {
+          leafletMap.scrollWheelZoom.disable();
+        }
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      window.addEventListener("keyup", handleKeyUp);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("keyup", handleKeyUp);
+      };
+    }, [leafletMap]);
+
+    useEffect(() => {
+      if (leafletMap) {
+        if (lock) {
+          leafletMap.dragging.disable();
+          leafletMap.touchZoom.disable();
+          leafletMap.scrollWheelZoom.disable();
+          leafletMap.boxZoom.disable();
+          leafletMap.keyboard.disable();
+        } else {
+          leafletMap.dragging.enable();
+          leafletMap.touchZoom.enable();
+          leafletMap.boxZoom.enable();
+          leafletMap.keyboard.enable();
+        }
+      }
+    }, [leafletMap, lock]);
+
+    return null;
+  };
 
   return (
     <div
-      className="w-screen h-screen relative"
-      ref={mapRef}
+      className={minimal
+        ? "w-full h-full relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden"
+        : "w-screen h-screen relative"
+      }
+      ref={minimal ? ref : mapRef}
     >
-      <style>
-        {`
-          .leaflet-interactive:focus{
-            outline: none;
-          }
-          .global-tooltip {
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 500;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            z-index: 20;
-          }
-          .global-tooltip:before {
-            border-top-color: rgba(0, 0, 0, 0.8);
-          }
-          .permanent-tooltip {
-            z-index: 30;
-          }
-        `}
-      </style>
+      {!minimal && (
+        <style>
+          {`
+            .leaflet-interactive:focus{
+              outline: none;
+            }
+            .global-tooltip {
+              background-color: rgba(0, 0, 0, 0.8);
+              color: white;
+              border: none;
+              border-radius: 4px;
+              padding: 6px 10px;
+              font-size: 12px;
+              font-weight: 500;
+              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+              z-index: 20;
+            }
+            .global-tooltip:before {
+              border-top-color: rgba(0, 0, 0, 0.8);
+            }
+            .permanent-tooltip {
+              z-index: 30;
+            }
+          `}
+        </style>
+      )}
 
-      <div className="z-10 absolute flex flex-col justify-center items-center
-        gap-2 right-0 top-16 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
-        {fullScreen ? (
-          <AiOutlineFullscreenExit
-            className="text-white text-[2.5rem] stroke-2 hover:scale-110"
-            onClick={() => setFullScreen(false)}
-          />
-        ) : (
-          <AiOutlineFullscreen
-            className="text-white text-[2.5rem] stroke-2 hover:scale-110"
-            onClick={() => setFullScreen(true)}
-          />
-        )}
-        {
-          editMode !== undefined && location &&
-          <IoMdDoneAll
-            className={`text-[2.5rem] 
-                ${location.district ? "text-white hover:scale-110" : "cursor-not-allowed text-gray-400"}`}
-            onClick={handleSubmit}
-          />
-        }
-      </div>
+      {!minimal && (
+        <div className="z-10 absolute flex flex-col justify-center items-center
+          gap-2 right-0 top-16 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
+          {fullScreen ? (
+            <AiOutlineFullscreenExit
+              className="text-white text-[2.5rem] stroke-2 hover:scale-110"
+              onClick={() => setFullScreen(false)}
+            />
+          ) : (
+            <AiOutlineFullscreen
+              className="text-white text-[2.5rem] stroke-2 hover:scale-110"
+              onClick={() => setFullScreen(true)}
+            />
+          )}
+          {
+            editMode !== undefined && location &&
+            <IoMdDoneAll
+              className={`text-[2.5rem] 
+                  ${location.district ? "text-white hover:scale-110" : "cursor-not-allowed text-gray-400"}`}
+              onClick={handleSubmit}
+            />
+          }
+        </div>
+      )}
 
-      {
-        editMode !== undefined && (
-          !askForCoordinates ?
-            (
-              <div
-                className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white hover:scale-105 
-                  p-2 rounded-xl hover:bg-primary text-back cursor-pointer text-[2rem]"
-                onClick={() => setAskForCoordinates(true)}
-              >
-                <FaMagnifyingGlassLocation className="" />
-              </div>
-            ) :
+      {!minimal && editMode !== undefined && (
+        !askForCoordinates ?
+          (
+            <div
+              className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white hover:scale-105 
+                p-2 rounded-xl hover:bg-primary text-back cursor-pointer text-[2rem]"
+              onClick={() => setAskForCoordinates(true)}
+            >
+              <FaMagnifyingGlassLocation className="" />
+            </div>
+          ) :
 
-            (
-              <form
-                className="absolute w-1/3 flex flex-col gap-3 left-5 top-1/2 -translate-y-1/2 z-10 bg-black
-                  p-6 rounded-xl text-back cursor-pointer"
-                onSubmit={handleCoordinatesSubmit}>
-                <MdCancel
-                  size={"25px"}
-                  className="absolute top-3 right-3 fill-white hover:fill-primary"
-                  onClick={() => setAskForCoordinates(false)}
+          (
+            <form
+              className="absolute w-1/3 flex flex-col gap-3 left-5 top-1/2 -translate-y-1/2 z-10 bg-black
+                p-6 rounded-xl text-back cursor-pointer"
+              onSubmit={handleCoordinatesSubmit}>
+              <MdCancel
+                size={"25px"}
+                className="absolute top-3 right-3 fill-white hover:fill-primary"
+                onClick={() => setAskForCoordinates(false)}
+              />
+              <div className="w-full flex flex-col items-center justify-between gap-2">
+                <label className="text-white" htmlFor="lat">Latitude</label>
+                <input
+                  className="p-1 bg-white w-4/5"
+                  type="text"
+                  id="lat"
+                  name="lat"
+                  autoComplete="off"
+                  value={location?.lat ?? ""}
+                  onChange={handleCoordinateChange}
                 />
-                <div className="w-full flex flex-col items-center justify-between gap-2">
-                  <label className="text-white" htmlFor="lat">Latitude</label>
-                  <input
-                    className="p-1 bg-white w-4/5"
-                    type="text"
-                    id="lat"
-                    name="lat"
-                    autoComplete="off"
-                    value={location?.lat ?? ""}
-                    onChange={handleCoordinateChange}
-                  />
-                  {coordinateErrors.lat && <p className="text-red-500">{coordinateErrors.lat}</p>}
-                </div>
-                <div className="w-full flex flex-col items-center justify-between gap-2">
-                  <label className="text-white" htmlFor="lng">Longitude</label>
-                  <input
-                    className="p-1 bg-white w-4/5"
-                    type="text"
-                    id="lng"
-                    name="lng"
-                    autoComplete="off"
-                    value={location?.lng ?? ""}
-                    onChange={handleCoordinateChange}
-                  />
-                  {coordinateErrors.lng && <p className="text-red-500">{coordinateErrors.lng}</p>}
-                </div>
-                <Button content="Find" type="submit" className="w-fit mx-auto" />
-              </form>
-            )
-        )
-      }
+                {coordinateErrors.lat && <p className="text-red-500">{coordinateErrors.lat}</p>}
+              </div>
+              <div className="w-full flex flex-col items-center justify-between gap-2">
+                <label className="text-white" htmlFor="lng">Longitude</label>
+                <input
+                  className="p-1 bg-white w-4/5"
+                  type="text"
+                  id="lng"
+                  name="lng"
+                  autoComplete="off"
+                  value={location?.lng ?? ""}
+                  onChange={handleCoordinateChange}
+                />
+                {coordinateErrors.lng && <p className="text-red-500">{coordinateErrors.lng}</p>}
+              </div>
+              <Button content="Find" type="submit" className="w-fit mx-auto" />
+            </form>
+          )
+      )}
 
-      {
-        activeVillage && (
-          <div className="absolute bottom-0 bg-black m-5 p-5 text-white z-1000
-             flex flex-col gap-2 rounded-2xl transition-all"
+      {!minimal && activeVillage && (
+        <div className="absolute bottom-0 bg-black m-5 p-5 text-white z-1000
+           flex flex-col gap-2 rounded-2xl transition-all"
+          style={{
+            translate: showMenu ? "0 0 " : "-100% 0"
+          }}
+        >
+          <FaChevronCircleLeft
+            size={"20px"}
             style={{
-              translate: showMenu ? "0 0 " : "-100% 0"
+              rotate: showMenu ? "0deg" : "180deg"
             }}
-          >
-            <FaChevronCircleLeft
-              size={"20px"}
-              style={{
-                rotate: showMenu ? "0deg" : "180deg"
-              }}
-              className="absolute top-1/2 -translate-y-1/2 -right-2 cursor-pointer hover:fill-primary
-              transition-all"
-              onClick={() => setShowMenu(!showMenu)} />
-            <p className="text-center text-primary font-bold">{activeVillage.properties?.VILLAGE}</p>
-            <p className="text-sm">District: {activeVillage.properties?.DISTRICT}</p>
-            <p className="text-sm">Taluk: {activeVillage.properties?.TALUK || "Unknown"}</p>
-            <p className="text-sm">No of covered locations: {0}</p>
-            <Button content="View More" className="mx-auto text-sm" onClick={handleView} />
-          </div>
-        )
-      }
+            className="absolute top-1/2 -translate-y-1/2 -right-2 cursor-pointer hover:fill-primary
+            transition-all"
+            onClick={() => setShowMenu(!showMenu)} />
+          <p className="text-center text-primary font-bold">{activeVillage.properties?.VILLAGE}</p>
+          <p className="text-sm">District: {activeVillage.properties?.DISTRICT}</p>
+          <p className="text-sm">Taluk: {activeVillage.properties?.TALUK || "Unknown"}</p>
+          <p className="text-sm">No of covered locations: {0}</p>
+          <Button content="View More" className="mx-auto text-sm" onClick={handleView} />
+        </div>
+      )}
 
-      <MapComponent
-        className={`z-0 relative w-full h-full`}
-        geoJsonData={geoJsonData}
-        onMapReady={handleMapReady}
-        zoom={zoom}
-        onZoomChange={setZoom}
-        lock={lock}
-        onLockChange={setLock}
-        showControls={true}
-        minZoom={9}
-        initialZoom={9}
-        gestureHandling={!fullScreen}
-      >
-        {zoom >= 11 && (
-          zoom > 15 ?
-            uninteractiveVillageLayers
-            :
-            villageLayers
-        )}
-        {
-          editMode !== undefined && location.district &&
-          <Marker
-            position={[location.lat!, location.lng!]}
+      <div ref={minimal ? undefined : ref} className="z-0 relative w-full h-full">
+        <div className="z-10 absolute flex flex-col justify-center items-center gap-2 left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
+          <div className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md ${lock ? "pointer-events-none" : ""}`}>
+            <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(1)}>
+              <FaPlus className={`${lock ? "text-slate-300" : "text-black"}`} />
+            </div>
+            <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(-1)}>
+              <FaMinus className={`${lock ? "text-slate-300" : "text-black"}`} />
+            </div>
+          </div>
+          <IoLocationSharp
+            className={`${lock ? "text-slate-300 pointer-events-none" : "text-red-500"}`}
+            size={32}
+            onClick={() => map && map.setView(MAP_CENTER, MAP_INITIAL_ZOOM, { animate: true })}
           />
-        }
-        {
-          editMode !== undefined && (
+
+          {lock ? (
+            <FaLock
+              className="text-slate-500"
+              size={24}
+              onClick={() => setLock(false)}
+            />
+          ) : (
+            <FaLockOpen
+              className="text-slate-500"
+              size={24}
+              onClick={() => setLock(true)}
+            />
+          )}
+        </div>
+
+        <MapContainer
+          className="z-0 relative w-full h-full"
+          center={MAP_CENTER}
+          zoom={MAP_INITIAL_ZOOM}
+          maxBounds={MAP_MAX_BOUNDS}
+          minZoom={MAP_MIN_ZOOM}
+          scrollWheelZoom={false}
+          zoomControl={false}
+          doubleClickZoom={false}
+          touchZoom={true}
+        >
+          <MapEvents />
+
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution="&copy; <a class='pr-2' target='_blank' href='https://www.esri.com/'>Esri</a>"
+          />
+
+          {geoJsonData?.districts && (
+            <GeoJSON
+              data={geoJsonData.districts}
+              style={{ color: "var(--primary)", fillColor: "transparent", opacity: 0.5 }}
+            />
+          )}
+
+          {!minimal && zoom >= 11 && (
+            zoom > 15 ?
+              uninteractiveVillageLayers
+              :
+              villageLayers
+          )}
+          {!minimal && editMode !== undefined && location.district &&
+            <Marker
+              position={[location.lat!, location.lng!]}
+            />
+          }
+          {!minimal && editMode !== undefined && (
             editMode === Mode.EVENT ?
               <div
                 className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
@@ -656,9 +812,10 @@ const MAP = ({ editMode }: { editMode?: Mode.EVENT | Mode.POST }) => {
                 onClick={() => navigate(`/create/post/${id}/editor`)}>
                 {`< Editor`}
               </div>
-          )
-        }
-      </MapComponent>
+          )}
+          {React.Children.toArray(children)}
+        </MapContainer>
+      </div>
 
     </div>
   );

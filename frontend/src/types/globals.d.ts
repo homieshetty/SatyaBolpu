@@ -1,4 +1,3 @@
-import { LatLngBoundsExpression, LatLngExpression } from "leaflet";
 import { CardType } from "../components/CardList";
 import { ReactNode } from "react";
 import { FilterGroups } from "../components/Filters";
@@ -115,24 +114,6 @@ export type FormProps = {
   loadingText?: string;
   className?: string;
   formClassName?: string;
-};
-
-export type MapComponentProps = {
-  children?: ReactNode;
-  className?: string;
-  geoJsonData?: { [key: string]: any };
-  onMapReady?: (map: Map) => void;
-  zoom?: number;
-  onZoomChange?: (zoom: number) => void;
-  lock?: boolean;
-  onLockChange?: (locked: boolean) => void;
-  showControls?: boolean;
-  center?: LatLngExpression;
-  maxBounds?: LatLngBoundsExpression;
-  minZoom?: number;
-  initialZoom?: number;
-  ref?: React.RefObject<HTMLDivElement | null>;
-  gestureHandling?: boolean;
 };
 
 export type User = {

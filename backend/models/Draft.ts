@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { ICulture, IDraft, IEvent, IPost } from "../types/globals.js";
-import { locationSchema } from "./Post.js";
 import { durationSchema } from "./Event.js";
+import { locationSchema } from "./Location.js";
 
 const draftSchema = new Schema<IDraft & ((IPost & { locationSpecific: boolean }) | ICulture | IEvent)>({
   userId: {
@@ -85,7 +85,8 @@ const eventSchema = new Schema<IEvent>({
     type: [String]
   },
   location: {
-    type: locationSchema
+    type: Schema.Types.ObjectId,
+    ref: "Location"
   }
 }, { timestamps: true });
 export const EventDraft = Draft.discriminator("event", eventSchema);
