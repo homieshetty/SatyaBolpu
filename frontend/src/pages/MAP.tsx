@@ -34,6 +34,16 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+const orangeMarker = new L.Icon({
+  iconUrl: '/assets/Map/orange-marker.png',
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+  className: 'marker'
+});
+
 type coordinatesErrorType = {
   lat: string;
   lng: string;
@@ -64,7 +74,7 @@ const MAP = ({
   minimal?: boolean;
   children?: ReactNode;
   ref?: React.RefObject<HTMLDivElement | null>;
-  editMode?: Mode.EVENT | Mode.POST;
+  editMode?: Mode.EVENT | Mode.POST | Mode.LOCATION;
 }) => {
   const { id } = useParams();
 
@@ -100,13 +110,13 @@ const MAP = ({
       if (!res) return;
       if (editMode === Mode.EVENT) {
         if (!validateEventDetails(res.draft.details)) {
-          navigate(`/create/event/${id}/details`);
+          navigate(`/add/event/${id}/details`);
         } else {
           setLocation(res.draft.location ?? initialLocation);
         }
       } else if (editMode === Mode.POST) {
         if (!validatePostDetails(res.draft.details)) {
-          navigate(`/create/post/${id}/details`);
+          navigate(`/add/post/${id}/details`);
         } else {
           setLocation(res.draft.location ?? initialLocation);
         }
@@ -243,6 +253,11 @@ const MAP = ({
       fillOpacity: 0.5,
       opacity: 1,
     },
+    viewMore: {
+      color: "#E87E36",
+      weight: 4,
+      fillColor: "transparent"
+    }
   };
 
   const onEachVillage = (feature: GeoJSON.Feature, layer: Layer) => {
@@ -372,8 +387,8 @@ const MAP = ({
   ), [geoJsonData]);
 
   const handleView = () => {
-    if (map && activeVillage) {
-      console.log(activeVillage)
+    if (map && activeVillage && activeLayerRef.current) {
+      activeLayerRef.current?.setStyle(styles.viewMore);
       const [xmin, ymin, xmax, ymax] = activeVillage.bbox!;
       map.flyTo([(ymin + ymax) / 2, (xmin + xmax) / 2], 14)
     }
@@ -508,10 +523,10 @@ const MAP = ({
 
     if (editMode === Mode.POST) {
       await postsApi.refetch({ endpoint: `/posts/draft/${id}/location`, method: "POST", body: { location } })
-      setTimeout(() => navigate(`/create/post/${id}`), 3000)
+      setTimeout(() => navigate(`/add/post/${id}`), 3000)
     } else if (editMode === Mode.EVENT) {
       await eventsApi.refetch({ endpoint: `/events/draft/${id}/location`, method: "POST", body: { location } })
-      setTimeout(() => navigate(`/create/event/${id}`), 3000)
+      setTimeout(() => navigate(`/add/event/${id}`), 3000)
     }
     toast.success("Location stored successfully.");
   }
@@ -594,6 +609,31 @@ const MAP = ({
 
     return null;
   };
+
+  const handleMarkerHover = (loc: ILocation) => {
+    if(!map) return;
+
+    const tooltip = new Tooltip({
+      permanent: false,
+      direction: "top",
+      className: "global-tooltip"
+    })
+      .setContent(loc.name)
+      .setLatLng([loc.lat, loc.lng]);
+
+    tooltip.addTo(map);
+  }
+
+  const handleMarkerClick = (loc: ILocation) => {
+    if(!map) return;
+
+    if(editMode !== undefined) {
+      setLocation(loc);
+      return;
+    }
+
+
+  }
 
   return (
     <div
@@ -787,29 +827,49 @@ const MAP = ({
             />
           )}
 
-          {!minimal && zoom >= 11 && (
-            zoom > 15 ?
-              uninteractiveVillageLayers
-              :
-              villageLayers
+          {
+            !minimal && zoom >= 11 && (
+              zoom > 15 ?
+                uninteractiveVillageLayers
+                :
+                villageLayers
           )}
-          {!minimal && editMode !== undefined && location.district &&
-            <Marker
-              position={[location.lat!, location.lng!]}
-            />
+          {
+            !minimal && editMode !== undefined && location.district &&
+              <Marker
+                position={[location.lat!, location.lng!]}
+                icon={orangeMarker}
+              />
+          }
+          {
+            !minimal && activeVillage && zoom >= 14 && existingLocations.length > 0 && (
+              existingLocations.filter(loc => loc.village === activeVillage.properties?.VILLAGE).map(loc => (
+                <Marker
+                  position={[
+                    loc.lat,
+                    loc.lng
+                  ]}
+                  eventHandlers={{
+                    mouseover: () => handleMarkerHover(loc),
+                    mousedown: () => handleMarkerClick(loc)
+                  }}
+                  icon={orangeMarker}
+                />
+              ))
+            )
           }
           {!minimal && editMode !== undefined && (
             editMode === Mode.EVENT ?
               <div
                 className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
                cursor-pointer hover:text-primary"
-                onClick={() => navigate(`/create/event/${id}/details`)}>
+                onClick={() => navigate(`/add/event/${id}/details`)}>
                 {`< Event Details`}
               </div> :
               <div
                 className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
                cursor-pointer hover:text-primary"
-                onClick={() => navigate(`/create/post/${id}/editor`)}>
+                onClick={() => navigate(`/add/post/${id}/editor`)}>
                 {`< Editor`}
               </div>
           )}

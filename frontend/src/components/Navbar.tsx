@@ -125,11 +125,11 @@ const Navbar = () => {
         state.token && state.user?.role === "admin" &&
         <NavLink
           style={{ textShadow: "1px 1px 6px black" }}
-          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/create" ? "text-primary" : ""}`}
-          to="/create"
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/add" ? "text-primary" : ""}`}
+          to="/add"
           onClick={() => setIsMenuOpen(false)}
         >
-          Create
+          Add
         </NavLink>
       }
       <NavLink
@@ -214,7 +214,10 @@ const Navbar = () => {
       {
         isCollapsed &&
           <div
-            className="fixed bg-primary w-full h-4 z-9999 flex justify-center"
+            className='fixed bg-primary h-4 z-9999 flex justify-center'
+            style={{
+              width: 'calc(100% + 8px)'
+            }}
             onClick={() => setCollapsed(false)}
           >
             <IoIosArrowDropdownCircle size={"30px"} className="bg-primary rounded-full cursor-pointer"/>

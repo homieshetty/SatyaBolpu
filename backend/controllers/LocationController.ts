@@ -24,9 +24,12 @@ export const getLocations = async (req: Request, res: Response) => {
       locations: locations.map(l => ({
         district: l.district,
         taluk: l.taluk,
+        maagane: l.maagane,
         village: l.village,
+        name: l.name,
         lat: l.coordinates[0],
-        lng: l.coordinates[1]
+        lng: l.coordinates[1],
+        attachments: l.attachments
       }))
     });
   } catch (err: any) {
@@ -48,9 +51,12 @@ export const getLocation = async (req: Request, res: Response) => {
       location: {
         district: location.district,
         taluk: location.taluk,
+        maagane: location.maagane,
         village: location.village,
+        name: location.name,
         lat: location.coordinates[0],
-        lng: location.coordinates[1]
+        lng: location.coordinates[1],
+        attachments: location.attachments
       }
     });
   } catch (err: any) {

@@ -7,17 +7,18 @@ import { Swiper , SwiperSlide } from "swiper/react";
 import { Autoplay, EffectCoverflow, Keyboard, Navigation, Pagination } from "swiper/modules";
 import Button from "../components/Button";
 import { GrFormNextLink, GrFormPreviousLink } from "react-icons/gr";
-import "swiper/swiper-bundle.css";
-import MAP from "./Map";
-import { useAuth } from "../context/AuthContext";
-import { buildAnimationProps } from "../constants/Animations";
-import { useNavigate } from "react-router-dom";
-import { Marker, Popup } from "react-leaflet";
-import SVGHeader2 from "../constants/SVGHeader2";
-import { RotatingCardProps } from "../types/globals";
-import useApi from "../hooks/useApi";
-import { toast } from "react-toastify";
-import RotatingCard from "../components/RotatingCard";
+import 'swiper/swiper-bundle.css';
+import { useAuth } from '../context/AuthContext';
+import { buildAnimationProps } from '../constants/Animations';
+import { useNavigate } from 'react-router-dom';
+import { Marker, Popup } from 'react-leaflet';
+import SVGHeader2 from '../constants/SVGHeader2';
+import { EventDetailsType, RotatingCardProps } from '../types/globals';
+import useApi from '../hooks/useApi';
+import { toast } from 'react-toastify';
+import RotatingCard from '../components/RotatingCard';
+import { BASE_URL } from "../App";
+import MAP from "./MAP";
 
 gsap.registerPlugin(useGSAP); 
 gsap.registerPlugin(ScrollTrigger);
@@ -40,17 +41,17 @@ const Home = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const swiperOverlayRef = useRef<HTMLDivElement>(null);
   const recentPostRefs = useRef<HTMLDivElement[]>([]);
-  const lineRef = useRef<HTMLDivElement>(null);
-  const [lineHeight, setLineHeight] = useState<number>(0);
+  const upcomingEventsLineRef = useRef<HTMLDivElement>(null);
+  const upcomingEventRefs = useRef<HTMLDivElement[]>([]);
   const bgRefs = useRef<HTMLDivElement[]>([]);
-
+  
   const [swiperData, setSwiperData] = useState<swiperDataType[]>([]);
   const [recentPosts, setRecentPosts] = useState<RotatingCardProps[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<RotatingCardProps[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<EventDetailsType[]>([]);
   const [isHovering,setHovering] = useState<boolean>(false);
 
-  const recentPostsApi = useApi("/posts?fields=shortTitle,description,image&limit=5");
-  const upcomingEventsApi = useApi("/events?fields=title,duration,docs&limit=5&sortBy=duration.start");
+  const recentPostsApi = useApi("/posts?fields=shortTitle,description,coverImage&limit=5");
+  const upcomingEventsApi = useApi("/events?fields=title,duration,coverImage&limit=5&sortBy=duration.start");
 
   const navigate = useNavigate();
   const { state } = useAuth();
@@ -61,7 +62,7 @@ const Home = () => {
     }
 
     if(upcomingEventsApi.data) {
-      setUpcomingEvents(upcomingEventsApi.data);
+      setUpcomingEvents(upcomingEventsApi.data.events);
     }
   }, [recentPostsApi.data, upcomingEventsApi.data]);
 
@@ -76,40 +77,6 @@ const Home = () => {
       console.error(upcomingEventsApi.error);
     }
   }, [recentPostsApi.error, upcomingEventsApi.error]);
-
-  useEffect(() => {
-    if (!lineRef.current) return;
-
-    const elementTop =
-      lineRef.current.getBoundingClientRect().top + window.scrollY;
-
-    let ticking = false;
-
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => {
-          const triggerPoint = elementTop - 500;
-
-          const newHeight = Math.max(
-            0,
-            window.scrollY - triggerPoint
-          );
-
-          setLineHeight(newHeight);
-
-          ticking = false;
-        });
-
-        ticking = true;
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -137,6 +104,7 @@ const Home = () => {
   }, []);
 
   useLayoutEffect(() => {
+    if(recentPostsApi.loading || upcomingEventsApi.loading) return;
 
     const ctx = gsap.context(() => {
       const runAnimations = (isMobile: boolean) => {
@@ -150,9 +118,10 @@ const Home = () => {
           svgRef,
           mapRef,
           swiperOverlayRef,
-          bgRefs,
           recentPostRefs,
-          lineRef,
+          upcomingEventsLineRef,
+          upcomingEventRefs,
+          bgRefs,
           buttonRefs,
           isMobile
         );
@@ -160,6 +129,17 @@ const Home = () => {
         animations.forEach(({ ref, fromVars, toVars }) => {
           gsap.fromTo(ref, fromVars, toVars);
         });
+
+        // console.table(
+        //   animations.map(anim => ({
+        //     name: anim.name,
+        //     exists: !!anim.ref,
+        //     isArray: Array.isArray(anim.ref),
+        //     length: Array.isArray(anim.ref)
+        //       ? anim.ref.length
+        //       : 'single'
+        //   }))
+        // );
 
       };
 
@@ -171,7 +151,7 @@ const Home = () => {
 
     return () => ctx.revert();
 
-  }, [swiperData, recentPosts]);
+  }, [swiperData, recentPostsApi, upcomingEvents, recentPostsApi.loading, upcomingEventsApi.loading]);
 
     return (
       <div className="home w-screen bg-black">
@@ -444,7 +424,7 @@ const Home = () => {
             className="w-full flex flex-wrap items-center justify-center my-20 gap-5"
           >
             {
-              recentPosts.length && recentPosts.map((post, id) => (
+              recentPosts.length > 0 && recentPosts.map((post, id) => (
                 <div
                   className="w-1/4"
                   key={id}
@@ -462,32 +442,70 @@ const Home = () => {
           </div>
         </div>
 
-        <div 
-          className="w-screen h-[300vh] flex flex-col items-center justify-center"
-          ref={(el) => { if(el) scrollWatcherRef.current[5] = el }}
+        <div
+          className='w-screen flex flex-col items-center justify-start gap-40'
+          ref={(el) => { if(el) scrollWatcherRef.current[5] = el; }}
+          style={{
+            height: `${upcomingEvents.length * 100}vh`
+          }}
         >
           <div 
-            className="text-primary text-center text-[2.25rem]/[2.25rem] md:text-[3rem] xl:text-[5rem] "
-            ref={(el) => {if(el) headingRefs.current[9] = el }}
+            className='text-primary text-center text-[2.25rem]/[2.25rem] md:text-[3rem] xl:text-[5rem]'
+            ref={(el) => { if (el) headingRefs.current[9] = el; }}
           >
             Upcoming Events
           </div>
-          <div
-            className="w-full flex flex-wrap items-center justify-center my-20 gap-5"
+
+          <div 
+            className='relative flex flex-col w-full h-full'
+            style={{
+              justifyContent: upcomingEvents.length > 1 ? 'space-between' : 'center'
+            }}
           >
-            <div 
-              style={{
-                height: `${lineHeight}px`
-              }}
-              className="w-2 bg-primary rounded-lg" ref={lineRef}>
-            </div>
+
+            <div
+              ref={upcomingEventsLineRef}
+              className='w-2 h-full bg-primary origin-top absolute left-1/2 -translate-x-1/2'
+            />
+
+            {
+              upcomingEvents.length > 0 && upcomingEvents.map((item, id) => (
+              <div
+                key={id}
+                className='w-1/2 items-center flex'
+                  ref={(el) => {
+                    if (el) upcomingEventRefs.current[id] = el;
+                  }}
+                style={{
+                  flexDirection: id % 2 === 0 ? 'row' : 'row-reverse',
+                  justifyContent: id % 2 === 0 ? 'flex-end' : 'flex-start'
+                }}
+              >
+                <div
+                  className="w-1/2 flex flex-col items-center justify-center"
+                >
+                  <img
+                    className=""
+                    src={`${BASE_URL}${item?.coverImage as string}`} 
+                    alt="event" 
+                  />
+                  <div className="text-center">
+                    <p className="text-primary font-bold">{item.title}</p>
+                    <p className="text-nowrap text-white text-[0.75rem]">
+                      {new Date(item?.duration?.start ?? "").toDateString()} - {new Date(item?.duration?.end ?? "").toDateString()} 
+                    </p>
+                  </div>
+                </div>
+                  <div className="h-2 w-1/3 bg-primary" />
+              </div>
+            ))}
           </div>
         </div>
 
-        <div 
-          className="cta relative w-screen h-[350vh] mt-[50vh] mb-[50vh] transition-all" 
+        <div
+          className='cta relative w-screen h-[350vh] mt-[50vh] mb-[50vh] transition-all'
           ref={(el) => {
-            if(el) scrollWatcherRef.current[6] = el
+            if (el) scrollWatcherRef.current[6] = el
           }}
         >
           <div className="sticky top-0 w-full h-screen">

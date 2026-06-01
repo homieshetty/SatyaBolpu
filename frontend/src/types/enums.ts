@@ -1,7 +1,8 @@
 export enum Mode {
   POST,
   CULTURE,
-  EVENT
+  EVENT,
+  LOCATION
 };
 
 export enum CardType {

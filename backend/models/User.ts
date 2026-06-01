@@ -31,6 +31,9 @@ const userSchema = new Schema<IUser>({
     type: phoneSchema,
     required: false
   },
+  image: {
+    type: String
+  },
   role: {
     type: String,
     enum: ["user", "admin"],

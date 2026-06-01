@@ -7,10 +7,21 @@ import { Culture } from "../models/Culture.js";
 export const getTags = async (req: Request, res: Response) => {
   try {
     const sortBy = req.query?.sortBy?.toString() ?? "tag";
-    const tags = await Tag.find({}, "tag").sort({ [sortBy]: 1 });
-    if (!tags) {
+    const tagsData = 
+      await Tag.find({}, "tag")
+        .collation({ locale: "en", strength: 2 })
+        .sort({ [sortBy]: 1 });
+    if (!tagsData) {
       res.status(404).json({ msg: "No tags found" });
     }
+
+    const tags = tagsData.map(tag => {
+      const { _id, ...rest } = tag.toObject();
+      return {
+        id: _id,
+        ...rest
+      };
+    });
 
     return res.status(200).json({ tags })
   } catch (err: any) {
@@ -43,10 +54,21 @@ export const addTag = async (req: Request, res: Response) => {
 export const getPostTypes = async (req: Request, res: Response) => {
   try {
     const sortBy = req.query?.sortBy?.toString() ?? "name";
-    const postTypes = await PostType.find({}, "name").sort({ [sortBy]: 1 });
-    if (!postTypes) {
+    const postTypesData = 
+      await PostType.find({}, "name")
+        .collation({ locale: "en", strength: 2 })
+        .sort({ [sortBy]: 1 });
+    if (!postTypesData) {
       res.status(404).json({ msg: "No post types found." });
     }
+
+    const postTypes = postTypesData.map(postType => {
+      const { _id, ...rest } = postType.toObject();
+      return {
+        id: _id,
+        ...rest
+      };
+    });
 
     return res.status(200).json({ postTypes });
   } catch (err: any) {
@@ -79,10 +101,21 @@ export const addPostType = async (req: Request, res: Response) => {
 export const getPostGroups = async (req: Request, res: Response) => {
   try {
     const sortBy = req.query?.sortBy?.toString() ?? "name";
-    const postGroups = await PostGroup.find({}, "name").sort({ [sortBy]: 1 });
-    if (!postGroups) {
+    const postGroupsData = 
+      await PostGroup.find({}, "name")
+        .collation({ locale: "en", strength: 2 })  
+        .sort({ [sortBy]: 1 });
+    if (!postGroupsData) {
       res.status(404).json({ msg: "No post groups found." });
     }
+
+    const postGroups = postGroupsData.map(postGroup => {
+      const { _id, ...rest } = postGroup.toObject();
+      return {
+        id: _id,
+        ...rest
+      };
+    });
 
     return res.status(200).json({ postGroups });
   } catch (err: any) {

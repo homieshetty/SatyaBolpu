@@ -95,9 +95,6 @@ const cultureSchema = new Schema<ICulture>({
   title: {
     type: String
   },
-  descriptiveName: {
-    type: String
-  },
   description: {
     type: String
   },

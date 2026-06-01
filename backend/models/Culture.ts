@@ -6,10 +6,6 @@ const cultureSchema = new Schema<ICulture>({
     type: String,
     required: true,
   },
-  descriptiveName: {
-    type: String,
-    required: true,
-  },
   description: {
     type: String,
     required: true,
@@ -31,4 +27,4 @@ const cultureSchema = new Schema<ICulture>({
   }
 }, { timestamps: true });
 
-export const Culture = mongoose.model<ICulture>("Culture",cultureSchema);
+export const Culture = mongoose.model<ICulture>("Culture", cultureSchema);

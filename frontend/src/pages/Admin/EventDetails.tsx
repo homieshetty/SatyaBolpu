@@ -10,15 +10,11 @@ import useApi from "../../hooks/useApi";
 import { EventDetailsType } from "../../types/globals";
 import { useLoading } from "../../context/LoadingContext";
 import { validateEventDetails } from "../../utils/validate";
+import { BASE_URL } from "../../App";
 
 type FormErrorType = {
-  title: string;
-  description: string;
-  culture: string;
-  start: string,
-  end: string,
-  docs: string
-};
+  [k in keyof (Omit<EventDetailsType, "duration"> & { start: string, end: string })]: string
+}
 
 const initialFormData: EventDetailsType = {
   title: "",
@@ -28,7 +24,8 @@ const initialFormData: EventDetailsType = {
     start: null,
     end: null
   },
-  docs: []
+  coverImage: null,
+  files: []
 };
 
 const initialFormErrors: FormErrorType = {
@@ -37,7 +34,8 @@ const initialFormErrors: FormErrorType = {
   culture: "",
   start: "",
   end: "",
-  docs: ""
+  coverImage: "",
+  files: ""
 };
 
 const EventDetails = () => {
@@ -50,6 +48,7 @@ const EventDetails = () => {
   const [cultures, setCultures] = useState<{_id: string, title: string}[]>([]);
 
   const culturesApi = useApi("/cultures");
+  const uploadSingleApi = useApi("/upload/single", { auto: false });
   const uploadMultipleApi = useApi("/upload/multiple", { auto: false });
   const eventsApi = useApi("/events", { auto: false });
   const draftsApi = useApi("/drafts", { auto: false });
@@ -93,13 +92,13 @@ const EventDetails = () => {
 
   // useEffect(() => {
   //   return () => {
-  //     if(formData.docs.length > 0) {
-  //       formData.docs.forEach((doc) => {
+  //     if(formData.files.length > 0) {
+  //       formData.files.forEach((doc) => {
   //         if (doc instanceof File) URL.revokeObjectURL(URL.createObjectURL(doc));
   //       });
   //     }
   //   };
-  // }, [formData.docs]);
+  // }, [formData.files]);
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -168,7 +167,8 @@ const EventDetails = () => {
       culture: "",
       start: "",
       end: "",
-      docs: ""
+      coverImage: "",
+      files: ""
     };
 
     if (!formData.title.trim()) {
@@ -206,6 +206,10 @@ const EventDetails = () => {
       }
     }
 
+    if(!formData.coverImage) {
+      newErrors.coverImage = "A cover image is required.";
+    }
+
     setErrors(newErrors);
     const hasErrors = Object.values(newErrors).some(err => err !== "");
     if (hasErrors) {
@@ -214,21 +218,29 @@ const EventDetails = () => {
     }
 
     const uploadData = { ...formData };
-    if (formData.docs.length > 0) {
-      const docsData = new FormData();
-      const existingDocs: string[] = [];
-      formData.docs.forEach(doc => { 
+
+    if(formData.coverImage instanceof File) {
+      const coverImageData = new FormData();
+      coverImageData.append('file', formData.coverImage);
+      const res = await uploadSingleApi.post(coverImageData);
+      uploadData.coverImage = res.path;
+    }
+
+    if (formData.files.length > 0) {
+      const filesData = new FormData();
+      const existingfiles: string[] = [];
+      formData.files.forEach(doc => { 
         if(doc instanceof File) 
-          docsData.append("files", doc) 
+          filesData.append("files", doc) 
         else
-          existingDocs.push(doc)
+          existingfiles.push(doc)
       });
-      const res = await uploadMultipleApi.post(docsData);
+      const res = await uploadMultipleApi.post(filesData);
       if (!res) {
         setSaving(false);
         return;
       }
-      uploadData.docs = [...existingDocs, ...res.paths];
+      uploadData.files = [...existingfiles, ...res.paths];
     }
 
     const res = await eventsApi.refetch({ endpoint: `/events/draft/${id}/details`, method: "POST", body: { details: uploadData } });
@@ -248,7 +260,7 @@ const EventDetails = () => {
 
   const handleNext = () => {
     if (submitted) {
-      navigate(`/create/event/${id}/map`);
+      navigate(`/add/event/${id}/map`);
     } else {
       toast.error("You need to submit the form first!");
     }
@@ -357,9 +369,52 @@ const EventDetails = () => {
 
         <div className="flex flex-col w-full gap-3">
           <label className="text-primary font-semibold text-[1.5rem]">
+            Cover Image
+          </label>
+          <label htmlFor="coverImage" className="w-fit">
+            <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
+              justify-center border-3 border-solid border-primary  
+              ${submitted || formData.coverImage ?
+                "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
+              <FaUpload />
+              <p>Upload Image</p>
+            </div>
+          </label>
+          <input
+            className="hidden"
+            disabled={submitted || !!formData.coverImage}
+            type="file"
+            accept="image/*"
+            id="coverImage"
+            name="coverImage"
+            multiple
+            onChange={handleFileChange}
+          />
+          <div className="flex flex-wrap text-white">
+            {
+              formData.coverImage &&
+              <div className="w-1/2 border-2 border-solid border-white flex relative">
+                <img
+                  className="w-full aspect-square object-cover object-center"
+                  src={formData.coverImage instanceof File ? URL.createObjectURL(formData.coverImage) : `${BASE_URL}${formData.coverImage}`} alt="cover-image" />
+                {
+                  !submitted &&
+                  <MdCancel
+                    className="absolute bg-black rounded-full text-[1.5rem] top-2 right-2 cursor-pointer hover:text-primary"
+                    onClick={() => setFormData(prev => ({ ...prev, "coverImage": "" }))}
+                  />
+                }
+              </div>
+            }
+          </div>
+          {errors.coverImage && <p className="text-red-500">{errors.coverImage}</p>}
+        </div>
+
+        <div className="flex flex-col w-full gap-3">
+          <label className="text-primary font-semibold text-[1.5rem]">
             Related Documents
           </label>
-          <label htmlFor="docs" className="w-fit">
+          <label htmlFor="files" className="w-fit">
             <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
               justify-center border-3 border-solid border-primary  
               ${submitted ? "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
@@ -372,46 +427,66 @@ const EventDetails = () => {
             disabled={submitted}
             type="file"
             accept="image/*,application/pdf"
-            id="docs"
-            name="docs"
+            id="files"
+            name="files"
             multiple
             onChange={handleFileChange}
           />
           <div className="flex flex-wrap text-white">
             {
-              formData.docs.length > 0 && formData.docs.map((doc, index) => {
-                if (doc instanceof File) {
-                  return (
-                    <div className="border-2 border-solid border-white flex relative" key={index}>
-                      {
-                        doc.type.startsWith("image") ?
-                          <img
-                            className="w-full aspect-square object-cover object-center"
-                            src={URL.createObjectURL(doc)} alt={`doc-${index}`}
-                          /> :
-                          <iframe
-                            style={{
-                              scrollbarWidth: "none"
-                            }}
-                            className="w-full aspect-square object-cover object-center"
-                            src={URL.createObjectURL(doc)}
-                          />
-                      }
-                      {
-                        !submitted &&
-                        <MdCancel
-                          className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
-                          onClick={() => handleRemoveImage("docs", index)}
+              formData.files.length > 0 &&
+              formData.files.map((doc, index) => {
+
+                const isFile = doc instanceof File;
+
+                const fileUrl = isFile
+                  ? URL.createObjectURL(doc)
+                  : doc;
+
+                const fileType = isFile
+                  ? doc.type
+                  : doc.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+                    ? "image"
+                    : "other";
+
+                return (
+                  <div
+                    className="border-2 border-solid border-white flex relative"
+                    key={index}
+                  >
+
+                    {
+                      fileType.startsWith("image") ? (
+                        <img
+                          className="w-full aspect-square object-cover object-center"
+                          src={fileUrl}
+                          alt={`doc-${index}`}
                         />
-                      }
-                    </div>
-                  )
-                }
-                return null;
+                      ) : (
+                        <iframe
+                          style={{
+                            scrollbarWidth: "none"
+                          }}
+                          className="w-full aspect-square object-cover object-center"
+                          src={fileUrl}
+                        />
+                      )
+                    }
+
+                    {
+                      !submitted &&
+                      <MdCancel
+                        className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
+                        onClick={() => handleRemoveImage("files", index)}
+                      />
+                    }
+
+                  </div>
+                );
               })
             }
           </div>
-          {errors.docs && <p className="text-red-500">{errors.docs}</p>}
+          {errors.files && <p className="text-red-500">{errors.files}</p>}
         </div>
 
         {
@@ -437,7 +512,7 @@ const EventDetails = () => {
       <div className="flex w-screen items-center justify-between p-10">
         <div
           className={`text-[1.2rem] sm:text-[1.75rem] hover:text-primary text-white cursor-pointer`}
-          onClick={() => navigate(`/create/event/${id}`)}>
+          onClick={() => navigate(`/add/event/${id}`)}>
           {`< Progress`}
         </div>
         <div

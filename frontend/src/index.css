@@ -4,9 +4,7 @@
 
 @theme {
   --color-primary: #E88138;
-
   --font-cursive: "Charm", serif;
-
   --height-1500vh: 1500vh;
 }
 
@@ -28,6 +26,18 @@
   -moz-osx-font-smoothing: grayscale;
   interpolate-size: allow-keywords;
   --primary: #E87E36;
+}
+
+.Toastify__toast-icon svg {
+  fill: white;
+}
+
+.Toastify__toast--success {
+  background: #22c55e !important;
+}
+
+.Toastify__toast--error {
+  background: #ff4d4d !important;
 }
 
 body {
@@ -98,4 +108,12 @@ blockquote {
 
 .recharts-wrapper *:focus {
   outline: none !important;
+}
+
+.marker {
+  transition: filter 0.2s ease;
+}
+
+.marker:hover {
+  filter: brightness(1.15);
 }

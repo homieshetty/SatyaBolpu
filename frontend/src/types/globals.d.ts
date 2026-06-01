@@ -53,7 +53,7 @@ export type BlogCardProps = BaseCardProps & {
   subtitle: string;
   image: string;
   userId: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export type PostGroupProps = BaseCardProps & {
@@ -86,34 +86,39 @@ export type FormFieldOption = {
   label: string;
 };
 
-export type FormField = {
+export type FormField<T> = {
   name: string;
   label: string;
-  type: "text" | "email" | "password" | "textarea" | "select" | "file" | "url" | "number" | "radio";
+  type: "text" | "email" | "password" | "textarea" | "select" | "file" | "files" | "url" | "number" | "radio" | "multi-select" | "date";
   placeholder?: string;
-  required?: boolean;
   options?: FormFieldOption[];
   accept?: string;
   rows?: number;
-  min?: number;
-  max?: number;
-  validation?: (value: any) => string | null;
+  minValue?: number;
+  maxValue?: number;
+  required?: boolean;
+  unique?: boolean;
+  existingValues?: any[];
+  defaultValue?: FormFieldOption['value'];
+  minLength?: number;
+  maxLength?: number;
+  minWords?: number;
+  maxWords?: number;
+  minItems?: number;
+  maxItems?: number;
+  validation?: (formData: T, value: any) => string | undefined;
   disabled?: boolean;
 };
 
-export type FormProps = {
-  onClose: () => void;
-  title: string;
-  fields: FormField[];
-  formData: Record<string, any>;
-  onChange: (name: string, value: any) => void;
-  onSubmit: (e: React.FormEvent) => void;
+export type FormProps<T> = {
+  fields: FormField<T>[];
+  state: T;
+  submitEndpoint: string;
   error?: string;
-  loading?: boolean;
   submitText?: string;
   loadingText?: string;
+  toastMsg?: string;
   className?: string;
-  formClassName?: string;
 };
 
 export type User = {
@@ -155,28 +160,25 @@ export type AuthContextType = {
   dispatch: React.Dispatch<AuthAction>;
 };
 
-export type CultureState = {
-  details: CultureDetailsType | null;
-  content: string; 
-};
-
 export type DialogBoxOptions = {
-    title: string;
-    description?: string;
-    severity?: "irreversible" | "risky" | "default";
-    form?: FormProps;
-    onConfirm?: () => void;
-    onCancel?: () => void;
+  title: string;
+  description?: string;
+  severity?: "irreversible" | "risky" | "default";
+  form?: FormProps;
+  onConfirm?: () => void;
+  onCancel?: () => void;
 };
 
 export type DialogBoxContextType = {
-    popup: (options: DialogBoxOptions) => void;
+  popup: (options: DialogBoxOptions) => void;
 };
 
 export type LoadingContextType = {
   isLoading: boolean;
   setLoading: (loading: boolean) => void;
 };
+
+export type DetailsType = PostDetailsType | CultureDetailsType | EventDetailsType;
 
 export type PostState = {
   details: PostDetailsType | null;
@@ -188,6 +190,18 @@ export type EventState = {
   details: EventDetailsType | null;
   location: Location | null;
 };
+
+export type CultureState = {
+  details: CultureDetailsType | null;
+  content: string;
+};
+
+export type LocationState = {
+  details: {
+    title: string
+  } | null;
+  location: Location | null;
+}
 
 export type SignUpProps = {
   name: string;
@@ -207,8 +221,8 @@ export type LoginProps = {
 };
 
 export interface ICulture {
+  id: string;
   title: string;
-  descriptiveName: string;
   description: string;
   coverImage: string | File | null;
   galleryImages: string[] | File[];
@@ -217,15 +231,22 @@ export interface ICulture {
   posts: number;
 };
 
+export type CultureDetailsType = Omit<ICulture, "id" | "content" | "posts">;
+
 export interface ILocation {
+  id: string;
+  name: string;
   district: string;
   taluk: string;
+  maagane: string;
   village: string;
   lat: number;
   lng: number;
+  attachments: File[] | string[];
 };
 
 export interface IPost {
+  id: string;
   title: string;
   shortTitle: string;
   culture: string;
@@ -239,12 +260,14 @@ export interface IPost {
   location?: ILocation;
 };
 
+export type PostDetailsType = Omit<IPost, "id" | "content" | "location"> & { locationSpecific: boolean }
+
 export interface IEvent {
   title: string;
   description: string;
   duration: {
-    start: Date,
-    end: Date
+    start: Date | string | null,
+    end: Date | string | null
   };
   culture: string;
   coverImage: string | File | null;
@@ -252,18 +275,20 @@ export interface IEvent {
   location: ILocation;
 };
 
+export type EventDetailsType = Omit<IEvent, "id" | "location">;
+
 export interface ITag {
-  _id: string;
+  id: string;
   tag: string;
 }
 
 export interface IPostType {
-  _id: string;
+  id: string;
   name: string;
 }
 
 export interface IPostGroup {
-  _id: string;
+  id: string;
   name: string;
 }
 

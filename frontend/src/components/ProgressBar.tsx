@@ -1,20 +1,20 @@
-import { useLayoutEffect, useMemo } from "react";
+import { ReactNode, useLayoutEffect, useMemo } from "react";
 import { MdDone } from "react-icons/md";
-import { useNavigate } from "react-router-dom";
-import { CultureState, EventState, PostState } from "../types/globals";
+import { CultureState, EventState, LocationState, PostState } from "../types/globals";
 
 type PropsType = {
-  steps: Record<string,string>;
+  steps: Record<string, ReactNode>;
   progress: number;
   setProgress: (progress: number) => void;
-  state: PostState | CultureState | EventState;
+  setShowStep: (step: string) => void;
+  state: PostState | CultureState | EventState | LocationState;
 }
 
-const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, state }) => {
-  const navigate = useNavigate();
+const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, setShowStep, state }) => {
+
   const offset = useMemo(
     () => 100 / (Object.keys(steps).length - 1)
-  ,[steps]);
+  , [steps]);
 
   useLayoutEffect(() => {
     let width = 0;
@@ -30,48 +30,47 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, state 
 
   return (
     <>
-      <div className="flex text-white w-[80%] sm:w-2/3 md:w-1/2 h-10 bg-white 
-        mx-auto items-center justify-between relative rounded-full">
-        <div 
-          className="absolute z-10 h-10 bg-primary transition-all duration-300" 
+      <div 
+        className="w-[80%] sm:w-2/3 md:w-1/3 h-1 bg-white rounded-lg
+          flex itemse-center justify-between relative">
+        <div
+          className="absolute z-10 rounded-lg bg-primary h-1"
           style={{
-            borderTopLeftRadius: "9999px",
-            borderBottomLeftRadius: "9999px",
-            borderTopRightRadius: progress >= 100 ? "9999px" : "",
-            borderBottomRightRadius: progress >= 100 ? "9999px" : "",
-            width: `${Math.min(progress,100)}%`
+            width: `${Math.min(progress, 100)}%`
           }}
-          ></div>
+        >
+
+        </div>
         {
-          Object.values(steps).map((step,index) => {
+          Object.keys(steps).map((step, index) => {
             const isDisabled = index === 0 ? false : progress < offset * index;
-            const isCompleted = progress > offset*index;
+            const isCompleted = progress > offset * index;
             return (
-              <div className="flex z-20 flex-col items-center justify-center" key={index}>
-                <div 
-                  className={`outline-primary outline rounded-full w-9 h-9 text-center transition-all flex items-center justify-center 
-                    ${isDisabled ? 
-                      "cursor-not-allowed bg-gray-400" :
-                      "cursor-pointer hover:scale-110 hover:bg-primary hover:text-black hover:outline-black bg-black"}`} 
-                  onClick={() => {
-                    if(!isDisabled) 
-                      navigate(`${step}`) 
-                  }}
-                >
-                  {
-                    isCompleted ? 
-                      <MdDone /> : index+1
-                  }
-                </div>
-                <div className="absolute text-sm md:text-lg -bottom-10 text-nowrap cursor-pointer">
-                  {Object.keys(steps)[index]}
+              <div 
+                className={`w-10 h-10 p-2 rounded-full absolute top-1/2 -translate-y-1/2
+                  border-3 border-primary z-20 flex items-center justify-center text-white
+                  ${isCompleted ? 'bg-primary' : 'bg-black'}
+                  ${!isDisabled ? "hover:border-white hover:bg-primary opacity-100" : "opacity-50"}`}
+                key={index}
+                onClick={isDisabled ? () => {} : () => setShowStep(step) }
+                style={{
+                  cursor: isDisabled ? 'not-allowed' : 'pointer',
+                  left: `${index * offset}%`
+                }}  
+              >
+                {
+                  isCompleted ?
+                    <MdDone /> :
+                    index + 1
+                }
+                <div className="absolute bottom-full text-nowrap mb-2">
+                  {step}
                 </div>
               </div>
             )
           })
         }
       </div>
-
     </>
   )
 }

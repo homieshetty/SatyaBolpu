@@ -7,8 +7,7 @@ import { FaArrowUpLong, FaLocationDot, FaPeopleGroup } from "react-icons/fa6";
 import { MdOutlineExplore } from "react-icons/md";
 import { VscFileSubmodule } from "react-icons/vsc";
 import FilterTable from "../components/FilterTable";
-import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from 'recharts';
-import Map from "./Map";
+import Map from "./MAP";
 
 const data = [
   { month: "Jan 2025", posts: 4 },
@@ -26,10 +25,10 @@ const Dashboard = () => {
   
   return (
     <div
-      className="w-full flex items-center justify-around my-10"
+      className="w-full flex flex-wrap items-center justify-around my-10"
     >
 
-      <div className="w-[70%] px-10">
+      <div className="w-[70%] h-[60vh] px-10">
         {/* Greetings */}
         <div className="w-full flex gap-1 text-[2rem] mb-5">
           <p className="text-primary">Hello,</p>
@@ -156,50 +155,49 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Recent Updates */}
-        <div className="w-full my-20 flex flex-col gap-3">
-          <div className="text-white text-[1.25rem]">
-            Recent Updates
-          </div>
-          <div>
-            <FilterTable 
-              filters={[
-                {
-                  name: 'All',
-                  endpoint: 'feed',
-                  key: "feed"
-                },
-                {
-                  name: 'Posts',
-                  endpoint: 'posts?fields=title,image,userId&limit=5',
-                  key: 'posts'
-                },
-                {
-                  name: 'Cultures',
-                  endpoint: 'cultures?fields=title,image,userId&limit=5',
-                  key: 'cultures'
-                },
-                {
-                  name: 'Events',
-                  endpoint: 'events?fields=title,image,userId&limit=5',
-                  key: 'events'
-                },
-                {
-                  name: 'Blogs',
-                  endpoint: 'blogs?fields=title,image,userId&limit=5',
-                  key: 'blogs'
-                }
-              ]}
-            />
-          </div>
-        </div>
-
       </div>
 
-      <div className="w-[30%] h-screen">
+      <div className="w-[30%] h-[60vh]">
         <Map
           minimal
         />
+      </div>
+
+      <div className="w-full my-10 flex flex-col gap-3 px-10">
+        <div className="text-white text-[1.25rem]">
+          Recent Updates
+        </div>
+        <div>
+          <FilterTable
+            filters={[
+              {
+                name: 'All',
+                endpoint: 'feed',
+                key: "feed"
+              },
+              {
+                name: 'Posts',
+                endpoint: 'posts?fields=title,image,userId&limit=5',
+                key: 'posts'
+              },
+              {
+                name: 'Cultures',
+                endpoint: 'cultures?fields=title,image,userId&limit=5',
+                key: 'cultures'
+              },
+              {
+                name: 'Events',
+                endpoint: 'events?fields=title,image,userId&limit=5',
+                key: 'events'
+              },
+              {
+                name: 'Blogs',
+                endpoint: 'blogs?fields=title,image,userId&limit=5',
+                key: 'blogs'
+              }
+            ]}
+          />
+        </div>
       </div>
 
     </div>

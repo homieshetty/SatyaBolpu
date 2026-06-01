@@ -1,4 +1,5 @@
 export type PropsType = {
+  name: string,
   ref: GSAPTweenTarget;
   fromVars: GSAPTweenVars;
   toVars: GSAPTweenVars;
@@ -38,15 +39,36 @@ export const buildAnimationProps = (
   svgRef: React.RefObject<SVGSVGElement | null>,
   mapRef: React.RefObject<HTMLDivElement | null>,
   swiperOverlayRef: React.RefObject<HTMLDivElement | null>,
-  bgRefs: React.RefObject<HTMLDivElement[]>,
   recentPostRefs: React.RefObject<HTMLDivElement[]>,
-  lineRef: React.RefObject<HTMLDivElement | null>,
+  upcomingEventsLineRef: React.RefObject<HTMLDivElement | null>,
+  upcomingEventRefs: React.RefObject<HTMLDivElement[]>,
+  bgRefs: React.RefObject<HTMLDivElement[]>,
   buttonRefs: React.RefObject<HTMLButtonElement[]>,
   isMobile: boolean
 ): PropsType[] => {
 
+  const upcomingEventRefsAnimations: PropsType[] = upcomingEventRefs.current.map((ref, index) => ({
+    name: `upcoming-event-${index}`,
+    ref,
+    fromVars: {
+      clipPath: "inset(0% 0% 0% 100%)",
+    },
+    toVars: {
+      clipPath: "inset(0% 0% 0% 0%)",
+      ease: 'none',
+      scrollTrigger: {
+        trigger: ref,
+        scrub: true,
+        start: '-10% center',
+        end: 'center center',
+        toggleActions: 'play none none reverse'
+      }
+    }
+  }))
+
   return [
     {
+      name: 'heading-(1,2,3)',
       ref: headingRefs.current.slice(0, 3),
       fromVars: {
         opacity: 0 
@@ -62,6 +84,7 @@ export const buildAnimationProps = (
       }
     },
     {
+      name: 'heading-(1,2)',
       ref: headingRefs.current.slice(0, 2),
       fromVars: {  },
       toVars: { 
@@ -75,6 +98,7 @@ export const buildAnimationProps = (
       }
     },
     {
+      name: 'heading-3',
       ref: headingRefs.current[2],
       fromVars: {  },
       toVars: { 
@@ -88,6 +112,7 @@ export const buildAnimationProps = (
       }
     },
     { 
+      name: 'svg',
       ref: svgRef.current, 
       fromVars: { 
         strokeDashoffset: 400 
@@ -103,6 +128,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'foliage-1',
       ref: foliageRefs.current[0], 
       fromVars: { 
         scale: 1 
@@ -118,6 +144,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'overlay-1',
       ref: overlayRef.current, 
       fromVars: {}, 
       toVars: { 
@@ -132,6 +159,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'heading-4',
       ref: headingRefs.current[3], 
       fromVars: { 
         opacity: 0 
@@ -147,6 +175,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'foliage-1',
       ref: foliageRefs.current[0], 
       fromVars: { }, 
       toVars: { 
@@ -160,6 +189,7 @@ export const buildAnimationProps = (
       } 
     },
     {
+      name: 'img-1',
       ref: imgRefs.current[0],
       fromVars: { 
         clipPath: "inset(0% 0% 0% 0%)" 
@@ -176,6 +206,7 @@ export const buildAnimationProps = (
       }
     },
     { 
+      name: 'heading-4',
       ref: headingRefs.current[3], 
       fromVars: { 
         clipPath: "inset(0% 0% 0% 0%)"
@@ -192,6 +223,7 @@ export const buildAnimationProps = (
       } 
     },
     {
+      name: 'img-2',
       ref: imgRefs.current[1],
       fromVars: { 
         clipPath: "inset(0% 0% 0% 100%)"
@@ -208,6 +240,7 @@ export const buildAnimationProps = (
       }
     },
     { 
+      name: 'heading-5',
       ref: headingRefs.current[4], 
       fromVars: { 
         clipPath: "inset(0% 0% 0% 100%)"
@@ -224,6 +257,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'foliage-2',
       ref: foliageRefs.current[1], 
       fromVars: { }, 
       toVars: { 
@@ -237,6 +271,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'overlay-2',
       ref: overlayRef.current, 
       fromVars: {}, 
       toVars: { 
@@ -251,6 +286,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'foliage-2',
       ref: foliageRefs.current[1], 
       fromVars: { }, 
       toVars: { 
@@ -265,6 +301,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'heading-5',
       ref: headingRefs.current[4], 
       fromVars: { }, 
       toVars: { 
@@ -278,6 +315,7 @@ export const buildAnimationProps = (
       } 
     },
     {
+      name: 'img-2',
       ref: imgRefs.current[1],
       fromVars: { },
       toVars: {  
@@ -292,6 +330,7 @@ export const buildAnimationProps = (
       }
     },
     { 
+      name: 'foliage-2',
       ref: foliageRefs.current[1], 
       fromVars: { }, 
       toVars: { 
@@ -306,6 +345,7 @@ export const buildAnimationProps = (
       } 
     },
     {
+      name: 'img-3',
       ref: imgRefs.current[2],
       fromVars: { 
         clipPath: "inset(100% 0% 0% 0%)"
@@ -322,6 +362,7 @@ export const buildAnimationProps = (
       }
     },
     { 
+      name: 'heading-6',
       ref: headingRefs.current[5], 
       fromVars: { 
         clipPath: "inset(100% 0% 0% 0%)"
@@ -338,6 +379,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'heading-7',
       ref: headingRefs.current[6], 
       fromVars: { 
         opacity: 0
@@ -352,6 +394,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'map',
       ref: mapRef.current, 
       fromVars: { 
         height: "0" 
@@ -366,6 +409,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'heading-8',
       ref: headingRefs.current[7], 
       fromVars: { 
         opacity: 0
@@ -380,6 +424,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'swiper-overlay',
       ref: swiperOverlayRef.current, 
       fromVars: {
         opacity: 1
@@ -395,6 +440,7 @@ export const buildAnimationProps = (
       } 
     },
     { 
+      name: 'heading-9',
       ref: headingRefs.current[8], 
       fromVars: { 
         opacity: 0
@@ -403,27 +449,62 @@ export const buildAnimationProps = (
         opacity: 1,
         scrollTrigger: { 
           trigger: scrollWatcherRef.current[4], 
-          start: "10% top",
+          start: '10% top',
+        }
+      } 
+    },
+    ...(recentPostRefs.current.length > 0 
+      ? [{
+        name: 'recent-posts',
+        ref: recentPostRefs.current,
+        fromVars: {
+          opacity: 0,
+          scale: 0.75
+        },
+        toVars: {
+          scale: 1,
+          opacity: 1,
+          stagger: 0.2,
+          scrollTrigger: {
+            trigger: scrollWatcherRef.current[4],
+            start: '15% top'
+          }
+        },
+      }] : []
+    ),
+    { 
+      name: 'heading-10',
+      ref: headingRefs.current[9], 
+      fromVars: { 
+        opacity: 0
+      }, 
+      toVars: { 
+        opacity: 1,
+        scrollTrigger: { 
+          trigger: scrollWatcherRef.current[5], 
+          start: '-10% center',
           markers: true
         }
       } 
     },
     {
-      ref: recentPostRefs.current,
+      name: 'upcoming-events-line',
+      ref: upcomingEventsLineRef.current,
       fromVars: {
-        opacity: 0,
-        scale: 0.75
+        scaleY: 0
       },
       toVars: {
-        scale: 1,
-        opacity: 1,
-        stagger: 0.2,
+        scaleY: 1,
+        ease: 'none',
         scrollTrigger: {
-          trigger: scrollWatcherRef.current[4],
-          start: "15% top"
+          trigger: scrollWatcherRef.current[5],
+          start: 'top center',
+          end: 'bottom center',
+          scrub: true,
         }
       }
     },
+    ...upcomingEventRefsAnimations,
     // {
     //   ref: buttonRefs.current,
     //   fromVars: {
@@ -439,6 +520,7 @@ export const buildAnimationProps = (
     //   }
     // },
     {
+      name: 'cta-bgs',
       ref: bgRefs.current,
       fromVars: {
         clipPath: (index) => isMobile ? initalMobileClipPaths[index] : initalDesktopClipPaths[index]
@@ -448,10 +530,10 @@ export const buildAnimationProps = (
           duration: 0.25,
         stagger: 0.1, 
         scrollTrigger: { 
-          trigger: scrollWatcherRef.current[5],
-          start: "top top",
-          end: "center top",
-          toggleActions: "play none none reverse"
+          trigger: scrollWatcherRef.current[6],
+          start: 'top top',
+          end: 'center top',
+          toggleActions: 'play none none reverse'
         }
       }
     }

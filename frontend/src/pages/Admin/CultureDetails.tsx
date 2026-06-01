@@ -147,7 +147,7 @@ const CultureDetails = () => {
 
     setFormData((prev) => ({
       ...prev,
-      [name]: [
+      [name]: name === "coverImage" ? files[0] : [
         ...(prev[name as keyof CultureDetailsType] as File[]),
         ...Array.from(files)
       ]
@@ -272,7 +272,7 @@ const CultureDetails = () => {
 
   const handleNext = () => {
     if (submitted) {
-      navigate(`/create/culture/${id}/editor`)
+      navigate(`/add/culture/${id}/editor`)
     } else {
       toast.error("You need to submit the form first!");
     }
@@ -497,7 +497,7 @@ const CultureDetails = () => {
       <div className="flex w-screen items-center justify-between p-10">
         <div
           className={`text-[1.2rem] sm:text-[1.75rem] hover:text-primary text-white cursor-pointer`}
-          onClick={() => navigate(`/create/culture/${id}`)}>
+          onClick={() => navigate(`/add/culture/${id}`)}>
           {`< Progress`}
         </div>
         <div

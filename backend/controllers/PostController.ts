@@ -45,13 +45,16 @@ export const getPosts = async (req: Request, res: Response) => {
       Post.countDocuments(filterOptions),
     ]);
 
-    const posts = postsData.map(d => ({
-      id: d._id as string,
-      title: d.shortTitle,
-      culture: d.culture,
-      image: d.coverImage,
-      description: d.description,
-    }));
+    const posts = postsData.map(post => {
+      const { _id, shortTitle, coverImage, ...rest } = post.toObject();
+
+      return {
+        ...rest,
+        image: coverImage,
+        title: shortTitle,
+        id: _id
+      };
+    });
 
     return res.status(200).json({
       posts,
@@ -211,7 +214,7 @@ export const getPost = async (req: Request, res: Response) => {
 export const savePostDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const { details } = req.body;
+    const { formData: details } = req.body;
 
     if (!details) {
       return res.status(400).json({ msg: "Missing Required Field" });

@@ -44,12 +44,12 @@ export const BlogCard = ({
 
   const [user, setUser] = useState<{ name: string, image: string } | null>(null);
 
-  const userApi = useApi(`/users/${userId}?fields=name,image`);
+  // const userApi = useApi(`/users/${userId}?fields=name,image`);
 
-  useEffect(() => {
-    if(!userApi.data) return;
-    setUser(userApi.data?.user);
-  }, [userApi.data]);
+  // useEffect(() => {
+  //   if(!userApi.data) return;
+  //   setUser(userApi.data?.user);
+  // }, [userApi.data]);
 
   return (
     <div
@@ -80,7 +80,7 @@ export const BlogCard = ({
       <div 
         className="text-gray-400"
       >
-        {createdAt.toDateString()}
+        {new Date(createdAt).toDateString()}
       </div>
 
     </div>

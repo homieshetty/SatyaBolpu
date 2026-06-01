@@ -6,16 +6,16 @@ import { useAuth } from "../../context/AuthContext";
 import Title from "../../components/Title";
 import useApi from "../../hooks/useApi";
 import { FaRegCalendar } from "react-icons/fa";
+import { FaLocationDot } from "react-icons/fa6";
 
-const Create = () => {
+const Add = () => {
   const navigate = useNavigate();
   const draftsApi = useApi("/drafts", { auto: false });
 
   const { state: authState } = useAuth();
 
-  const handleClick = async (type: "post" | "culture" | "event") => {
+  const handleClick = async (type: "post" | "culture" | "event" | "location") => {
     const res = await draftsApi.post({ type });
-    console.log(res)
     navigate(`${type}/${res.id}`);
   }
 
@@ -24,13 +24,13 @@ const Create = () => {
 
   return (
     <div className="w-screen my-20">
-      <Title title="Create"/>
+      <Title title="Add"/>
 
       <div className="w-2/3 mx-auto md:w-1/2 lg:w-1/3 flex flex-col items-center justify-center gap-5 text-black my-20">
         <div 
           className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
             cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => navigate("/create/draft")}
+          onClick={() => navigate("/add/draft")}
         >
           <p className="ml-auto">Drafts</p>
           <MdDrafts className="ml-auto"/>
@@ -62,7 +62,15 @@ const Create = () => {
         <div 
           className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
             cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => navigate("/create/others")}>
+          onClick={() => handleClick("location")}
+        >
+          <p className="ml-auto">Location</p>
+          <FaLocationDot className="ml-auto" strokeWidth={"10px"}/>
+        </div>
+        <div 
+          className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
+            cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
+          onClick={() => navigate("/add/others")}>
           <p className="ml-auto">Others</p>
           <p className="ml-auto">...</p>
         </div>
@@ -71,4 +79,4 @@ const Create = () => {
   )
 }
 
-export default Create;
+export default Add;

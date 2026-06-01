@@ -21,7 +21,7 @@ const Others = () => {
         <div 
           className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
             cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => navigate("/create/tag")}
+          onClick={() => navigate("/add/tag")}
         >
           <p className="ml-auto">Tag</p>
           <FaHashtag className="ml-auto"/>
@@ -29,14 +29,14 @@ const Others = () => {
         <div 
           className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
             cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => navigate("/create/post-type")}>
+          onClick={() => navigate("/add/post-type")}>
           <p className="ml-auto">Post type</p>
           <VscTypeHierarchySub className="ml-auto"/>
         </div>
         <div 
           className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
             cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => navigate("/create/post-group")}>
+          onClick={() => navigate("/add/post-group")}>
           <p className="ml-auto">Post Group</p>
           <VscGroupByRefType className="ml-auto"/>
         </div>

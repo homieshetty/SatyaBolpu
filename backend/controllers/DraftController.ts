@@ -52,8 +52,7 @@ export const getDraft = async (req: Request, res: Response) => {
         details: {
           title: d?.title ?? "",
           description: d?.description ?? "",
-          descriptiveName: d?.descriptiveName ?? "",
-          coverImage: d?.coverImage ?? [],
+          coverImage: d?.coverImage ?? null,
           galleryImages: d?.galleryImages ?? [],
           files: d?.files ?? []
         },

@@ -9,11 +9,9 @@ import { toast } from "react-toastify";
 import { FaEdit } from "react-icons/fa";
 import useApi from "../../hooks/useApi";
 import { useLoading } from "../../context/LoadingContext";
-import { IPost, IPostGroup, IPostType, ITag } from "../../types/globals";
+import { IPostGroup, IPostType, ITag, PostDetailsType } from "../../types/globals";
 import { BASE_URL } from "../../App";
 import { validatePostDetails } from "../../utils/validate";
-
-type PostDetailsType = Omit<IPost, "content" | "location"> & { locationSpecific: boolean }
 
 type FormErrorType = {
   [k in keyof Omit<PostDetailsType, "locationSpecific">]: string
@@ -263,12 +261,12 @@ const PostDetails = () => {
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     setErrors((prev) => ({
       ...prev,
-      image: ""
+      coverImage: ""
     }));
 
     setFormData((prev) => ({
       ...prev,
-      image: e.target.files![0]
+      coverImage: e.target.files![0]
     }))
   }
 
@@ -358,7 +356,7 @@ const PostDetails = () => {
 
   const handleNext = () => {
     if (submitted) {
-      navigate(`/create/post/${id}/editor`)
+      navigate(`/add/post/${id}/editor`)
     } else {
       toast.error("You need to submit the form first!");
     }
@@ -647,7 +645,7 @@ const PostDetails = () => {
       <div className="flex w-screen items-center justify-between p-10">
         <div
           className={`text-[1.2rem] sm:text-[1.75rem] hover:text-primary text-white cursor-pointer`}
-          onClick={() => navigate(`/create/post/${id}`)}>
+          onClick={() => navigate(`/add/post/${id}`)}>
           {`< Progress`}
         </div>
         <div

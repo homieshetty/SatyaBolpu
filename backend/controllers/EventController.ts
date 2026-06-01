@@ -36,12 +36,14 @@ export const getEvents = async (req: Request, res: Response) => {
       Event.countDocuments(filterOptions),
     ]);
 
-    const events = eventsData.map(d => ({
-      id: d._id as string,
-      title: d.title,
-      culture: d.culture,
-      image: d.coverImage
-    }));
+    const events = eventsData.map(event => {
+      const { _id, ...rest } = event.toObject();
+
+      return {
+        ...rest,
+        id: _id
+      };
+    });
 
     if (!events) {
       return res.status(500).json({ msg: "No posts found." });

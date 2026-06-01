@@ -11,6 +11,7 @@ export interface IUser extends Document {
   uname: string;
   email: string;
   phone: IPhone;
+  image: string;
   role: "user" | "admin";
   verified: boolean;
   password: string;
@@ -18,7 +19,6 @@ export interface IUser extends Document {
 
 export interface ICulture extends Document {
   title: string;
-  descriptiveName: string;
   description: string;
   coverImage: string;
   galleryImages: string[];
@@ -28,10 +28,13 @@ export interface ICulture extends Document {
 
 export interface ILocation extends Document {
   type: "Point",
+  name: string;
   district: string;
   taluk: string;
+  maagane: string;
   village: string;
   coordinates: number[2];
+  attachments: string[];
 };
 
 export interface IPost extends Document {

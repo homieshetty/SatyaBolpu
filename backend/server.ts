@@ -8,6 +8,7 @@ import eventRoutes from "./routes/EventRoutes.js";
 import draftRoutes from "./routes/DraftRoutes.js";
 import feedRoutes from "./routes/FeedRoutes.js";
 import blogRoutes from "./routes/BlogRoutes.js";
+import locationRoutes from "./routes/LocationRoutes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./utils/db.js";
@@ -52,5 +53,6 @@ app.use("/api/cultures", cultureRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/others", otherRoutes);
 app.use("/api/drafts", draftRoutes);
+app.use("/api/locations", locationRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

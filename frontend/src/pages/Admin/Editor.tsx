@@ -6,7 +6,7 @@ import { Placeholder } from "@tiptap/extension-placeholder";
 import { RiAttachmentLine } from "react-icons/ri";
 import { GrBlockQuote } from "react-icons/gr";
 import { MdCancel, MdPreview } from "react-icons/md";
-import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo, FaSave } from "react-icons/fa";
 import { ResizableImage } from "../../components/EditorExtensions/Image";
 import { Video } from "../../components/EditorExtensions/Video";
@@ -17,25 +17,26 @@ import { useAuth } from "../../context/AuthContext";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Title from "../../components/Title";
-import { Mode } from "../../types/enums";
 import useApi from "../../hooks/useApi";
-import { validateCultureDetails, validatePostDetails } from "../../utils/validate";
 import { CultureState, PostState } from "../../types/globals";
 import { BASE_URL } from "../../App";
 import DOMPurify from "dompurify";
 import { CustomKeyboardExtensions } from "../../components/EditorExtensions/CustomKeyboardExtensions";
 
-const Editor = ({ mode }: { mode: Mode }) => {
+const Editor = ({ 
+  state,
+  setState,
+  endpoint 
+} : {
+  state: PostState | CultureState,
+  setState: React.Dispatch<React.SetStateAction<typeof state>>,
+  endpoint: string 
+}) => {
   const { id } = useParams();
   const { state: authState } = useAuth();
-  const navigate = useNavigate();
-  const culturesApi = useApi("/cultures", { auto: false });
-  const postsApi = useApi("/posts", { auto: false });
-  const draftsApi = useApi("/drafts", { auto: false });
+  const api = useApi(endpoint, { auto: false });
   const uploadApi = useApi("/upload/single", { auto: false });
 
-  const [cultureState, setCultureState] = useState<CultureState | null>(null);
-  const [postState, setPostState] = useState<PostState | null>(null);
   const [editorMode, setEditorMode] = useState<"editing" | "preview">("editing");
   const [title, setTitle] = useState<string>("Title");
   const [body, setBody] = useState<string>("");
@@ -47,36 +48,6 @@ const Editor = ({ mode }: { mode: Mode }) => {
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const attachmentRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const fetchDetails = async () => {
-      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
-      if (!res) return;
-      setTitle(res.draft.details.title);
-      if (mode === Mode.CULTURE) {
-        if (!validateCultureDetails(res.draft.details)) {
-          navigate(`/create/culture/${id}/details`);
-        } else {
-          setCultureState({
-            content: res.draft.content ?? "",
-            details: res.draft.details
-          });
-        }
-      } else if (mode === Mode.POST) {
-        if (!validatePostDetails(res.draft.details)) {
-          navigate(`/create/post/${id}/details`);
-        } else {
-          setPostState({
-            content: res.draft.content ?? "",
-            details: res.draft.details,
-            location: res.draft.location
-          });
-        }
-      }
-    }
-
-    fetchDetails();
-  }, [id]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -128,15 +99,9 @@ const Editor = ({ mode }: { mode: Mode }) => {
 
   useEffect(() => {
     if(!editor) return;
-
-    const content = 
-      mode === Mode.CULTURE ? 
-        cultureState?.content :
-        postState?.content;
-    
-    editor.commands.setContent(content ?? "");
-
-  }, [postState?.content, cultureState?.content, editor, mode]);
+    setTitle(state.details?.title ?? "Title");
+    editor.commands.setContent(state.content ?? "");
+  }, [editor, state]);
 
   useEffect(() => {
     if (titleRef.current) {
@@ -249,20 +214,12 @@ const Editor = ({ mode }: { mode: Mode }) => {
   }
 
   const handleSave = useCallback(async () => {
-  if (!editor) return;
+  if (!editor || !state) return;
 
   const content = await uploadFiles(editor.getHTML());
-  console.log(content)
-
-  const isPost = mode === Mode.POST;
-  const state = isPost ? postState : cultureState;
-  const api = isPost ? postsApi : culturesApi;
-
-  if (!state) return;
-
   if (title !== state.details?.title) {
     await api.refetch({
-      endpoint: `/${isPost ? "posts" : "cultures"}/draft/${id}/details`,
+      endpoint: `/${endpoint}/draft/${id}/details`,
       method: "POST",
       body: {
         details: {
@@ -274,7 +231,7 @@ const Editor = ({ mode }: { mode: Mode }) => {
   }
 
   const res = await api.refetch({
-    endpoint: `/${isPost ? "posts" : "cultures"}/draft/${id}/content`,
+    endpoint: `/${endpoint}/draft/${id}/content`,
     method: "POST",
     body: { content }
   });
@@ -284,15 +241,10 @@ const Editor = ({ mode }: { mode: Mode }) => {
     return;
   }
 
-  if(mode === Mode.POST) {
-    setPostState(prev => prev ? { ...prev, content } : null);
-  } else {
-    setCultureState(prev => prev ? { ...prev, content } : null);
-  }
-
+  setState(prev => ({ ...prev, content }));
   toast.success("Saved successfully.");
 
-}, [editor, title, mode, postState, cultureState, id, postsApi, culturesApi]);
+}, [editor, title, state, api, id]);
 
   const handlePreview = useCallback(() => {
     if (editor) {
@@ -544,42 +496,6 @@ const Editor = ({ mode }: { mode: Mode }) => {
         >
         </div>
 
-      </div>
-
-      <div className="w-full flex items-center justify-between p-10">
-        <div
-          className="text-white text-[1.2rem] sm:text-[1.75rem] cursor-pointer hover:text-primary"
-          onClick={() =>
-            mode === Mode.POST ?
-              navigate(`/create/post/${id}/details`) :
-              navigate(`/create/culture/${id}/details`)
-          }
-        >
-          {
-            mode === Mode.POST ?
-              `< Post Details` :
-              `< Culture Details`
-          }
-        </div>
-
-        {
-          postState?.content && mode === Mode.POST && (
-            <div
-              className="text-white text-[1.2rem] sm:text-[1.75rem] cursor-pointer hover:text-primary"
-              onClick={() => navigate(postState?.details?.locationSpecific ? `/create/post/${id}/map` : `/create/post/${id}`)}>
-              {postState?.details?.locationSpecific ? `Map >` : "Upload Post >"}
-            </div>
-          )
-        }
-        {
-          cultureState?.content && mode === Mode.CULTURE && (
-            <div
-              className="text-white text-[1.2rem] sm:text-[1.75rem] cursor-pointer hover:text-primary"
-              onClick={() => navigate(`/create/culture/${id}`)}>
-              {`Upload Culture >`}
-            </div>
-          )
-        }
       </div>
 
     </div>

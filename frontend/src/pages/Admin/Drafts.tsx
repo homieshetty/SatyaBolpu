@@ -18,7 +18,7 @@ const Drafts = () => {
     const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
     if(!res) return;
     console.log(res)
-    navigate(`/create/${res.draft.type.toLowerCase()}/${id}`)
+    navigate(`/add/${res.draft.type.toLowerCase()}/${id}`)
   }
 
   const handleDelete = async (id: string) => {

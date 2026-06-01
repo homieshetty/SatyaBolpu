@@ -11,10 +11,19 @@ export const getCultures = async (req: Request, res: Response) => {
     if(fields?.includes(" userId ")) {
       query = query.populate('userId');
     }
-    const cultures = await Promise.resolve(query);
-    if (!cultures) {
+    const culturesData = await Promise.resolve(query);
+    if (!culturesData) {
       return res.status(404).json({ msg: "No cultures found." });
     }
+
+    const cultures = culturesData.map(culture => {
+      const { _id, ...rest } = culture.toObject();
+
+      return {
+        ...rest,
+        id: _id
+      };
+    });
 
     return res.status(200).json({ cultures });
   } catch (err: any) {
@@ -55,7 +64,6 @@ export const saveCultureDetails = async (req: Request, res: Response) => {
       id,
       {
         title: details.title,
-        descriptiveName: details.descriptiveName,
         description: details.description,
         coverImages: details.coverImages,
         galleryImages: details.galleryImages
@@ -84,7 +92,6 @@ export const deleteCultureDetails = async (req: Request, res: Response) => {
       { 
         $unset: { 
           title: "",
-          descriptiveName: "",
           description: "",
           coverImages: "",
           galleryImages: ""
@@ -177,7 +184,6 @@ export const uploadCulture = async (req: Request, res: Response) => {
 
     const newCulture = await Culture.create({
       title: details.title,
-      descriptiveName: details.descriptiveName,
       description: details.description,
       coverImages: details.coverImages,
       galleryImages: details.galleryImages,
