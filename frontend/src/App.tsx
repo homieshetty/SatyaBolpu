@@ -88,16 +88,6 @@ function App() {
         <Route path="/add/post/:id" element={<New type="post" />} />
         <Route path="/add/culture/:id" element={<New type="culture" />} />
         <Route path="/add/event/:id" element={<New type="event" />} />
-        {/* <Route path="/add/post/:id" element={<NewPost />} />
-        <Route path="/add/post/:id/details" element={<PostDetails />} />
-        <Route path="/add/post/:id/editor" element={<Editor mode={Mode.POST} />} />
-        <Route path="/add/post/:id/map" element={<Map editMode={Mode.POST} />} />
-        <Route path="/add/culture/:id" element={<NewCulture />} />
-        <Route path="/add/culture/:id/details" element={<CultureDetails />} />
-        <Route path="/add/culture/:id/editor" element={<Editor mode={Mode.CULTURE} />} />
-        <Route path="/add/event/:id" element={<NewEvent />} />
-        <Route path="/add/event/:id/details" element={<EventDetails />} />
-        <Route path="/add/event/:id/map" element={<Map editMode={Mode.EVENT} />} /> */}
         <Route path="/add/tag" element={<NewTag />} />
         <Route path="/add/post-type" element={<NewPostType />} />
         <Route path="/add/post-group" element={<NewPostGroup />} />

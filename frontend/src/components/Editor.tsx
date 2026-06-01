@@ -1,27 +1,27 @@
 import { useEditor, EditorContent, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { TextStyle } from "@tiptap/extension-text-style";
-import { FontSize } from "../../components/EditorExtensions/FontSize";
+import { FontSize } from "./EditorExtensions/FontSize";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import { RiAttachmentLine } from "react-icons/ri";
 import { GrBlockQuote } from "react-icons/gr";
 import { MdCancel, MdPreview } from "react-icons/md";
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo, FaSave } from "react-icons/fa";
-import { ResizableImage } from "../../components/EditorExtensions/Image";
-import { Video } from "../../components/EditorExtensions/Video";
-import { Audio } from "../../components/EditorExtensions/Audio";
-import Button from "../../components/Button";
-import { Iframe } from "../../components/EditorExtensions/Iframe";
-import { useAuth } from "../../context/AuthContext";
+import { ResizableImage } from "./EditorExtensions/Image";
+import { Video } from "./EditorExtensions/Video";
+import { Audio } from "./EditorExtensions/Audio";
+import Button from "./Button";
+import { Iframe } from "./EditorExtensions/Iframe";
+import { useAuth } from "../context/AuthContext";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-import Title from "../../components/Title";
-import useApi from "../../hooks/useApi";
-import { CultureState, PostState } from "../../types/globals";
-import { BASE_URL } from "../../App";
+import Title from "./Title";
+import useApi from "../hooks/useApi";
+import { CultureState, PostState } from "../types/globals";
+import { BASE_URL } from "../App";
 import DOMPurify from "dompurify";
-import { CustomKeyboardExtensions } from "../../components/EditorExtensions/CustomKeyboardExtensions";
+import { CustomKeyboardExtensions } from "./EditorExtensions/CustomKeyboardExtensions";
 
 const Editor = ({ 
   state,

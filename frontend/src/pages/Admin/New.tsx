@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CultureDetailsType, CultureState, EventDetailsType, EventState, ICulture, IEvent, IPost, IPostGroup, IPostType, ITag, LocationState, PostDetailsType, PostState } from "../../types/globals";
 import ProgressBar from "../../components/ProgressBar";
-import Editor from "./Editor";
+import Editor from "../../components/Editor";
 import { Mode } from "../../types/enums";
 import MAP from "../MAP";
 import useApi from "../../hooks/useApi";
