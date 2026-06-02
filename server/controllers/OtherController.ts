@@ -6,11 +6,12 @@ import { Culture } from "../models/Culture.js";
 
 export const getTags = async (req: Request, res: Response) => {
   try {
-    const sortBy = req.query?.sortBy?.toString() ?? "tag";
+    const sortBy = req.query.sortBy?.toString() ?? "tag";
+    const orderBy = req.query.orderBy?.toString() ?? "asc";
     const tagsData = 
       await Tag.find({}, "tag")
         .collation({ locale: "en", strength: 2 })
-        .sort({ [sortBy]: 1 });
+        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 });
     if (!tagsData) {
       res.status(404).json({ msg: "No tags found" });
     }
@@ -54,10 +55,12 @@ export const addTag = async (req: Request, res: Response) => {
 export const getPostTypes = async (req: Request, res: Response) => {
   try {
     const sortBy = req.query?.sortBy?.toString() ?? "name";
+    const orderBy = req.query?.orderBy?.toString() ?? "asc";
+
     const postTypesData = 
       await PostType.find({}, "name")
         .collation({ locale: "en", strength: 2 })
-        .sort({ [sortBy]: 1 });
+        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 });
     if (!postTypesData) {
       res.status(404).json({ msg: "No post types found." });
     }
@@ -101,10 +104,12 @@ export const addPostType = async (req: Request, res: Response) => {
 export const getPostGroups = async (req: Request, res: Response) => {
   try {
     const sortBy = req.query?.sortBy?.toString() ?? "name";
+    const orderBy = req.query?.orderBy?.toString() ?? "asc";
+
     const postGroupsData = 
       await PostGroup.find({}, "name")
         .collation({ locale: "en", strength: 2 })  
-        .sort({ [sortBy]: 1 });
+        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 });
     if (!postGroupsData) {
       res.status(404).json({ msg: "No post groups found." });
     }

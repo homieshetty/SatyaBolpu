@@ -1,0 +1,30 @@
+{
+  "name": "satyabolpu",
+  "version": "1.0.0",
+  "description": "![home page](./frontend/public/assets/screenshots/home.png)\r ![home-map page](./frontend/public/assets/screenshots/home-map.png)\r ![explore page](./frontend/public/assets/screenshots/explore.png)\r ![map page](./frontend/public/assets/screenshots/map.png)\r ![new-post page](./frontend/public/assets/screenshots/new-post.png)\r ![profile page](./frontend/public/assets/screenshots/profile.png)\r ![dashboard page](./frontend/public/assets/screenshots/dashboard.png)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "client": "npm run dev --prefix client",
+    "server": "npm run dev ---prefix server",
+    "build:client": "npm run build --prefix client",
+    "build:server": "npm run build --prefix server",
+    "app": "concurrently \"npm run client\" \"npm run server\"",
+    "build": "concurrently \"npm run build:client\" \"npm run build:server\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CurryB0i/SatyaBolpu.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/CurryB0i/SatyaBolpu/issues"
+  },
+  "homepage": "https://github.com/CurryB0i/SatyaBolpu#readme",
+  "dependencies": {
+    "concurrently": "^10.0.3"
+  }
+}

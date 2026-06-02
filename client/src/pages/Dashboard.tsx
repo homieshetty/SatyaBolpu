@@ -9,14 +9,14 @@ import { VscFileSubmodule } from "react-icons/vsc";
 import FilterTable from "../components/FilterTable";
 import Map from "./MAP";
 
-const data = [
-  { month: "Jan 2025", posts: 4 },
-  { month: "Feb 2025", posts: 7 },
-  { month: "Mar 2025", posts: 20 },
-  { month: "Apr 2025", posts: 4 },
-  { month: "May 2025", posts: 7 },
-  { month: "Jun 2025", posts: 20 },
-];
+// const data = [
+//   { month: "Jan 2025", posts: 4 },
+//   { month: "Feb 2025", posts: 7 },
+//   { month: "Mar 2025", posts: 20 },
+//   { month: "Apr 2025", posts: 4 },
+//   { month: "May 2025", posts: 7 },
+//   { month: "Jun 2025", posts: 20 },
+// ];
 
 const Dashboard = () => {
   const { state } = useAuth();

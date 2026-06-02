@@ -8,13 +8,13 @@ export const getBlogs = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const sortBy = req.query.sortBy?.toString() ?? "createdAt";
-    const orderBy = req.query.orderBy === "asc" ? 1 : -1;
+    const orderBy = req.query.orderBy?.toString() ?? "asc";
 
     const fields = req.query.fields?.toString().split(",").join(" ");
 
     let query = Blog.find()
       .select(fields ?? "")
-      .sort({ [sortBy]: orderBy })
+      .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(limit);
 

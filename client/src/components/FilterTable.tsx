@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BlogCardProps } from "../types/globals";
 import { BlogCard, BlogSkeletonCard } from "./BlogCard";
 import CardList from "./CardList";
-import useApi from "../hooks/useApi";
 
 export type FilterTableProps = {
   filters: {

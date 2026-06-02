@@ -3,7 +3,7 @@ import BaseComponent from "./BaseComponent";
 import { NodeViewProps } from "@tiptap/react";
 
 const AudioComponent = (props: NodeViewProps) => {
-  const { node, editor } = props;
+  const { node } = props;
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const audioEl = (

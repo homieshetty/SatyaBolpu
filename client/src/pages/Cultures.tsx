@@ -67,7 +67,7 @@ useLayoutEffect(() => {
               culturesRef.current[index] = el
           }}
           style={{
-            backgroundImage: `url(${BASE_URL}${culture.coverImages[0]})`
+            backgroundImage: `url(${BASE_URL}${culture.coverImage})`
           }}>
             <div className="w-[95%] md:w-2/3 lg:w-1/2 flex flex-col items-center justify-center bg-black/70
               rounded-2xl p-3 gap-5">

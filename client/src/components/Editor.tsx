@@ -14,7 +14,7 @@ import { Audio } from "./EditorExtensions/Audio";
 import Button from "./Button";
 import { Iframe } from "./EditorExtensions/Iframe";
 import { useAuth } from "../context/AuthContext";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Title from "./Title";
 import useApi from "../hooks/useApi";

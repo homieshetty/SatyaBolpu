@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import useApi from "../hooks/useApi";
 import { BlogCardProps } from "../types/globals";
+import useApi from "../hooks/useApi";
 
 export const BlogSkeletonCard = () => {
   return (
@@ -44,12 +44,12 @@ export const BlogCard = ({
 
   const [user, setUser] = useState<{ name: string, image: string } | null>(null);
 
-  // const userApi = useApi(`/users/${userId}?fields=name,image`);
+  const userApi = useApi(`/users/${userId}?fields=name,image`);
 
-  // useEffect(() => {
-  //   if(!userApi.data) return;
-  //   setUser(userApi.data?.user);
-  // }, [userApi.data]);
+  useEffect(() => {
+    if(!userApi.data) return;
+    setUser(userApi.data?.user);
+  }, [userApi.data]);
 
   return (
     <div

@@ -13,7 +13,7 @@ export const getEvents = async (req: Request, res: Response) => {
     const skip = (page - 1) * limit;
 
     const sortBy = req.query.sortBy?.toString() ?? "createdAt";
-    const orderBy = req.query.orderBy === "asc" ? 1 : -1;
+    const orderBy = req.query.orderBy?.toString() ?? "asc";
 
     const fields = req.query.fields?.toString().split(",").join(" ");
     const cultures = req.query.cultures ? req.query.cultures.toString().split(",") : [];
@@ -21,11 +21,13 @@ export const getEvents = async (req: Request, res: Response) => {
     const filterOptions: Record<string, any> = {};
     if (cultures.length) filterOptions.culture = { $in: cultures.map(c => new Types.ObjectId(c)) }; 
 
-    let query = Event.find(filterOptions)
-      .select(fields ?? "")
-      .sort({ [sortBy]: orderBy })
-      .skip(skip)
-      .limit(limit);
+    let query = 
+      Event
+        .find(filterOptions)
+        .select(fields ?? "")
+        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 })
+        .skip(skip)
+        .limit(limit);
 
     if(fields?.includes(" userId ")) {
       query  = query.populate('userId');

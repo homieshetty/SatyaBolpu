@@ -43,7 +43,7 @@ export const buildAnimationProps = (
   upcomingEventsLineRef: React.RefObject<HTMLDivElement | null>,
   upcomingEventRefs: React.RefObject<HTMLDivElement[]>,
   bgRefs: React.RefObject<HTMLDivElement[]>,
-  buttonRefs: React.RefObject<HTMLButtonElement[]>,
+  // buttonRefs: React.RefObject<HTMLButtonElement[]>,
   isMobile: boolean
 ): PropsType[] => {
 

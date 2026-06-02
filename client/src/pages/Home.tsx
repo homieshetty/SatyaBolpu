@@ -36,7 +36,7 @@ const Home = () => {
   const headingRefs = useRef<HTMLDivElement[]>([]);
   const foliageRefs = useRef<HTMLImageElement[]>([]);
   const imgRefs = useRef<HTMLImageElement[]>([]);
-  const buttonRefs = useRef<HTMLButtonElement[]>([]);
+  // const buttonRefs = useRef<HTMLButtonElement[]>([]);
   const overlayRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const swiperOverlayRef = useRef<HTMLDivElement>(null);
@@ -122,7 +122,7 @@ const Home = () => {
           upcomingEventsLineRef,
           upcomingEventRefs,
           bgRefs,
-          buttonRefs,
+          // buttonRefs,
           isMobile
         );
 

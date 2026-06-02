@@ -6,8 +6,14 @@ export const getCultures = async (req: Request, res: Response) => {
   try {
     const fields = req.query?.fields?.toString().split(",").join(" ");
     const sortBy = req.query?.sortBy?.toString() ?? "title";
-    const orderBy = req.query?.orderBy?.toString() ?? "desc";
-    let query = Culture.find().select(fields ?? "").sort({ [sortBy]: orderBy === "asc" ? 1 : -1 });
+    const orderBy = req.query?.orderBy?.toString() ?? "asc";
+
+    let query = 
+      Culture
+        .find()
+        .select(fields ?? "")
+        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 });
+
     if(fields?.includes(" userId ")) {
       query = query.populate('userId');
     }
