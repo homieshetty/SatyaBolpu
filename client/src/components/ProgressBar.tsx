@@ -1,13 +1,13 @@
 import { ReactNode, useLayoutEffect, useMemo } from "react";
 import { MdDone } from "react-icons/md";
-import { CultureState, EventState, LocationState, PostState } from "../types/globals";
+import { NewState } from "../types/globals";
 
 type PropsType = {
   steps: Record<string, ReactNode>;
   progress: number;
   setProgress: (progress: number) => void;
   setShowStep: (step: string) => void;
-  state: PostState | CultureState | EventState | LocationState;
+  state: NewState;
 }
 
 const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, setShowStep, state }) => {

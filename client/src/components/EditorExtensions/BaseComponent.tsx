@@ -152,7 +152,7 @@ const BaseComponent = ({
           <input
             type="text"
             value={node.attrs.caption || ""}
-            className="bg-black w-full text-gray-300 text-[1rem] text-center mt-1"
+            className="caption w-full text-center text-sm text-gray-400 mt-2"
             placeholder="Caption..."
             onInput={(e) => updateAttributes({ caption: e.currentTarget.value })}
           />

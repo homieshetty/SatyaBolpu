@@ -2,6 +2,11 @@ import mongoose, { Schema } from "mongoose";
 import { ILocation } from "../types/globals.js";
 
 export const locationSchema = new Schema<ILocation>({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   type: {
     type: String,
     enum: ["Point"],
@@ -22,11 +27,9 @@ export const locationSchema = new Schema<ILocation>({
   },
   taluk: {
     type: String,
-    required: true
   },
   maagane: {
     type: String,
-    required: true
   },
   village: {
     type: String,
@@ -35,6 +38,6 @@ export const locationSchema = new Schema<ILocation>({
   attachments: {
     type: [String]
   }
-}, { _id: false });
+}, { timestamps: true });
 
 export const Location = mongoose.model<ILocation>("Location", locationSchema);

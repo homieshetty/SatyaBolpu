@@ -11,6 +11,7 @@ import { cn } from "../utils/merge";
 const Form = <T extends {}>({
   fields,
   state,
+  setState,
   submitEndpoint,
   error,
   submitText = "Submit",
@@ -35,25 +36,6 @@ const Form = <T extends {}>({
   const submitApi = useApi(submitEndpoint, { auto: false });
   const uploadSingleApi = useApi('/upload/single', { auto: false });
   const uploadMultipleApi = useApi('/upload/multiple', { auto: false });
-
-  useEffect(() => console.log(formData), [formData])
-
-  useEffect(() => {
-    if(submitApi.error) {
-      toast.error(submitApi.error);
-      console.error(submitApi.error);
-    }
-
-    if(uploadMultipleApi.error) {
-      toast.error(uploadMultipleApi.error);
-      console.error(uploadMultipleApi.error);
-    }
-
-    if(uploadSingleApi.error) {
-      toast.error(uploadSingleApi.error);
-      console.error(uploadSingleApi.error);
-    }
-  }, [submitApi.error, uploadMultipleApi.error, uploadSingleApi.error]);
 
   useEffect(() => {
     Object.values(textAreaRefs.current).forEach(ref => {
@@ -90,7 +72,6 @@ const Form = <T extends {}>({
     }
 
     current[keys[keys.length - 1]] = value;
-
     return result;
   };
 
@@ -357,9 +338,15 @@ const Form = <T extends {}>({
     }
 
     await submitApi.post({ formData: finalFormData });
-    toast.success(toastMsg);
     setSaving(false);
   };
+
+  useEffect(() => {
+    if(submitApi.data) {
+      toast.success(toastMsg);
+      setState(formData);
+    }
+  }, [submitApi.data]);
 
   const renderField = (field: FormField<T>) => {
     const fieldError = getValue(errors, field.name);
@@ -425,7 +412,7 @@ const Form = <T extends {}>({
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label className="text-primary font-semibold text-[1.5rem]" htmlFor={field.name}>
-              {field.label}
+              {field.label} {field.required && <span className="text-red-500">*</span>}
             </label>
             <input
               className={`text-black font-semibold p-2 cursor-pointer bg-white disabled:bg-gray-400`}

@@ -88,6 +88,7 @@ function App() {
         <Route path="/add/post/:id" element={<New type="post" />} />
         <Route path="/add/culture/:id" element={<New type="culture" />} />
         <Route path="/add/event/:id" element={<New type="event" />} />
+        <Route path="/add/location/:id" element={<New type="location" />} />
         <Route path="/add/tag" element={<NewTag />} />
         <Route path="/add/post-type" element={<NewPostType />} />
         <Route path="/add/post-group" element={<NewPostGroup />} />

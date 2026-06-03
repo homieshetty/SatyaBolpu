@@ -16,6 +16,7 @@ const Add = () => {
 
   const handleClick = async (type: "post" | "culture" | "event" | "location") => {
     const res = await draftsApi.post({ type });
+    if(!res) return;
     navigate(`${type}/${res.id}`);
   }
 

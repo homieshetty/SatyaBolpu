@@ -8,7 +8,6 @@ import { CultureDetailsType } from "../types/globals";
 
 const Culture = () => {
   const { culture } = useParams();
-  const { setLoading } = useLoading();
   const culturesApi = useApi(`/cultures/${culture}`);
   const [cultureData, setCultureData] = useState<CultureDetailsType | null>(null);
   const [imgCount, setImgCount] = useState<number>(1);
@@ -18,7 +17,6 @@ const Culture = () => {
   const imagesRef = useRef<HTMLDivElement[]>([]);
 
   useEffect(() => {
-    console.log(imgCount)
     if(imagesRef.current.length <= 0) return;
 
     let imgWidth = 0;
@@ -32,14 +30,9 @@ const Culture = () => {
     }
 
     const c = (window.innerWidth/imgWidth) * (window.innerHeight/imgWidth);
-    console.log(imgWidth, c)
     setImgCount(Math.round(c));
   }, [cultureData, window.innerWidth, window.innerHeight]);
 
-  useEffect(() => {
-    setLoading(culturesApi.loading);
-  }, [culturesApi.loading]);
-  
   useEffect(() => {
     if (culturesApi.data) {
       setCultureData(culturesApi.data.culture);

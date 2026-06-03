@@ -24,7 +24,6 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import useApi from "../hooks/useApi";
-import { validateEventDetails, validatePostDetails } from "../utils/validate";
 
 //the below line is because someone caches something
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -94,10 +93,10 @@ const MAP = ({
   const toolTipPane = useRef<Element>(null);
   const activeLayerRef = useRef<Polygon | null>(null);
 
-  const { setLoading } = useLoading();
+  const { startLoading, stopLoading } = useLoading();
   const navigate = useNavigate();
 
-  const locationsApi = useApi("/locations?fields=coordinates,district,taluk,village", { auto: !minimal });
+  const locationsApi = useApi("/locations?fields=name,coordinates,district,taluk,village", { auto: !minimal });
   const draftsApi = useApi("/drafts", { auto: false });
   const postsApi = useApi("/posts", { auto: false });
   const eventsApi = useApi("/events", { auto: false });
@@ -108,54 +107,11 @@ const MAP = ({
     const fetchDraft = async () => {
       const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
       if (!res) return;
-      if (editMode === Mode.EVENT) {
-        if (!validateEventDetails(res.draft.details)) {
-          navigate(`/add/event/${id}/details`);
-        } else {
-          setLocation(res.draft.location ?? initialLocation);
-        }
-      } else if (editMode === Mode.POST) {
-        if (!validatePostDetails(res.draft.details)) {
-          navigate(`/add/post/${id}/details`);
-        } else {
-          setLocation(res.draft.location ?? initialLocation);
-        }
-      }
+      setLocation(res.draft.location ?? initialLocation);
     }
 
     fetchDraft();
   }, [id]);
-
-  useEffect(() => {
-    setLoading(
-      draftsApi.loading 
-      || postsApi.loading 
-      || eventsApi.loading 
-      || locationsApi.loading
-    );
-  }, [draftsApi.loading, postsApi.loading, eventsApi.loading, locationsApi.loading]);
-
-  useEffect(() => {
-    if(draftsApi.error) {
-      console.error(draftsApi.error);
-      toast.error(draftsApi.error);
-    }
-
-    if(postsApi.error) {
-      console.error(postsApi.error);
-      toast.error(postsApi.error);
-    }
-
-    if(eventsApi.error) {
-      console.error(eventsApi.error);
-      toast.error(eventsApi.error);
-    }
-
-    if(locationsApi.error) {
-      console.error(locationsApi.error);
-      toast.error(locationsApi.error);
-    }
-  }, [draftsApi.error, postsApi.error, eventsApi.error, locationsApi.error]);
 
   useEffect(() => {
     if(locationsApi.data) {
@@ -165,8 +121,8 @@ const MAP = ({
 
   useEffect(() => {
     const fetchGeoJson = async (name: string) => {
-      setLoading(true);
       try {
+        startLoading();
         const response = await fetch(`/assets/Map/${name}.geojson`);
         if (!response.ok) throw new Error(`Failed to fetch ${name}`);
         const data = await response.json();
@@ -174,7 +130,7 @@ const MAP = ({
       } catch (error) {
         console.error(`Error loading ${name} GeoJSON:`, error);
       } finally {
-        setLoading(false);
+        stopLoading();
       }
     };
 
@@ -274,7 +230,7 @@ const MAP = ({
             const tooltip = new Tooltip({
               permanent: false,
               direction: "top",
-              className: "global-tooltip"
+              className: "global-tooltip village-name-tooltip"
             })
               .setContent(feature.properties.VILLAGE)
               .setLatLng(e.latlng);
@@ -312,17 +268,6 @@ const MAP = ({
             layer.setStyle(styles.click);
             activeLayerRef.current = layer;
             setActiveVillage(feature)
-            if (feature.properties?.VILLAGE && map) {
-              const permanentTooltip = new Tooltip({
-                permanent: true,
-                direction: "top",
-                className: "global-tooltip permanent-tooltip"
-              })
-                .setContent(feature.properties.VILLAGE)
-                .setLatLng(e.latlng);
-
-              permanentTooltip.addTo(map);
-            }
           }
         },
       });
@@ -337,6 +282,7 @@ const MAP = ({
           setLocation({
             district: feature.properties?.DISTRICT,
             taluk: feature.properties?.TALUK,
+            maagane: feature.properties?.MAAGANE,
             village: feature.properties?.VILLAGE,
             lat: e.latlng.lat,
             lng: e.latlng.lng
@@ -523,10 +469,10 @@ const MAP = ({
 
     if (editMode === Mode.POST) {
       await postsApi.refetch({ endpoint: `/posts/draft/${id}/location`, method: "POST", body: { location } })
-      setTimeout(() => navigate(`/add/post/${id}`), 3000)
     } else if (editMode === Mode.EVENT) {
       await eventsApi.refetch({ endpoint: `/events/draft/${id}/location`, method: "POST", body: { location } })
-      setTimeout(() => navigate(`/add/event/${id}`), 3000)
+    } else if (editMode === Mode.LOCATION) {
+      await locationsApi.refetch({ endpoint: `/locations/draft/${id}/location`, method: "POST", body: { location } })
     }
     toast.success("Location stored successfully.");
   }
@@ -616,7 +562,7 @@ const MAP = ({
     const tooltip = new Tooltip({
       permanent: false,
       direction: "top",
-      className: "global-tooltip"
+      className: "global-tooltip text-white"
     })
       .setContent(loc.name)
       .setLatLng([loc.lat, loc.lng]);
@@ -631,7 +577,6 @@ const MAP = ({
       setLocation(loc);
       return;
     }
-
 
   }
 
@@ -749,25 +694,38 @@ const MAP = ({
       )}
 
       {!minimal && activeVillage && (
-        <div className="absolute bottom-0 bg-black m-5 p-5 text-white z-1000
-           flex flex-col gap-2 rounded-2xl transition-all"
-          style={{
-            translate: showMenu ? "0 0 " : "-100% 0"
-          }}
+        <div className="absolute bottom-0 m-5 p-5 text-white z-1000
+           flex flex-col rounded-2xl"
         >
-          <FaChevronCircleLeft
-            size={"20px"}
+          <p
             style={{
-              rotate: showMenu ? "0deg" : "180deg"
+              textShadow: "1px 1px 10px black"
             }}
-            className="absolute top-1/2 -translate-y-1/2 -right-2 cursor-pointer hover:fill-primary
-            transition-all"
-            onClick={() => setShowMenu(!showMenu)} />
-          <p className="text-center text-primary font-bold">{activeVillage.properties?.VILLAGE}</p>
-          <p className="text-sm">District: {activeVillage.properties?.DISTRICT}</p>
-          <p className="text-sm">Taluk: {activeVillage.properties?.TALUK || "Unknown"}</p>
-          <p className="text-sm">No of covered locations: {0}</p>
-          <Button content="View More" className="mx-auto text-sm" onClick={handleView} />
+            className="text-primary font-bold mb-1">
+            {activeVillage.properties?.VILLAGE}
+          </p>
+          <p
+            style={{
+              textShadow: "1px 1px 10px black"
+            }}
+            className="text-sm text-gray-300">
+            {activeVillage.properties?.DISTRICT}
+          </p>
+          <p
+            style={{
+              textShadow: "1px 1px 10px black"
+            }}
+            className="text-sm text-gray-300">
+            {activeVillage.properties?.TALUK || "Unknown"}
+          </p>
+          <p
+            style={{
+              textShadow: "1px 1px 10px black"
+            }}
+            className="text-sm text-gray-300">
+            {activeVillage.properties?.MAAGANE || "Unknown"}
+          </p>
+          {/* <Button content="View More" className="mx-auto text-sm" onClick={handleView} /> */}
         </div>
       )}
 
@@ -838,7 +796,6 @@ const MAP = ({
             !minimal && editMode !== undefined && location.district &&
               <Marker
                 position={[location.lat!, location.lng!]}
-                icon={orangeMarker}
               />
           }
           {

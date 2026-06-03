@@ -1,10 +1,11 @@
 import { Request, Response} from "express";
 import { Event } from "../models/Event.js";
-import { AuthRequest, CardDataType, IEvent } from "../types/globals.js";
+import { AuthRequest, IEvent } from "../types/globals.js";
 import { Culture } from "../models/Culture.js";
 import { EventDraft } from "../models/Draft.js";
 import { Types } from "mongoose";
 import { Location } from "../models/Location.js";
+import { validateEventDetails } from "../utils/validate.js";
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
@@ -48,7 +49,7 @@ export const getEvents = async (req: Request, res: Response) => {
     });
 
     if (!events) {
-      return res.status(500).json({ msg: "No posts found." });
+      return res.status(500).json({ msg: "No events found." });
     }
 
     return res.status(200).json({ events, total, totalPages: Math.ceil(total / limit) });
@@ -83,9 +84,14 @@ export const getEvent = async (req: Request, res: Response) => {
 export const saveEventDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const { details } = req.body;
-    if (!id || !details) {
+    const { formData: details } = req.body;
+    if (!id || !details || !validateEventDetails(details)) {
       return res.status(400).json({ msg: "Missing required field." });
+    }
+
+    const exists = await Event.findOne({ title: details.title });
+    if (exists) {
+      return res.status(409).json({ msg: `Event '${details.title}' already exists.` })
     }
 
     const culture = await Culture.findById(details.culture);
@@ -123,7 +129,8 @@ export const deleteEventDetails = async (req: Request, res: Response) => {
           description: "",
           duration: "",
           culture: "",
-          docs: ""
+          coverImage: "",
+          files: ""
        } 
       }
     );
@@ -151,6 +158,7 @@ export const saveEventLocation = async (req: Request, res: Response) => {
           type: "Point",
           district: location.district,
           taluk: location.taluk,
+          maagane: location.maagane,
           village: location.village,
           coordinates: [location.lat, location.lng]
         }
@@ -159,7 +167,7 @@ export const saveEventLocation = async (req: Request, res: Response) => {
     );
 
     const { _id, __v, ...rest } = draft!.toObject();
-    return res.status(201).json({ post: { id: _id, ...rest } });
+    return res.status(201).json({ event: { id: _id, ...rest } });
 
   } catch (err: any) {
     console.error("Error while saving event location: ", err.message);
@@ -195,23 +203,29 @@ export const createDraft = async (req: Request, res: Response) => {
 
     const event = (await Event.findById(id))?.toObject();
     if(!event) {
-      return res.status(404).json("Post not found.");
+      return res.status(404).json("Event not found.");
     }
 
     const { _id } = await EventDraft.create({ ...event });
     return res.status(201).json({ _id });
 
   } catch (err: any) {
-    console.error("Error while creating post draft: ", err.message);
-    return res.status(500).json({ msg: "Internal Server error while creating post draft." });
+    console.error("Error while creating event draft: ", err.message);
+    return res.status(500).json({ msg: "Internal Server error while creating event draft." });
   }
 }
 
-export const uploadEvent = async (req: Request, res: Response) => {
+export const uploadEvent = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = req.user._id;
     const { details, location } = req.body;
-    if(!details || !location) {
+    if(!details || !validateEventDetails(details) || !location) {
       return res.status(400).json({ msg: "Missing required field." });
+    }
+
+    const exists = await Event.findOne({ title: details.title });
+    if (exists) {
+      return res.status(409).json({ msg: `Event '${details.title}' already exists.` })
     }
 
     const culture = await Culture.findById(details.culture);
@@ -220,12 +234,15 @@ export const uploadEvent = async (req: Request, res: Response) => {
     }
 
     const { _id: locationId } = await Location.create({ 
+      userId,
       type: "Point",
       district: location.district,
       taluk: location.taluk,
+      maagane: location.maagane,
       village: location.village,
       coordinates: [location.lat, location.lng]
     });
+
     const newEvent = await Event.create({
       ...details,
       location: locationId

@@ -113,6 +113,7 @@ export type FormField<T> = {
 export type FormProps<T> = {
   fields: FormField<T>[];
   state: T;
+  setState: (state: T) => void | React.Dispatch<React.SetStateAction<T>>;
   submitEndpoint: string;
   error?: string;
   submitText?: string;
@@ -137,6 +138,7 @@ export type User = {
 export type Location = {
   district: string;
   taluk?: string;
+  maagane?: string;
   village: string;
   lat: number | null;
   lng: number | null;
@@ -174,11 +176,11 @@ export type DialogBoxContextType = {
 };
 
 export type LoadingContextType = {
-  isLoading: boolean;
-  setLoading: (loading: boolean) => void;
+  startLoading: () => void;
+  stopLoading: () => void;
 };
 
-export type DetailsType = PostDetailsType | CultureDetailsType | EventDetailsType;
+export type DetailsType = PostDetailsType | CultureDetailsType | EventDetailsType | TagState | PostGroupState | PostTypeState | LocationDetailsType;
 
 export type PostState = {
   details: PostDetailsType | null;
@@ -198,8 +200,8 @@ export type CultureState = {
 
 export type LocationState = {
   details: {
-    title: string
-  } | null;
+    name: string;
+  },
   location: Location | null;
 }
 
@@ -276,6 +278,9 @@ export interface IEvent {
 };
 
 export type EventDetailsType = Omit<IEvent, "id" | "location">;
+export type LocationDetailsType = {
+  name: string;
+};
 
 export interface ITag {
   id: string;
@@ -312,3 +317,63 @@ export interface ApiState<T> {
   del: (opts?: Partial<ApiOptions>) => Promise<T | null>;
   reset: () => void;
 }
+
+export type NewProps = {
+  type: "post" | "event" | "culture" | "location" | "tag" | "post-type" | "post-group";
+};
+
+export type TagState = Omit<ITag, "id">;
+export type PostGroupState = Omit<IPostGroup, "id">;
+export type PostTypeState = Omit<IPostType, "id">;
+export type NewState = PostState | CultureState | EventState | LocationState | TagState | PostGroupState | PostTypeState;
+
+export type NewPostData = {
+  titles: string[],
+  shortTitles: string[],
+  tags: FormFieldOption[],
+  cultures: FormFieldOption[],
+  postTypes: FormFieldOption[],
+  postGroups: FormFieldOption[],
+};
+
+export type NewCultureData = {
+  titles: string[]
+}
+
+export type NewEventData = {
+  titles: string[],
+  cultures: FormFieldOption[]
+}
+
+export type NewTagData = {
+  tags: string[]
+}
+
+export type NewPostTypeData = {
+  postTypes: string[]
+}
+
+export type NewPostGroupData = {
+  postGroups: string[]
+}
+
+type NewDataMap = {
+  post: NewPostData;
+  culture: NewCultureData;
+  event: NewEventData;
+  location: {};
+  tag: {
+    tags: string[];
+  };
+  "post-group": {
+    postGroups: string[];
+  };
+  "post-type": {
+    postTypes: string[];
+  };
+};
+
+type NewData<T extends NewProps["type"]> =
+  NewDataMap[T] & {
+    submitApi: ApiState<any>;
+  };

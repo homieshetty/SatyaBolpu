@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Culture } from "../models/Culture.js";
 import { CultureDraft } from "../models/Draft.js";
+import { validateCultureDetails } from "../utils/validate.js";
 
 export const getCultures = async (req: Request, res: Response) => {
   try {
@@ -56,24 +57,19 @@ export const getCulture = async (req: Request, res: Response) => {
 export const saveCultureDetails = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const { details } = req.body;
-    if (!details) {
+    const { formData: details } = req.body;
+    if (!id || !details || !validateCultureDetails(details)) {
       return res.status(400).json({ msg: "Missing required field." });
     }
 
-    const doesExist = await Culture.findOne({ title: details.title });
-    if (doesExist) {
-      return res.status(400).json({ msg: `Culture "${details.title}" already exists.` })
+    const exists = await Culture.findOne({ title: details.title });
+    if (exists) {
+      return res.status(400).json({ msg: `Culture '${details.title}' already exists.` })
     }
 
     const draft = await CultureDraft.findByIdAndUpdate(
       id,
-      {
-        title: details.title,
-        description: details.description,
-        coverImages: details.coverImages,
-        galleryImages: details.galleryImages
-      },
+      details,
       { new: true, upsert: true }
     );
 
@@ -99,8 +95,9 @@ export const deleteCultureDetails = async (req: Request, res: Response) => {
         $unset: { 
           title: "",
           description: "",
-          coverImages: "",
-          galleryImages: ""
+          coverImage: "",
+          galleryImages: "",
+          files: ""
        } 
       }
     );
@@ -178,21 +175,17 @@ export const createDraft = async (req: Request, res: Response) => {
 export const uploadCulture = async (req: Request, res: Response) => {
   try {
     const { details, content } = req.body;
-    if (!details || !content) {
+    if (!details || !validateCultureDetails(details) || !content) {
       return res.status(400).json({ msg: "Missing required field." });
     }
 
-    const cultureName = details.title.charAt(0).toUpperCase() + details.title.slice(1);
-    const doesExist = await Culture.findOne({ title: cultureName });
-    if (doesExist) {
-      return res.status(400).json({ msg: `Culture "${details.title}" already exists.` })
+    const exists = await Culture.findOne({ title: details.title });
+    if (exists) {
+      return res.status(409).json({ msg: `Culture '${details.title}' already exists.` })
     }
 
     const newCulture = await Culture.create({
-      title: details.title,
-      description: details.description,
-      coverImages: details.coverImages,
-      galleryImages: details.galleryImages,
+      ...details,
       content: content,
       posts: 0
     });

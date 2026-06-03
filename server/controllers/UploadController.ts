@@ -9,7 +9,6 @@ export const uploadController = async (req: Request, res: Response) => {
     }
 
     const fileUrl = `/${file.destination}/${file.filename}`.replace(/\\/g, "/");
-    console.log("Uploaded file",fileUrl);
     return res.status(200).json({ msg: "Upload Successful", path: fileUrl })
   } catch (err: any) {
     console.error("Error during file upload:", err);
@@ -28,7 +27,6 @@ export const uploadMultipleController = async (req: Request, res: Response) => {
     const paths = [];
     for(const file of files) {
       const fileUrl = `/${file.destination}/${file.filename}`.replace(/\\/g, "/");
-      console.log("Uploaded file",fileUrl);
       paths.push(fileUrl);
     }
     return res.status(200).json({ msg: "Upload Successful", paths: paths })

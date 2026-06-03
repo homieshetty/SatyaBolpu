@@ -76,7 +76,6 @@ const SignUp = () => {
       }
       if(formData.phone && typeof formData.phone === "object") {
         const phone =  parsePhoneNumberFromString("+" + formData.phone.dialCode + formData.phone.number);
-        console.log(formData)
         if(formData.phone.number !== "" && phone?.getType() !== "MOBILE") {
           newErrors.phone = "Invalid phone number.";
         }
@@ -99,7 +98,6 @@ const SignUp = () => {
 
   const handleNext = (step: number) => {
     const newErrors = validateForm(step);
-    console.log(newErrors)
     if (Object.values(newErrors).some(err => err !== "")) {
       setErrors(newErrors);
       return;

@@ -3,28 +3,18 @@ import Title from "../components/Title";
 import { useEffect, useState } from "react";
 import useApi from "../hooks/useApi";
 import { IPost } from "../types/globals";
-import { toast } from "react-toastify";
 import { useLoading } from "../context/LoadingContext";
 
 const Post = () => {
   const { postId } = useParams();
   const postsApi = useApi(`/posts/${postId}`);
-  const { setLoading } = useLoading();
   const [post, setPost] = useState<IPost | null>(null);
 
   useEffect(() => {
     if(postsApi.data) {
       setPost(postsApi.data.post);
     }
-
-    if(postsApi.error) {
-      toast.error(postsApi.error);
-    }
-  }, [postsApi.data, postsApi.error]);
-
-  useEffect(() => {
-    setLoading(postsApi.loading);
-  }, [postsApi.loading]);
+  }, [postsApi.data]);
 
   return (
     <div className="w-screen relative flex-col items-center justify-center gap-10 bg-black py-20">

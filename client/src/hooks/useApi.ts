@@ -1,155 +1,163 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { BASE_URL } from "../App";
 import { ApiOptions, ApiState, Method } from "../types/globals";
+import { toast } from "react-toastify";
+import { useLoading } from "../context/LoadingContext";
 
 const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiState<T> => {
-    const [state, setState] = useState<Omit<ApiState<T>, "refetch" | "post" | "put" | "patch" | "del" | "reset">>({
-        data: null,
-        loading: false,
-        error: null,
-    });
-    
-    const isMountedRef = useRef(true);
-    const abortControllerRef = useRef<AbortController | null>(null);
+  const [state, setState] = useState<Omit<ApiState<T>, "refetch" | "post" | "put" | "patch" | "del" | "reset">>({
+    data: null,
+    loading: false,
+    error: null,
+  });
 
-    useEffect(() => {
-        isMountedRef.current = true;
-        return () => {
-            isMountedRef.current = false;
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort();
-            }
+  const isMountedRef = useRef(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const { startLoading, stopLoading } = useLoading();
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  const fetchData = useCallback(async (options: ApiOptions = {}): Promise<T | null> => {
+    startLoading();
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      stopLoading();
+    }
+
+    abortControllerRef.current = new AbortController();
+
+    const mergedOptions = {
+      method: "GET" as Method,
+      ...initOptions,
+      ...options,
+    };
+
+    if (!isMountedRef.current) {
+      stopLoading();
+      return null;
+    };
+
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const requestOptions: RequestInit = {
+        ...mergedOptions,
+        method: mergedOptions.method,
+        signal: abortControllerRef.current.signal,
+        credentials: "include"
+      };
+
+      const isFormData = mergedOptions.body instanceof FormData;
+      const isFile = mergedOptions.body instanceof File;
+      const isBlob = mergedOptions.body instanceof Blob;
+
+      if (isFormData || isFile || isBlob) {
+        requestOptions.headers = {
+          ...(mergedOptions.headers || {})
+        }
+
+        requestOptions.body = mergedOptions.body;
+      } else if (mergedOptions.body && ["POST", "PUT", "PATCH"].includes(mergedOptions.method || "GET")) {
+        requestOptions.headers = {
+          "Content-Type": "application/json",
+          ...(mergedOptions.headers || {})
         };
-    }, []);
-
-    const fetchData = useCallback(async (options: ApiOptions = {}): Promise<T | null> => {
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-        }
-
-        abortControllerRef.current = new AbortController();
-        
-        const mergedOptions = {
-            method: "GET" as Method,
-            ...initOptions,
-            ...options,
+        requestOptions.body = typeof mergedOptions.body === "string"
+          ? mergedOptions.body
+          : JSON.stringify(mergedOptions.body);
+      } else {
+        requestOptions.headers = {
+          ...(mergedOptions.headers || {})
         };
+      }
+      const finalEndpoint = options.endpoint || endpoint;
+      const res = await fetch(`${BASE_URL}${finalEndpoint}`, requestOptions);
 
-        if (!isMountedRef.current) return null;
-
-        setState(prev => ({ ...prev, loading: true, error: null }));
-
-        try {
-            const requestOptions: RequestInit = {
-                ...mergedOptions,
-                method: mergedOptions.method,
-                signal: abortControllerRef.current.signal,
-                credentials: "include"
-            };
-
-            const isFormData = mergedOptions.body instanceof FormData;
-            const isFile = mergedOptions.body instanceof File;
-            const isBlob = mergedOptions.body instanceof Blob;
-
-            if(isFormData || isFile || isBlob) {
-              requestOptions.headers = {
-                ...(mergedOptions.headers || {})
-              }
-
-              requestOptions.body = mergedOptions.body;
-            } else if (mergedOptions.body && ["POST", "PUT", "PATCH"].includes(mergedOptions.method || "GET")) {
-                requestOptions.headers = {
-                    "Content-Type": "application/json",
-                    ...(mergedOptions.headers || {})
-                };
-                requestOptions.body = typeof mergedOptions.body === "string" 
-                    ? mergedOptions.body 
-                    : JSON.stringify(mergedOptions.body);
-            } else {
-                requestOptions.headers = {
-                    ...(mergedOptions.headers || {})
-                };
-            }
-            const finalEndpoint = options.endpoint || endpoint;
-            const res = await fetch(`${BASE_URL}${finalEndpoint}`, requestOptions);
-            
-            if (!res.ok) {
-              let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
-                try {
-                    const contentType = res.headers.get("content-type");
-                    if (contentType && contentType.includes("application/json")) {
-                        const err = await res.json();
-                        errorMessage = err.msg || err.message || errorMessage;
-                    } else {
-                        const textError = await res.text();
-                        if (textError) errorMessage = textError;
-                    }
-                } catch {
-                  //
-                }
-                throw new Error(errorMessage);
-            }
-
-            const contentType = res.headers.get("content-type");
-            let data: T;
-            
-            if (contentType && contentType.includes("application/json")) {
-                data = await res.json();
-            } else {
-                data = (await res.text()) as unknown as T;
-            }
-
-            if (isMountedRef.current) {
-                setState({ data, loading: false, error: null });
-            }
-            
-            return data;
-        } catch (err: any) {
-            if (err.name === "AbortError") {
-                return null;
-            }
-            
-            if (isMountedRef.current) {
-                setState({ data: null, loading: false, error: err.message });
-            }
-            return null;
+      if (!res.ok) {
+        let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+        const contentType = res.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const err = await res.json();
+          errorMessage = err.msg || err.message || errorMessage;
+        } else {
+          const textError = await res.text();
+          if (textError) errorMessage = textError;
         }
-    }, [endpoint, initOptions]);
+        throw new Error(errorMessage);
+      }
 
-    useEffect(() => {
-        if (initOptions.auto !== false) {
-            fetchData();
-        }
-    }, []);
+      const contentType = res.headers.get("content-type");
+      let data: T;
 
-    const refetch = useCallback((opts?: Partial<ApiOptions>) => {
-        return fetchData(opts);
-    }, [fetchData]);
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        data = (await res.text()) as unknown as T;
+      }
 
-    const post = useCallback((body: any, opts?: Partial<ApiOptions>) => {
-        return fetchData({ ...opts, body, method: "POST" });
-    }, [fetchData]);
+      if (isMountedRef.current) {
+        setState({ data, loading: false, error: null });
+      }
 
-    const put = useCallback((body: any, opts?: Partial<ApiOptions>) => {
-        return fetchData({ ...opts, body, method: "PUT" });
-    }, [fetchData]);
+      return data;
+    } catch (err: any) {
+      if (err.name === "AbortError") {
+        return null;
+      }
 
-    const patch = useCallback((body: any, opts?: Partial<ApiOptions>) => {
-        return fetchData({ ...opts, body, method: "PATCH" });
-    }, [fetchData]);
+      if (isMountedRef.current) {
+        setState({ data: null, loading: false, error: err.message });
+        toast.error(err.message);
+        console.error(err.message);
+      }
+      return null;
+    } finally {
+      stopLoading();
+    }
+  }, [endpoint, initOptions]);
 
-    const del = useCallback((opts?: Partial<ApiOptions>) => {
-        return fetchData({ ...opts, method: "DELETE" });
-    }, [fetchData]);
+  useEffect(() => {
+    if (initOptions.auto !== false) {
+      fetchData();
+    }
+  }, []);
 
-    const reset = useCallback(() => {
-        if (abortControllerRef.current) {
-            abortControllerRef.current.abort();
-        }
-        setState({ data: null, loading: false, error: null });
-    }, []);
+  const refetch = useCallback((opts?: Partial<ApiOptions>) => {
+    return fetchData(opts);
+  }, [fetchData]);
 
-    return { ...state, refetch, post, put, patch, del, reset };
+  const post = useCallback((body: any, opts?: Partial<ApiOptions>) => {
+    return fetchData({ ...opts, body, method: "POST" });
+  }, [fetchData]);
+
+  const put = useCallback((body: any, opts?: Partial<ApiOptions>) => {
+    return fetchData({ ...opts, body, method: "PUT" });
+  }, [fetchData]);
+
+  const patch = useCallback((body: any, opts?: Partial<ApiOptions>) => {
+    return fetchData({ ...opts, body, method: "PATCH" });
+  }, [fetchData]);
+
+  const del = useCallback((opts?: Partial<ApiOptions>) => {
+    return fetchData({ ...opts, method: "DELETE" });
+  }, [fetchData]);
+
+  const reset = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setState({ data: null, loading: false, error: null });
+  }, []);
+
+  return { ...state, refetch, post, put, patch, del, reset };
 };
 
 export default useApi;

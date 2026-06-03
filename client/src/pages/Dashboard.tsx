@@ -177,22 +177,22 @@ const Dashboard = () => {
               },
               {
                 name: 'Posts',
-                endpoint: 'posts?fields=title,image,userId&limit=5',
+                endpoint: 'posts?fields=title,coverImage,userId&limit=5',
                 key: 'posts'
               },
               {
                 name: 'Cultures',
-                endpoint: 'cultures?fields=title,image,userId&limit=5',
+                endpoint: 'cultures?fields=title,coverImage,userId&limit=5',
                 key: 'cultures'
               },
               {
                 name: 'Events',
-                endpoint: 'events?fields=title,image,userId&limit=5',
+                endpoint: 'events?fields=title,coverImage,userId&limit=5',
                 key: 'events'
               },
               {
                 name: 'Blogs',
-                endpoint: 'blogs?fields=title,image,userId&limit=5',
+                endpoint: 'blogs?fields=title,coverImage,userId&limit=5',
                 key: 'blogs'
               }
             ]}

@@ -3,19 +3,29 @@ import LoadingPage from "../components/LoadingPage";
 import { LoadingContextType } from "../types/globals";
 
 const LoadingContext = createContext<LoadingContextType>({
-  isLoading: false,
-  setLoading: () => {
-    console.warn("setLoading called outside of LoadingProvider");
+  startLoading: () => {
+    console.warn("startLoading called outside of LoadingProvider");
+  },
+  stopLoading: () => {
+    console.warn("stopLoading called outside of LoadingProvider");
   },
 });
 
 export const LoadingProvider = ({ children }: { children: ReactNode }) => {
-  const [isLoading, setLoading] = useState(false);
+  const [loadingCount, setLoadingCount] = useState<number>(0);
+
+  const startLoading = () => {
+    setLoadingCount(prev => prev + 1);
+  };
+
+  const stopLoading = () => {
+    setLoadingCount(prev => Math.max(0, prev - 1));
+  };
 
   return (
-    <LoadingContext.Provider value={{ isLoading, setLoading }}>
+    <LoadingContext.Provider value={{ startLoading, stopLoading }}>
         {children}
-        {isLoading && <LoadingPage /> }
+        {loadingCount > 0 && <LoadingPage /> }
     </LoadingContext.Provider>
   );
 };

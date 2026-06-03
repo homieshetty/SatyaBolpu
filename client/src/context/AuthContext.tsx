@@ -64,7 +64,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     
-    console.log(user, token)
     return { user, token, isRefreshing: false };
   }); 
   const refreshTimeoutRef = useRef<number | null>(null);
@@ -97,7 +96,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const timeUntilExpiry = exp - currentTime;
-      console.log(timeUntilExpiry)
       const refreshThreshold = 60;
 
       if (timeUntilExpiry <= 0) {

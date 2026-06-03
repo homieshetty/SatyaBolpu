@@ -29,7 +29,6 @@ export const ResizableImage = Image.extend({
         }),
       },
 
-      // ✅ NEW ATTRIBUTE
       mode: {
         default: "block",
         parseHTML: (el: HTMLElement) =>
@@ -75,7 +74,19 @@ export const ResizableImage = Image.extend({
 
   renderHTML({ HTMLAttributes }) {
     const { src, alt, width, align, mode, caption } = HTMLAttributes
-
+    const blockAlignStyles = {
+      left: "margin-right: auto;",
+      right: "margin-left: auto;",
+      center: "margin-left: auto; margin-right: auto;"
+    };
+    const floatAlignStyles = {
+      left: "float: left; margin: 8px;",
+      right: "float: right; margin: 8px;"
+    };
+    const alignStyle = 
+      mode === "block" ? 
+        blockAlignStyles[align as keyof typeof blockAlignStyles] : 
+        floatAlignStyles[align as keyof typeof floatAlignStyles];
 
     const children: any[] = [
       ["img", { src, alt, class: "w-full h-full object-cover" }],
@@ -93,7 +104,7 @@ export const ResizableImage = Image.extend({
       "div",
       {
         class: "file",
-        style: `width: ${width};`,
+        style: `width: ${width}; display: block; ${alignStyle}`,
         mode,
         align,
       },

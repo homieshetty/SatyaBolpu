@@ -18,18 +18,6 @@ const NewPostType = () => {
     }
   }, [postTypesApi.data]);
 
-  useEffect(() => {
-    if (postTypesApi.error) {
-      console.error(postTypesApi.error);
-      toast.error(postTypesApi.error);
-    }
-
-    if (postTypesPostApi.error) {
-      console.error(postTypesPostApi.error);
-      toast.error(postTypesPostApi.error);
-    }
-  }, [postTypesApi.error, postTypesPostApi.error]);
-
   const handlePostTypeChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPostType(e.target.value);
   }

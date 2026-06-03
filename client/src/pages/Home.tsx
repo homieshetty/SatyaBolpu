@@ -30,7 +30,7 @@ type swiperDataType = {
 }
 
 const Home = () => {
-  const { setLoading} = useLoading();
+  const { startLoading, stopLoading } = useLoading();
   const scrollWatcherRef = useRef<HTMLDivElement[]>([]);
   const svgRef = useRef<SVGSVGElement>(null);
   const headingRefs = useRef<HTMLDivElement[]>([]);
@@ -67,21 +67,9 @@ const Home = () => {
   }, [recentPostsApi.data, upcomingEventsApi.data]);
 
   useEffect(() => {
-    if (recentPostsApi.error) {
-      toast.error(recentPostsApi.error);
-      console.error(recentPostsApi.error);
-    }
-
-    if (upcomingEventsApi.error) {
-      toast.error(upcomingEventsApi.error);
-      console.error(upcomingEventsApi.error);
-    }
-  }, [recentPostsApi.error, upcomingEventsApi.error]);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+        startLoading();
         const response = await fetch("/assets/data/data.json");
         if (!response.ok) {
           throw new Error("Failed to fetch data");
@@ -96,7 +84,7 @@ const Home = () => {
       } catch (error) {
         console.error(error);
       } finally {
-          setLoading(false)
+          stopLoading();
       }
     };
   

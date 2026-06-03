@@ -41,21 +41,22 @@ export const BlogCard = ({
   userId,
   createdAt
 }: BlogCardProps) => {
+  console.log(image)
 
   const [user, setUser] = useState<{ name: string, image: string } | null>(null);
 
-  const userApi = useApi(`/users/${userId}?fields=name,image`);
+  // const userApi = useApi(`/users/${userId}?fields=name,image`);
 
-  useEffect(() => {
-    if(!userApi.data) return;
-    setUser(userApi.data?.user);
-  }, [userApi.data]);
+  // useEffect(() => {
+  //   if(!userApi.data) return;
+  //   setUser(userApi.data?.user);
+  // }, [userApi.data]);
 
   return (
     <div
       className="w-full flex items-center justify-around text-white h-32"
     >
-      <div>
+      <div className="w-1/5 object-cover">
         <img src={image} alt="blog image" />
       </div>
 

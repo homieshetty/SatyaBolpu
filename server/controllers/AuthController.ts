@@ -30,12 +30,12 @@ export const signup = async (req: Request, res: Response) => {
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ msg: "An account with this email already exists." });
+      return res.status(409).json({ msg: "An account with this email already exists." });
     }
 
     const takenUsername = await User.findOne({ uname: finalUname });
     if(takenUsername) {
-      return res.status(400).json({ msg: "Username already taken by another user" });
+      return res.status(409).json({ msg: "Username already taken by another user" });
     }
 
     const salt = await bcrypt.genSalt(10);

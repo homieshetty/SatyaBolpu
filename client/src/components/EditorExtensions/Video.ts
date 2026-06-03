@@ -99,7 +99,6 @@ export const Video = Node.create({
 
   renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
     const { src, type, width, align, caption, controls } = HTMLAttributes
-    console.log(HTMLAttributes)
 
     const tailwindAlignClass =
       align === "left"

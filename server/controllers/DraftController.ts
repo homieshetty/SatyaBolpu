@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { AuthRequest, ICulture, IEvent, IPost } from "../types/globals.js";
+import { AuthRequest, ICulture, IEvent, ILocation, IPost } from "../types/globals.js";
 import { Draft } from "../models/Draft.js";
 
 export const getDrafts = async (req: AuthRequest, res: Response) => {
@@ -12,11 +12,11 @@ export const getDrafts = async (req: AuthRequest, res: Response) => {
         .sort({ createdAt: -1 })
       ).map(d => ({
         id: d._id as string,
-        title: d.title
+        title: (d.draftType === "location" ? (d as ILocation).name : (d as any).title)
       }));
 
     if (!drafts) {
-      return res.status(500).json({ msg: "No posts found." });
+      return res.status(500).json({ msg: "No drafts found." });
     }
 
     return res.status(200).json({ drafts });
@@ -44,7 +44,7 @@ export const getDraft = async (req: Request, res: Response) => {
 
     let draftRes;
 
-    if (draft.type === "culture") {
+    if (draft.draftType === "culture") {
       const d = draft.toObject() as ICulture;
 
       draftRes = {
@@ -60,7 +60,7 @@ export const getDraft = async (req: Request, res: Response) => {
       };
     }
 
-    else if (draft.type === "event") {
+    else if (draft.draftType === "event") {
       const d = draft.toObject() as IEvent;
 
       draftRes = {
@@ -92,6 +92,7 @@ export const getDraft = async (req: Request, res: Response) => {
         location: d?.location ? {
           district: d?.location.district,
           taluk: d?.location.taluk,
+          maagane: d?.location.maagane,
           village: d?.location.village,
           lat: d?.location.coordinates[0],
           lng: d?.location.coordinates[1]
@@ -99,7 +100,7 @@ export const getDraft = async (req: Request, res: Response) => {
       };
     }
 
-    else if (draft.type === "post") {
+    else if (draft.draftType === "post") {
       const d = draft.toObject() as (IPost & { locationSpecific: boolean });
 
       draftRes = {
@@ -120,6 +121,7 @@ export const getDraft = async (req: Request, res: Response) => {
         location: d?.location ? {
           district: d?.location.district,
           taluk: d?.location.taluk,
+          maagane: d?.location.maagane,
           village: d?.location.village,
           lat: d?.location.coordinates[0],
           lng: d?.location.coordinates[1]
@@ -127,9 +129,26 @@ export const getDraft = async (req: Request, res: Response) => {
 
         content: d?.content ?? ""
       };
+    } else if (draft.draftType === "location") {
+      const d = draft.toObject() as ILocation;
+
+      draftRes = {
+        type: "location",
+        details: {
+          name: d?.name ?? "",
+        },
+        location: {
+          type: "Point",
+          district: d?.district,
+          taluk: d?.taluk,
+          maagane: d?.maagane,
+          village: d?.village,
+          lat: d?.coordinates[0],
+          lng: d?.coordinates[1]
+        }
+      };
     }
 
-    console.log(draftRes)
     return res.status(200).json({ draft: draftRes });
 
   } catch (err: any) {
@@ -141,12 +160,12 @@ export const getDraft = async (req: Request, res: Response) => {
 export const createDraft = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user._id;
-    const { type } = req.body;
-    const { _id } = (await Draft.create({ userId, type })).toObject();
+    const { type: draftType } = req.body;
+    const { _id } = (await Draft.create({ userId, draftType })).toObject();
     return res.status(201).json({ id: _id });
   } catch(err: any) {
-    console.error("Error while creating culture draft: " + err.message);
-    return res.status(500).json({ msg: "Internal Server Error while creating culture draft." });
+    console.error("Error while creating draft: " + err.message);
+    return res.status(500).json({ msg: "Internal Server Error while creating draft." });
   }
 }
 

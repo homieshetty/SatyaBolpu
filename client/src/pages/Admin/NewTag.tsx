@@ -18,18 +18,6 @@ const NewTag = () => {
     }
   }, [tagsApi.data]);
 
-  useEffect(() => {
-    if (tagsApi.error) {
-      console.error(tagsApi.error);
-      toast.error(tagsApi.error);
-    }
-
-    if (tagsPostApi.error) {
-      console.error(tagsPostApi.error);
-      toast.error(tagsPostApi.error);
-    }
-  }, [tagsApi.error, tagsPostApi.error]);
-
   const handleTagChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTag(e.target.value);
   }

@@ -1,25 +1,54 @@
 import mongoose, { Schema } from "mongoose";
-import { ICulture, IDraft, IEvent, IPost } from "../types/globals.js";
 import { durationSchema } from "./Event.js";
-import { locationSchema } from "./Location.js";
+import { ICulture, IDraftBase, IEvent, ILocation, IPost } from "../types/globals.js";
 
-const draftSchema = new Schema<IDraft & ((IPost & { locationSpecific: boolean }) | ICulture | IEvent)>({
+const draftSchema = new Schema<IDraftBase>({
   userId: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true
   },
-  type: {
+  draftType: {
     type: String,
-    enum: ["post", "culture", "event"],
+    enum: ["post", "culture", "event", "location"],
     required: true
   }
 }, {
-  discriminatorKey: "type", 
+  discriminatorKey: "draftType", 
   timestamps: true 
 });
-export const Draft = mongoose.model<IDraft & ((IPost & { locationSpecific: boolean }) | ICulture | IEvent)>("Draft", draftSchema);
+export const Draft = mongoose.model<IDraftBase>("Draft", draftSchema);
 draftSchema.index({ userId: 1, type: 1 });
+
+export const locationDraftSchema = new Schema<ILocation>({
+  type: {
+    type: String,
+    enum: ["Point"],
+    default: "Point"
+  },
+  name: {
+    type: String,
+  },
+  coordinates: {
+    type: [Number],
+  },
+  district: {
+    type: String,
+  },
+  taluk: {
+    type: String,
+  },
+  maagane: {
+    type: String,
+  },
+  village: {
+    type: String,
+  },
+  attachments: {
+    type: [String]
+  }
+}, { timestamps: true });
+export const LocationDraft = Draft.discriminator<ILocation>("location", locationDraftSchema);
 
 export const postDraftSchema = new Schema<IPost & { locationSpecific: boolean }>({
   title: {
@@ -59,10 +88,10 @@ export const postDraftSchema = new Schema<IPost & { locationSpecific: boolean }>
     type: String
   },
   location: {
-    type: locationSchema
+    type: locationDraftSchema
   }
 }, { timestamps: true });
-export const PostDraft = Draft.discriminator("post", postDraftSchema);
+export const PostDraft = Draft.discriminator<IPost & { locationSpecific: boolean }>("post", postDraftSchema);
 
 const eventSchema = new Schema<IEvent>({
   title: {
@@ -85,11 +114,10 @@ const eventSchema = new Schema<IEvent>({
     type: [String]
   },
   location: {
-    type: Schema.Types.ObjectId,
-    ref: "Location"
+    type: locationDraftSchema
   }
 }, { timestamps: true });
-export const EventDraft = Draft.discriminator("event", eventSchema);
+export const EventDraft = Draft.discriminator<IEvent>("event", eventSchema);
 
 const cultureSchema = new Schema<ICulture>({
   title: {
@@ -111,4 +139,4 @@ const cultureSchema = new Schema<ICulture>({
     type: String
   }
 }, { timestamps: true });
-export const CultureDraft = Draft.discriminator("culture", cultureSchema);
+export const CultureDraft = Draft.discriminator<ICulture>("culture", cultureSchema);

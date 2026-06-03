@@ -2,7 +2,6 @@ import { BaseCardProps, CardListProps } from "../types/globals";
 import { useEffect, useRef, useState } from "react";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import useApi from "../hooks/useApi";
-import { toast } from "react-toastify";
 import { Option } from "./DropDown";
 import { FaSortAmountDown } from "react-icons/fa";
 import Filters from "./Filters";
@@ -27,9 +26,10 @@ const Pagination = ({
     <div className="w-full flex items-center justify-center">
       <div className="text-[2rem] text-black flex items-center justify-center gap-3">
         <GrFormPrevious
-          className={`bg-white py-2 rounded-2xl cursor-pointer transition-colors ${isPrevDisabled
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-primary"
+          className={`bg-white py-2 rounded-2xl cursor-pointer transition-colors 
+            ${isPrevDisabled
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-primary"
             }`}
           onClick={() => !isPrevDisabled && handleArrows("-")}
         />
@@ -48,9 +48,10 @@ const Pagination = ({
           </span>
         </div>
         <GrFormNext
-          className={`bg-white py-2 rounded-2xl cursor-pointer transition-colors ${isNextDisabled
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-primary"
+          className={`bg-white py-2 rounded-2xl cursor-pointer transition-colors 
+            ${isNextDisabled
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-primary"
             }`}
           onClick={() => !isNextDisabled && handleArrows("+")}
         />
@@ -95,7 +96,6 @@ const CardList = <T extends BaseCardProps>({
 }: CardListProps<T>) => {
   const [data, setData] = useState<T[]>([]);
   const [pageNo, setPageNo] = useState<string>("1");
-  const [loading, setLoading] = useState<boolean>(false);
   const [showFilters, setShowFilters] = useState<boolean>(sessionStorage.getItem("showFilters") === "true" || false);
   const [showSortOptions, setShowSortOptions] = useState<boolean>(sessionStorage.getItem("showSortOptions") === "true" || false);
   const [selectedFilters, setSelectedFilters] = useState<Record<string, Option<string>[]>>(JSON.parse(sessionStorage.getItem("filters") ?? "{}"));
@@ -114,10 +114,6 @@ const CardList = <T extends BaseCardProps>({
     if (!pageNo) return;
     api.refetch();
   }, [pageNo, apiEndpoint]);
-
-  useEffect(() => {
-    setLoading(api.loading);
-  }, [api.loading]);
 
   const handleInternalDelete = (id: string) => {
     setData(prev => prev.filter(d => d.id !== id));
@@ -205,11 +201,7 @@ const CardList = <T extends BaseCardProps>({
       );
     }
 
-    if (api.error) {
-      console.error(api.error);
-      toast.error(api.error);
-    }
-  }, [api.data, api.error]);
+  }, [api.data]);
 
   const totalPages = api.data?.totalPages;
 
@@ -217,7 +209,6 @@ const CardList = <T extends BaseCardProps>({
     const num = parseInt(val);
     if (!val) {
       setPageNo("");
-      setLoading(true);
       return;
     }
     if (isNaN(num)) return;
@@ -234,7 +225,7 @@ const CardList = <T extends BaseCardProps>({
       if (num - 1 < 1) return setPageNo("1");
       setPageNo((num - 1).toString());
     } else {
-      if (num + 1 > data.length) return setPageNo(totalPages.toString());
+      if (num + 1 > totalPages) return setPageNo(totalPages.toString());
       setPageNo((num + 1).toString())
     }
   }
@@ -345,7 +336,7 @@ const CardList = <T extends BaseCardProps>({
         }}
       >
         {
-          loading ? (
+          api.loading ? (
             Array.from({ length: pagination ? cardsPerPage! : data.length }).map((_, id) => (
               <SkeletonCard key={id} />
             ))

@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Button from "../components/Button";
-import { useLoading } from "../context/LoadingContext";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import useApi from "../hooks/useApi";
@@ -16,7 +15,6 @@ const Cultures = () => {
   const culturesApi = useApi("/cultures");
   const [cultures,setCultures] = useState<ICulture[]>([]);
   const culturesRef = useRef<HTMLDivElement[]>([]);
-  const { setLoading } = useLoading();
   const navigate = useNavigate();
 
 useLayoutEffect(() => {
@@ -46,10 +44,6 @@ useLayoutEffect(() => {
     return () => ctx.revert();
   }
 }, [cultures]);
-
-  useEffect(() => {
-    setLoading(culturesApi.loading)
-  },[culturesApi.loading])
 
   useEffect(() => {
     if(culturesApi.data)

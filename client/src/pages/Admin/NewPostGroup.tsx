@@ -1,9 +1,8 @@
-import { ChangeEvent, SubmitEvent, useEffect, useLayoutEffect, useState } from "react";
+import { ChangeEvent, SubmitEvent, useEffect, useState } from "react";
 import Title from "../../components/Title";
 import Button from "../../components/Button";
 import useApi from "../../hooks/useApi";
 import { toast } from "react-toastify";
-import { useLoading } from "../../context/LoadingContext";
 
 type FormDataType = {
   postGroup: string;
@@ -20,29 +19,12 @@ const NewPostGroup = () => {
 
   const postGroupsApi = useApi("/others/post-groups");
   const postGroupsPostApi = useApi("/others/post-groups", { auto: false });
-  const { setLoading } = useLoading();
-
-  useLayoutEffect(() => {
-    setLoading(postGroupsApi.loading);
-  }, [postGroupsApi.loading]);
 
   useEffect(() => {
     if (postGroupsApi.data) {
       setExistingPostGroups(postGroupsApi.data.postGroups.map((pg: any) => pg.name));
     }
   }, [postGroupsApi.data]);
-
-  useEffect(() => {
-    if (postGroupsApi.error) {
-      console.error(postGroupsApi.error);
-      toast.error(postGroupsApi.error);
-    }
-
-    if (postGroupsPostApi.error) {
-      console.error(postGroupsPostApi.error);
-      toast.error(postGroupsPostApi.error);
-    }
-  }, [postGroupsApi.error, postGroupsPostApi.error]);
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

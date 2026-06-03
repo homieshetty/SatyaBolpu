@@ -17,24 +17,33 @@ export interface IUser extends Document {
   password: string;
 };
 
+export interface IDraft extends Document  {
+  userId: Schema.Types.ObjectId,
+  draftType: "post" | "culture" | "event" | "location"
+}
+
+export type IDraftBase = IDraft & ((IPost & { locationSpecific: boolean }) | ICulture | IEvent | ILocation);
+
 export interface ICulture extends Document {
-  title: string;
-  description: string;
-  coverImage: string;
-  galleryImages: string[];
+  userId: Schema.Types.ObjectId,
+  title: string,
+  description: string,
+  coverImage: string,
+  galleryImages: string[],
   files?: string[],
-  content: string;
+  content: string
 };
 
 export interface ILocation extends Document {
+  userId: Schema.Types.ObjectId,
   type: "Point",
-  name: string;
-  district: string;
-  taluk: string;
-  maagane: string;
-  village: string;
-  coordinates: number[2];
-  attachments: string[];
+  name: string,
+  district: string,
+  taluk: string,
+  maagane: string,
+  village: string,
+  coordinates: number[2],
+  attachments: string[]
 };
 
 export interface IPost extends Document {
@@ -58,22 +67,24 @@ export interface IDuration extends Document {
 };
 
 export interface IEvent extends Document {
-  title: string;
-  description: string;
-  duration: IDuration;
-  culture: Schema.Types.ObjectId;
-  coverImage?: string;
-  files?: string[];
+  userId: Schema.Types.ObjectId,
+  title: string,
+  description: string,
+  duration: IDuration,
+  culture: Schema.Types.ObjectId,
+  coverImage?: string,
+  files?: string[],
   location: ILocation
 };
 
 export interface IBlog extends Document {
-  title: string;
-  description?: string;
-  coverImage?: string;
-  files?: string;
-  content: string;
-  location?: ILocation;
+  userId: Schema.Types.ObjectId,
+  title: string,
+  description?: string,
+  coverImage?: string,
+  files?: string,
+  content: string,
+  location?: ILocation
 }
 
 export interface ITag extends Document {
@@ -87,11 +98,6 @@ export interface IPostGroup extends Document {
 
 export interface IPostType extends Document {
   name: string
-}
-
-export interface IDraft extends Document  {
-  userId: Schema.Types.ObjectId,
-  type: "post" | "culture" | "event"
 }
 
 export type CardDataType = {
