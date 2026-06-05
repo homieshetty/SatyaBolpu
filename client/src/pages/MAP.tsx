@@ -1,8 +1,8 @@
-import { MapContainer, TileLayer, GeoJSON, Marker, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap,  Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
 import React, { ChangeEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { Layer, LeafletMouseEvent, Map, Polygon, Tooltip } from "leaflet";
+import { Layer, LeafletMouseEvent, Map, Marker as MarkerType, Polygon, Tooltip } from "leaflet";
 import { GestureHandling } from "leaflet-gesture-handling";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 import { useLoading } from "../context/LoadingContext";
@@ -12,9 +12,9 @@ import { FaMagnifyingGlassLocation } from "react-icons/fa6";
 import { IoMdDoneAll } from "react-icons/io";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
-import { ILocation, Location } from "../types/globals";
+import { EventState, ILocation, LocationState, PostState } from "../types/globals";
 import { Mode } from "../types/enums";
-import { FaChevronCircleLeft, FaLock, FaLockOpen, FaPlus, FaMinus } from "react-icons/fa";
+import { FaLock, FaLockOpen, FaPlus, FaMinus } from "react-icons/fa";
 import { IoLocationSharp } from "react-icons/io5";
 
 //this is beacuse icons dont load in prod, some bs idk
@@ -33,6 +33,16 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+const blueMarker = new L.Icon({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+  className: 'marker'
+})
+
 const orangeMarker = new L.Icon({
   iconUrl: '/assets/Map/orange-marker.png',
   shadowUrl: markerShadow,
@@ -48,14 +58,6 @@ type coordinatesErrorType = {
   lng: string;
 };
 
-const initialLocation = {
-  district: "",
-  taluk: "",
-  village: "",
-  lat: null,
-  lng: null
-};
-
 const MAP_CENTER: [number, number] = [13.006995870591474, 75.07172913896241];
 const MAP_MAX_BOUNDS: [[number, number], [number, number]] = [
   [14.025289007277138, 73.94617968510107],
@@ -68,12 +70,16 @@ const MAP = ({
   minimal = false,
   children,
   ref,
-  editMode
+  editMode,
+  state,
+  setState
 }: {
   minimal?: boolean;
   children?: ReactNode;
   ref?: React.RefObject<HTMLDivElement | null>;
   editMode?: Mode.EVENT | Mode.POST | Mode.LOCATION;
+  state?: PostState | EventState | LocationState;
+  setState?: React.Dispatch<React.SetStateAction<EventState | PostState | LocationState>>
 }) => {
   const { id } = useParams();
 
@@ -84,40 +90,34 @@ const MAP = ({
   const [activeVillage, setActiveVillage] = useState<GeoJSON.Feature | null>(null);
   const [askForCoordinates, setAskForCoordinates] = useState<boolean>(false);
   const [coordinateErrors, setCoordinateErrors] = useState<coordinatesErrorType>({ lat: "", lng: "" });
-  const [location, setLocation] = useState<Location>(initialLocation);
-  const [showMenu, setShowMenu] = useState<boolean>(true);
   const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
   const [existingLocations, setExistingLocations] = useState<ILocation[]>([]);
 
   const mapRef = useRef<HTMLDivElement | null>(null);
   const toolTipPane = useRef<Element>(null);
+  const markers = useRef<Record<string, MarkerType>>({});
   const activeLayerRef = useRef<Polygon | null>(null);
 
   const { startLoading, stopLoading } = useLoading();
   const navigate = useNavigate();
 
   const locationsApi = useApi("/locations?fields=name,coordinates,district,taluk,village", { auto: !minimal });
-  const draftsApi = useApi("/drafts", { auto: false });
+  const locationSubmitApi = useApi("/locations", { auto: false });
   const postsApi = useApi("/posts", { auto: false });
   const eventsApi = useApi("/events", { auto: false });
-
-  useEffect(() => {
-    if (editMode === undefined) return;
-
-    const fetchDraft = async () => {
-      const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
-      if (!res) return;
-      setLocation(res.draft.location ?? initialLocation);
-    }
-
-    fetchDraft();
-  }, [id]);
 
   useEffect(() => {
     if(locationsApi.data) {
       setExistingLocations(locationsApi.data.locations);
     }
   }, [locationsApi.data]);
+
+  useEffect(() => {
+    markers.current = existingLocations.reduce((acc: any, loc: ILocation) => ({
+      ...acc,
+      [loc.name]: null
+    }), {});
+  }, [existingLocations]);
 
   useEffect(() => {
     const fetchGeoJson = async (name: string) => {
@@ -222,18 +222,13 @@ const MAP = ({
       layer.on({
         mouseover: (e: LeafletMouseEvent) => {
           if (feature.properties?.VILLAGE && layer !== activeLayerRef.current) {
-            if (toolTipPane.current) {
-              const existingTooltips = toolTipPane.current.querySelectorAll(".leaflet-tooltip:not(.permanent-tooltip)");
-              existingTooltips.forEach((tooltip: Element) => tooltip.remove());
-            }
-
             const tooltip = new Tooltip({
               permanent: false,
               direction: "top",
-              className: "global-tooltip village-name-tooltip"
+              className: `global-tooltip village-name-tooltip ${feature.properties?.VILLAGE.split(" ").join("-")}`
             })
               .setContent(feature.properties.VILLAGE)
-              .setLatLng(e.latlng);
+              .setLatLng(layer.getBounds().getCenter());
 
             if (map) {
               tooltip.addTo(map);
@@ -246,15 +241,17 @@ const MAP = ({
         },
 
         mouseout: () => {
+          if (!toolTipPane.current) return;
+          
+          const tooltip = toolTipPane.current.querySelector(`.${feature.properties?.VILLAGE.split(" ").join("-")}`);
+          if(tooltip) tooltip.remove();
           if (layer !== activeLayerRef.current) {
             layer.setStyle(styles.default);
           }
         },
 
-        click: (e: LeafletMouseEvent) => {
-          if (toolTipPane.current) {
-            toolTipPane.current.innerHTML = "";
-          }
+        click: () => {
+          if (!toolTipPane.current) return;
 
           if (activeLayerRef.current && activeLayerRef.current !== layer) {
             activeLayerRef.current.setStyle(styles.default);
@@ -279,14 +276,17 @@ const MAP = ({
     if (editMode !== undefined) {
       layer.on({
         click: (e: LeafletMouseEvent) => {
-          setLocation({
-            district: feature.properties?.DISTRICT,
-            taluk: feature.properties?.TALUK,
-            maagane: feature.properties?.MAAGANE,
-            village: feature.properties?.VILLAGE,
-            lat: e.latlng.lat,
-            lng: e.latlng.lng
-          });
+          if(editMode !== Mode.LOCATION) return;
+          setState?.(prev => ({
+            ...prev,
+            location: {
+              district: feature.properties?.DISTRICT,
+              taluk: feature.properties?.TALUK,
+              maagane: feature.properties?.MAAGANE,
+              village: feature.properties?.VILLAGE,
+              coordinates: [e.latlng.lat, e.latlng.lng]
+            }
+          }) as LocationState);
         }
       })
     }
@@ -332,13 +332,13 @@ const MAP = ({
     </>
   ), [geoJsonData]);
 
-  const handleView = () => {
-    if (map && activeVillage && activeLayerRef.current) {
-      activeLayerRef.current?.setStyle(styles.viewMore);
-      const [xmin, ymin, xmax, ymax] = activeVillage.bbox!;
-      map.flyTo([(ymin + ymax) / 2, (xmin + xmax) / 2], 14)
-    }
-  }
+  // const handleView = () => {
+  //   if (map && activeVillage && activeLayerRef.current) {
+  //     activeLayerRef.current?.setStyle(styles.viewMore);
+  //     const [xmin, ymin, xmax, ymax] = activeVillage.bbox!;
+  //     map.flyTo([(ymin + ymax) / 2, (xmin + xmax) / 2], 14)
+  //   }
+  // }
 
   const handleCoordinateChange = (e: ChangeEvent<HTMLInputElement>) => {
     setCoordinateErrors((prev) => ({
@@ -351,10 +351,13 @@ const MAP = ({
     if (isNaN(Number(value)))
       return
 
-    setLocation((prev) => ({
+    setState?.(prev => ({
       ...prev,
-      [name]: value
-    }))
+      location: {
+        ...prev.location!,
+        [name]: value
+      }
+    }) as LocationState)
   };
 
   const pointInPolygon = (point: number[], polygon: number[][]) => {
@@ -421,19 +424,21 @@ const MAP = ({
       lng: ""
     }
 
-    if (!location.lat) {
+    const lat = state?.location?.coordinates?.[0];
+    const lng = state?.location?.coordinates?.[1];
+    if (!lat) {
       newErrors.lat = "Latitude is required."
     }
 
-    if (!location.lng) {
+    if (!lng) {
       newErrors.lng = "Longitude is required."
     }
 
-    if (location.lat && (location.lat! > MAP_MAX_BOUNDS[0][0] || location.lat! < MAP_MAX_BOUNDS[1][0])) {
+    if (lat && (lat! > MAP_MAX_BOUNDS[0][0] || lat! < MAP_MAX_BOUNDS[1][0])) {
       newErrors.lat = "Latitude exceeds max bounds."
     }
 
-    if (location.lng && (location.lng! > MAP_MAX_BOUNDS[1][1] || location.lng! < MAP_MAX_BOUNDS[0][1])) {
+    if (lng && (lng! > MAP_MAX_BOUNDS[1][1] || lng! < MAP_MAX_BOUNDS[0][1])) {
       newErrors.lng = "Longitude exceeds max bounds."
     }
 
@@ -443,8 +448,8 @@ const MAP = ({
       return
 
     const containingLayer = findLayerContainingCoordinates(
-      location.lat!,
-      location.lng!,
+      lat,
+      lng,
       geoJsonData
     );
 
@@ -452,27 +457,30 @@ const MAP = ({
       toast.error("Somethig went wrong! Try again later");
     }
 
-    map?.flyTo([location.lat!, location.lng!], 18);
-    setLocation((prev) => ({
+    map?.flyTo([lat, lng], 18);
+    setState?.(prev => ({
       ...prev,
-      district: containingLayer?.properties.DISTRICT,
-      taluk: containingLayer?.properties.TALUK,
-      village: containingLayer?.properties.VILLAGE
-    }));
+      location: {
+        ...prev.location!,
+        district: containingLayer?.properties.DISTRICT,
+        taluk: containingLayer?.properties.TALUK,
+        village: containingLayer?.properties.VILLAGE
+      }
+    }) as LocationState);
   };
 
   const handleSubmit = async () => {
-    if (!location.district) {
+    if (!state?.location?.district) {
       toast.error("You need to submit the location details first.")
       return;
     }
 
     if (editMode === Mode.POST) {
-      await postsApi.refetch({ endpoint: `/posts/draft/${id}/location`, method: "POST", body: { location } })
+      await postsApi.refetch({ endpoint: `/posts/draft/${id}/location`, method: "POST", body: { location: state?.location }})
     } else if (editMode === Mode.EVENT) {
-      await eventsApi.refetch({ endpoint: `/events/draft/${id}/location`, method: "POST", body: { location } })
+      await eventsApi.refetch({ endpoint: `/events/draft/${id}/location`, method: "POST", body: { location: state?.location }})
     } else if (editMode === Mode.LOCATION) {
-      await locationsApi.refetch({ endpoint: `/locations/draft/${id}/location`, method: "POST", body: { location } })
+      await locationSubmitApi.refetch({ endpoint: `/locations/draft/${id}/location`, method: "POST", body: { location: state?.location }})
     }
     toast.success("Location stored successfully.");
   }
@@ -562,19 +570,40 @@ const MAP = ({
     const tooltip = new Tooltip({
       permanent: false,
       direction: "top",
-      className: "global-tooltip text-white"
+      offset: [0, -41],
+      className: `global-tooltip location-tooltip ${loc.name.split(" ").join("-")}`
     })
       .setContent(loc.name)
-      .setLatLng([loc.lat, loc.lng]);
+      .setLatLng([loc.coordinates?.[0], loc.coordinates?.[1]]);
 
     tooltip.addTo(map);
   }
 
-  const handleMarkerClick = (loc: ILocation) => {
-    if(!map) return;
+  const handleMarkerOut = (loc: ILocation) => {
+    if(!map || !toolTipPane.current) return;
 
+    const tooltip = toolTipPane.current.querySelector(`.${loc.name.split(" ").join("-")}`);
+    if(tooltip) tooltip.remove();
+  }
+
+  const handleMarkerClick = (e: LeafletMouseEvent, loc: ILocation) => {
+    if(!map || !toolTipPane.current) return;
+    if(editMode === undefined || editMode === Mode.LOCATION) return;
+
+    if((state as PostState | EventState)?.location?.name) {
+      const selectedMarker = markers.current[(state as PostState | EventState).location!.name];
+      if(selectedMarker) {
+        selectedMarker.setIcon(orangeMarker);
+      }
+    }
+
+    const marker = e.target as L.Marker;
+    marker.setIcon(blueMarker);
     if(editMode !== undefined) {
-      setLocation(loc);
+      setState?.(prev => ({
+        ...prev,
+        location: loc
+      }));
       return;
     }
 
@@ -633,7 +662,7 @@ const MAP = ({
             editMode !== undefined && location &&
             <IoMdDoneAll
               className={`text-[2.5rem] 
-                  ${location.district ? "text-white hover:scale-110" : "cursor-not-allowed text-gray-400"}`}
+                  ${state?.location?.district ? "text-white hover:scale-110" : "cursor-not-allowed text-gray-400"}`}
               onClick={handleSubmit}
             />
           }
@@ -670,7 +699,7 @@ const MAP = ({
                   id="lat"
                   name="lat"
                   autoComplete="off"
-                  value={location?.lat ?? ""}
+                  value={state?.location?.coordinates[0] ?? ""}
                   onChange={handleCoordinateChange}
                 />
                 {coordinateErrors.lat && <p className="text-red-500">{coordinateErrors.lat}</p>}
@@ -683,7 +712,7 @@ const MAP = ({
                   id="lng"
                   name="lng"
                   autoComplete="off"
-                  value={location?.lng ?? ""}
+                  value={state?.location?.coordinates[1] ?? ""}
                   onChange={handleCoordinateChange}
                 />
                 {coordinateErrors.lng && <p className="text-red-500">{coordinateErrors.lng}</p>}
@@ -793,22 +822,32 @@ const MAP = ({
                 villageLayers
           )}
           {
-            !minimal && editMode !== undefined && location.district &&
+            !minimal && editMode !== undefined && state?.location?.district &&
               <Marker
-                position={[location.lat!, location.lng!]}
+                position={[
+                  state?.location?.coordinates?.[0], 
+                  state?.location?.coordinates?.[1]
+                ]}
               />
           }
           {
-            !minimal && activeVillage && zoom >= 14 && existingLocations.length > 0 && (
-              existingLocations.filter(loc => loc.village === activeVillage.properties?.VILLAGE).map(loc => (
+            !minimal && activeVillage && zoom >= 14 && existingLocations?.length > 0 && (
+              existingLocations.filter(loc => loc.village === activeVillage.properties?.VILLAGE).map((loc, index) => (
                 <Marker
+                  key={loc.id}
+                  ref={(el) => {
+                    if(el) {
+                      markers.current[loc.name] = el;
+                    } 
+                  }}
                   position={[
-                    loc.lat,
-                    loc.lng
+                    loc.coordinates?.[0],
+                    loc.coordinates?.[1]
                   ]}
                   eventHandlers={{
                     mouseover: () => handleMarkerHover(loc),
-                    mousedown: () => handleMarkerClick(loc)
+                    mouseout: () => handleMarkerOut(loc),
+                    mousedown: (e) => handleMarkerClick(e, loc)
                   }}
                   icon={orangeMarker}
                 />

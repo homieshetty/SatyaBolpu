@@ -16,5 +16,14 @@ export const validateEventDetails = (event: IEvent) => {
 }
 
 export const validateLocationDetails = (location: ILocation) => {
-    return location.name;
+  return location.name;
+}
+
+export const validateLocationFields = (location: ILocation) => {
+  return location.district && // location.taluk && location.maagane &&
+  location.village && location.coordinates?.[0] && location.coordinates?.[1]  
+}
+
+export const validateLocation = (location: ILocation) => {
+  return validateLocationDetails(location) && validateLocationFields(location);
 }

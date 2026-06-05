@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CultureState, DetailsType, NewProps, NewState, PostState } from "../../types/globals";
+import { CultureState, DetailsType, EventState, LocationDetailsType, LocationState, NewProps, NewState, PostState } from "../../types/globals";
 import ProgressBar from "../../components/ProgressBar";
 import Editor from "../../components/Editor";
 import { Mode } from "../../types/enums";
@@ -73,6 +73,7 @@ const New = ({ type }: NewProps) => {
 
   const steps = useMemo(() => {
     if(!data || !state) return {};
+    console.log(state)
     const { submitApi, ...options } = data;
 
     return {
@@ -113,11 +114,21 @@ const New = ({ type }: NewProps) => {
           }
           : type === "event" ?
             {
-              "Location": <MAP editMode={Mode.EVENT} />
+              "Location": 
+              <MAP
+                state={state as EventState}
+                setState={setState as React.Dispatch<React.SetStateAction<typeof state>>}
+                editMode={Mode.EVENT} 
+              />
             }
             : type === "location" ?
               {
-                "Location": <MAP editMode={Mode.LOCATION} />
+                "Location": 
+                <MAP 
+                  state={state as PostState}
+                  setState={setState as React.Dispatch<React.SetStateAction<typeof state>>}
+                  editMode={Mode.LOCATION} 
+                />
               }
               : {}
     )
@@ -133,7 +144,8 @@ const New = ({ type }: NewProps) => {
     let res = await data?.submitApi?.post(state);
     if (!res) return;
     if(type === "culture" || type === "event" || type === "post" || type === "location")
-      res = await draftsApi.del({ endpoint: `/drafts/${id}` });
+    res = await draftsApi.del({ endpoint: `/drafts/${id}` });
+    if (!res) return;
     toast.success(`Uploaded successfully`);
     navigate("/add");
   }
@@ -145,26 +157,29 @@ const New = ({ type }: NewProps) => {
   if (!state) return;
 
   return (
-    <div className="w-full mt-20 mb-40 flex flex-col gap-10 items-center justify-center">
+    <div className="w-full mt-20 mb-40 flex flex-col gap-20 items-center justify-center">
       {/* <Title title={state.details ? `New ${type} - ${state.details.title}` : `New Draft ${type}`}/> */}
 
-      <ProgressBar
-        steps={steps}
-        progress={progress}
-        setProgress={setProgress}
-        setShowStep={setShowStep}
-        state={state}
-      />
-
-      {
-        progress >= 100 &&
-        <Button
-          content={`Upload ${type}`}
-          loadingText="Uploading"
-          loading={data?.submitApi?.loading}
-          onClick={handleUpload}
+      <div className="w-full flex flex-col items-center justify-center gap-10">
+        <ProgressBar
+          steps={steps}
+          progress={progress}
+          setProgress={setProgress}
+          setShowStep={setShowStep}
+          state={state}
         />
-      }
+
+        {
+          progress >= 100 &&
+          <Button
+            content={`Upload ${type}`}
+            loadingText="Uploading"
+            loading={data?.submitApi?.loading}
+            onClick={handleUpload}
+          />
+        }
+
+      </div>
 
       {
         steps[step as keyof typeof steps]

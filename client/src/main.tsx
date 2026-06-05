@@ -22,16 +22,16 @@ const ScrollToTop = () => {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <ScrollToTop />
-      <AuthProvider>
-        <DialogBoxProvider>
-          <Navbar />
-          <LoadingProvider>
+      <LoadingProvider>
+        <ScrollToTop />
+        <AuthProvider>
+          <DialogBoxProvider>
+            <Navbar />
             <App />
-          </LoadingProvider>
-          <Footer />
-        </DialogBoxProvider>
-      </AuthProvider>
+            <Footer />
+          </DialogBoxProvider>
+        </AuthProvider>
+      </LoadingProvider>
     </BrowserRouter>
   </StrictMode>
 )

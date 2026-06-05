@@ -136,12 +136,12 @@ export type User = {
 };
 
 export type Location = {
+  name: string;
   district: string;
   taluk?: string;
   maagane?: string;
   village: string;
-  lat: number | null;
-  lng: number | null;
+  coordinates: number[2]
 };
 
 export type AuthState = {
@@ -202,7 +202,7 @@ export type LocationState = {
   details: {
     name: string;
   },
-  location: Location | null;
+  location: Omit<Location, "name"> | null;
 }
 
 export type SignUpProps = {
@@ -242,8 +242,7 @@ export interface ILocation {
   taluk: string;
   maagane: string;
   village: string;
-  lat: number;
-  lng: number;
+  coordinates: number[];
   attachments: File[] | string[];
 };
 

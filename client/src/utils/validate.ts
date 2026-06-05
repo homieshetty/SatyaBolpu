@@ -1,4 +1,4 @@
-import { ICulture, IEvent, IPost } from "../types/globals";
+import { ICulture, IEvent, ILocation, IPost } from "../types/globals";
 
 export const validateCultureDetails = (culture: ICulture) => {
   return culture.title && culture.description &&
@@ -13,4 +13,17 @@ export const validatePostDetails = (post: IPost) => {
 export const validateEventDetails = (event: IEvent) => {
   return event.culture && event.description && event.duration.start &&
   event.duration.end && event.title && event.coverImage;
+}
+
+export const validateLocationDetails = (location: ILocation) => {
+  return location.name; 
+}
+
+export const validateLocationFields = (location: ILocation) => {
+  return location.district && //location.taluk && location.maagane &&
+   location.village && location.coordinates?.[0] && location.coordinates?.[1];
+}
+
+export const validateLocation = (location: ILocation) => {
+  return validateLocationDetails(location) && validateLocationFields(location);
 }

@@ -89,14 +89,18 @@ export const getDraft = async (req: Request, res: Response) => {
           files: d?.files ?? []
         },
 
-        location: d?.location ? {
-          district: d?.location.district,
-          taluk: d?.location.taluk,
-          maagane: d?.location.maagane,
-          village: d?.location.village,
-          lat: d?.location.coordinates[0],
-          lng: d?.location.coordinates[1]
-        } : null
+        location: {
+          details: {
+            name: d?.location?.name ?? "",
+          },
+          location: {
+            district: d?.location?.district ?? "",
+            taluk: d?.location?.taluk ?? "",
+            maagane: d?.location?.maagane ?? "",
+            village: d?.location?.village ?? "",
+            coordinates: d?.location?.coordinates ?? []
+          }
+        }
       };
     }
 
@@ -118,14 +122,18 @@ export const getDraft = async (req: Request, res: Response) => {
           locationSpecific: d?.locationSpecific
         },
 
-        location: d?.location ? {
-          district: d?.location.district,
-          taluk: d?.location.taluk,
-          maagane: d?.location.maagane,
-          village: d?.location.village,
-          lat: d?.location.coordinates[0],
-          lng: d?.location.coordinates[1]
-        } : null,
+        location: {
+          details: {
+            name: d?.location?.name ?? "",
+          },
+          location: {
+            district: d?.location?.district ?? "",
+            taluk: d?.location?.taluk ?? "",
+            maagane: d?.location?.maagane ?? "",
+            village: d?.location?.village ?? "",
+            coordinates: d?.location?.coordinates ?? []
+          }
+        },
 
         content: d?.content ?? ""
       };
@@ -138,13 +146,11 @@ export const getDraft = async (req: Request, res: Response) => {
           name: d?.name ?? "",
         },
         location: {
-          type: "Point",
           district: d?.district,
           taluk: d?.taluk,
           maagane: d?.maagane,
           village: d?.village,
-          lat: d?.coordinates[0],
-          lng: d?.coordinates[1]
+          coordinates: d?.coordinates
         }
       };
     }

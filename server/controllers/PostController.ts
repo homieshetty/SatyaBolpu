@@ -8,7 +8,7 @@ import { PostType } from "../models/PostType.js";
 import { Types } from "mongoose";
 import { Culture } from "../models/Culture.js";
 import { Location } from "../models/Location.js";
-import { validatePostDetails } from "../utils/validate.js";
+import { validateLocation, validatePostDetails } from "../utils/validate.js";
 
 export const getPosts = async (req: Request, res: Response) => {
   try {
@@ -217,7 +217,7 @@ export const savePostDetails = async (req: Request, res: Response) => {
     const id = req.params.id;
     const { formData: details } = req.body;
 
-    if (!details || !validatePostDetails(details)) {
+    if ( !id || !details || !validatePostDetails(details)) {
       return res.status(400).json({ msg: "Missing Required Field" });
     }
 
@@ -420,7 +420,7 @@ export const uploadPost = async (req: AuthRequest, res: Response) => {
     const userId = req.user._id;
     const { details, content, location } = req.body;
 
-    if (!details || !validatePostDetails(details) || !content) {
+    if (!details || !validatePostDetails(details) || !content || !validateLocation(location)) {
       return res.status(400).json({ msg: "Missing Required Field" });
     }
 

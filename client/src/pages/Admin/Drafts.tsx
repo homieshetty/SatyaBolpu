@@ -18,7 +18,7 @@ const Drafts = () => {
   }
 
   const handleDelete = async (id: string) => {
-    await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "DELETE" });
+    await draftsApi.del({ endpoint: `/drafts/${id}` });
   }
 
   if(!authState.token || !authState.user) {

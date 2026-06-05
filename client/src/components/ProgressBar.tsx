@@ -25,7 +25,7 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, setSho
       width += offset
     }
 
-    setProgress(width)
+    setProgress(Math.min(width, 100))
   },[state]);
 
   return (
@@ -36,7 +36,7 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, setSho
         <div
           className="absolute z-10 rounded-lg bg-primary h-1"
           style={{
-            width: `${Math.min(progress, 100)}%`
+            width: `${progress}%`
           }}
         >
 
@@ -44,13 +44,13 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, setSho
         {
           Object.keys(steps).map((step, index) => {
             const isDisabled = index === 0 ? false : progress < offset * index;
-            const isCompleted = progress > offset * index;
+            const isCompleted = progress > offset * index || progress >= 100;
             return (
               <div 
                 className={`w-10 h-10 p-2 rounded-full absolute top-1/2 -translate-y-1/2
                   border-3 border-primary z-20 flex items-center justify-center text-white
                   ${isCompleted ? 'bg-primary' : 'bg-black'}
-                  ${!isDisabled ? "hover:border-white hover:bg-primary opacity-100" : "opacity-50"}`}
+                  ${!isDisabled ? "hover:border-white hover:bg-primary " : "opacity-50"}`}
                 key={index}
                 onClick={isDisabled ? () => {} : () => setShowStep(step) }
                 style={{

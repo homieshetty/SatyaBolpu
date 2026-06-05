@@ -57,6 +57,7 @@ export const getInitialDetails = (type: NewProps['type'], state: NewState) => {
                   (state as LocationState).details ??
                   {
                     name: "",
+                    location: null
                   } :
                   null
   )

@@ -5,7 +5,7 @@ import { Culture } from "../models/Culture.js";
 import { EventDraft } from "../models/Draft.js";
 import { Types } from "mongoose";
 import { Location } from "../models/Location.js";
-import { validateEventDetails } from "../utils/validate.js";
+import { validateEventDetails, validateLocation } from "../utils/validate.js";
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
@@ -219,7 +219,7 @@ export const uploadEvent = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user._id;
     const { details, location } = req.body;
-    if(!details || !validateEventDetails(details) || !location) {
+    if(!details || !validateEventDetails(details) || !validateLocation(location)) {
       return res.status(400).json({ msg: "Missing required field." });
     }
 

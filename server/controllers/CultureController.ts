@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Culture } from "../models/Culture.js";
 import { CultureDraft } from "../models/Draft.js";
 import { validateCultureDetails } from "../utils/validate.js";
+import { AuthRequest } from "../types/globals.js";
 
 export const getCultures = async (req: Request, res: Response) => {
   try {
@@ -172,8 +173,9 @@ export const createDraft = async (req: Request, res: Response) => {
   }
 }
 
-export const uploadCulture = async (req: Request, res: Response) => {
+export const uploadCulture = async (req: AuthRequest, res: Response) => {
   try {
+    const userId = req.user._id;
     const { details, content } = req.body;
     if (!details || !validateCultureDetails(details) || !content) {
       return res.status(400).json({ msg: "Missing required field." });
@@ -185,6 +187,7 @@ export const uploadCulture = async (req: Request, res: Response) => {
     }
 
     const newCulture = await Culture.create({
+      userId,
       ...details,
       content: content,
       posts: 0

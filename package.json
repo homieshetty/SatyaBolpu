@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "install:all": "npm install concurrently && concurrently \"npm install\" \"npm install --prefix client\" \"npm install --prefix server\" ",
     "client": "npm run dev --prefix client",
-    "server": "npm run dev ---prefix server",
+    "server": "npm run dev --prefix server",
     "build:client": "npm run build --prefix client",
     "build:server": "npm run build --prefix server",
     "app": "concurrently \"npm run client\" \"npm run server\"",

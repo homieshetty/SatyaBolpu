@@ -507,7 +507,7 @@ const Form = <T extends {}>({
                         fileType.startsWith("image") ? (
                           <img
                             className="w-full aspect-square object-cover object-center"
-                            src={fileUrl}
+                            src={`${BASE_URL}${fileUrl}`}
                             alt={`file-${index}`}
                           />
                         ) : (
@@ -516,7 +516,7 @@ const Form = <T extends {}>({
                               scrollbarWidth: "none"
                             }}
                             className="w-full aspect-square object-cover object-center"
-                            src={fileUrl}
+                            src={`${BASE_URL}${fileUrl}`}
                           />
                         )
                       }
