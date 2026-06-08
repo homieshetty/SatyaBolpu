@@ -9,7 +9,6 @@ const Others = () => {
 
   const { state: authState } = useAuth();
 
-
   if(!authState.token || authState.user?.role !== "admin")
     return <Navigate to={"/404"} replace/>
 

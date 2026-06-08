@@ -9,6 +9,20 @@ const initialState: AuthState = {
   isRefreshing: false,
 };
 
+const getPersistedAuthState = (): AuthState => {
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  if (token) {
+    try {
+      const { exp } = jwtDecode<{ exp: number }>(token);
+      if (exp > Date.now() / 1000) {
+        return { user, token, isRefreshing: false };
+      }
+    } catch {}
+  }
+  return initialState;
+};
+
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
     case "LOGIN":
@@ -28,14 +42,14 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isRefreshing: false 
       };
     case "REFRESH_FAILED":
-      return { ...initialState };
+      return { ...state, isRefreshing: false };
     default:
       return state;
   }
 };
 
 const AuthContext = createContext<AuthContextType>({
-  state: initialState,
+  state: getPersistedAuthState(),
   dispatch: () => {
     console.warn("dispatch called outside of AuthProvider");
   },
@@ -138,7 +152,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     if (error && state.isRefreshing) {
       console.error("Refresh error:", error);
-      dispatch({ type: "REFRESH_FAILED" });
+      // Only log out if the current token is expired; otherwise keep the user logged in
+      if (state.token) {
+        try {
+          const { exp } = jwtDecode<{ exp: number }>(state.token);
+          if (exp <= Date.now() / 1000) {
+            dispatch({ type: "LOGOUT" });
+          } else {
+            dispatch({ type: "REFRESH_FAILED" });
+          }
+        } catch {
+          dispatch({ type: "LOGOUT" });
+        }
+      } else {
+        dispatch({ type: "LOGOUT" });
+      }
     }
   }, [data, error, state.isRefreshing]);
 
