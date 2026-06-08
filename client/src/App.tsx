@@ -14,14 +14,11 @@ import Lenis from "lenis";
 import { useLayoutEffect } from "react"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/all"
-import NewTag from "./pages/Admin/NewTag"
 import Posts from "./pages/Posts"
 import Post from "./pages/Post"
 import Cultures from "./pages/Cultures"
 import Drafts from "./pages/Admin/Drafts"
 import Others from "./pages/Admin/Others"
-import NewPostType from "./pages/Admin/NewPostType"
-import NewPostGroup from "./pages/Admin/NewPostGroup"
 import Events from "./pages/Events"
 import Add from "./pages/Admin/Add"
 import New from "./pages/Admin/New"
@@ -89,9 +86,9 @@ function App() {
         <Route path="/add/culture/:id" element={<New type="culture" />} />
         <Route path="/add/event/:id" element={<New type="event" />} />
         <Route path="/add/location/:id" element={<New type="location" />} />
-        <Route path="/add/tag" element={<NewTag />} />
-        <Route path="/add/post-type" element={<NewPostType />} />
-        <Route path="/add/post-group" element={<NewPostGroup />} />
+        <Route path="/add/tag" element={<New type="tag" />} />
+        <Route path="/add/post-type" element={<New type="post-type" />} />
+        <Route path="/add/post-group" element={<New type="post-group" />} />
         <Route path="/map" element={<Map />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

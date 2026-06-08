@@ -16,6 +16,10 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, setSho
     () => 100 / (Object.keys(steps).length - 1)
   , [steps]);
 
+  const allComplete = useMemo(
+    () => Object.values(state).every(v => Boolean(v))
+  , [state]);
+
   useLayoutEffect(() => {
     let width = 0;
     for(const value of Object.values(state)) {
@@ -44,7 +48,7 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, setSho
         {
           Object.keys(steps).map((step, index) => {
             const isDisabled = index === 0 ? false : progress < offset * index;
-            const isCompleted = progress > offset * index || progress >= 100;
+            const isCompleted = allComplete || progress > offset * index;
             return (
               <div 
                 className={`w-10 h-10 p-2 rounded-full absolute top-1/2 -translate-y-1/2

@@ -203,7 +203,7 @@ export const getPost = async (req: Request, res: Response) => {
         culture: (post.culture as any).title,
         postGroup: (post.postGroup as any).name,
         postType: (post.postType as any).name,
-        tags: post.tags.map((t: any) => t.tag)
+        tags: post.tags.map((t: any) => t.name)
       }
     });
   } catch (err: any) {

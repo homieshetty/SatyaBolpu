@@ -21,6 +21,7 @@ const Form = <T extends {}>({
 }: FormProps<T>) => {
 
   const pageSize = 10;
+  const formRef = useRef<HTMLFormElement>(null);
   const [formData, setFormData] = useState<T>(state);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [allowedOptions, setAllowedOptions] = useState<Record<string, FormFieldOption[]>>({});
@@ -33,9 +34,13 @@ const Form = <T extends {}>({
   const textAreaRefs = useRef<Record<string, HTMLTextAreaElement>>({});
   const optionRefs = useRef<Record<string, HTMLInputElement>>({});
 
-  const submitApi = useApi(submitEndpoint, { auto: false });
+  const submitApi = typeof submitEndpoint === "string" ? useApi(submitEndpoint, { auto: false }) : submitEndpoint;
   const uploadSingleApi = useApi('/upload/single', { auto: false });
   const uploadMultipleApi = useApi('/upload/multiple', { auto: false });
+
+  useEffect(() => {
+    setFormData(state);
+  }, [state]);
 
   useEffect(() => {
     Object.values(textAreaRefs.current).forEach(ref => {
@@ -109,7 +114,7 @@ const Form = <T extends {}>({
           field.name,
           (field.options ?? []).filter(opt =>
             !selectedValues.includes(opt.value) &&
-            (!searchVal || opt.label.toLowerCase().startsWith(searchVal.toLowerCase()))
+            (!searchVal || opt.label?.toLowerCase().startsWith(searchVal.toLowerCase()))
           )
         );
       }
@@ -337,16 +342,14 @@ const Form = <T extends {}>({
       }
     }
 
-    await submitApi.post({ formData: finalFormData });
+    const res = await submitApi.post({ formData: finalFormData });
+    if(!res) { setSaving(false); return; }
+    toast.success(toastMsg);
+    setState(res);
+    setFormData(state);
+    setErrors({});
     setSaving(false);
   };
-
-  useEffect(() => {
-    if(submitApi.data) {
-      toast.success(toastMsg);
-      setState(formData);
-    }
-  }, [submitApi.data]);
 
   const renderField = (field: FormField<T>) => {
     const fieldError = getValue(errors, field.name);
@@ -683,6 +686,7 @@ const Form = <T extends {}>({
 
   return (
     <form
+      ref={formRef}
       onSubmit={handleSubmit}
       className={cn(
         "w-4/5 md:w-2/3 lg:w-1/2 flex flex-col gap-20 mx-auto py-10 justify-center", 

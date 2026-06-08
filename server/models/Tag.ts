@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { ITag } from "../types/globals.js";
 
 const tagSchema = new Schema<ITag>({
-  tag: {
+  name: {
     type: String,
     required: true,
     unique: true

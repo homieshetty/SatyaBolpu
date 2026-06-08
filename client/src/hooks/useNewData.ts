@@ -4,9 +4,7 @@ import {
   IEvent,
   ILocation,
   IPost,
-  IPostGroup,
-  IPostType,
-  ITag,
+  IOther,
   NewData,
   NewProps,
 } from "../types/globals";
@@ -88,8 +86,8 @@ const useNewData = <T extends NewProps["type"]>(
           titles,
           shortTitles,
           tags:
-            tagsApi.data?.tags?.map((tag: ITag) => ({
-              label: tag.tag,
+            tagsApi.data?.tags?.map((tag: IOther) => ({
+              label: tag.name,
               value: tag.id,
             })) ?? [],
           cultures:
@@ -98,12 +96,12 @@ const useNewData = <T extends NewProps["type"]>(
               value: culture.id,
             })) ?? [],
           postTypes:
-            postTypesApi.data?.postTypes?.map((postType: IPostType) => ({
+            postTypesApi.data?.postTypes?.map((postType: IOther) => ({
               label: postType.name,
               value: postType.id,
             })) ?? [],
           postGroups:
-            postGroupsApi.data?.postGroups?.map((postGroup: IPostGroup) => ({
+            postGroupsApi.data?.postGroups?.map((postGroup: IOther) => ({
               label: postGroup.name,
               value: postGroup.id,
             })) ?? [],
@@ -142,7 +140,7 @@ const useNewData = <T extends NewProps["type"]>(
 
       case "tag":
         return {
-          tags: tagsApi.data?.tags.map((tag: ITag) => tag.tag) ?? [],
+          tags: tagsApi.data?.tags.map((tag: IOther) => tag.name) ?? [],
           submitApi: submitApis.tag,
         };
 
@@ -150,7 +148,7 @@ const useNewData = <T extends NewProps["type"]>(
         return {
           postGroups:
             postGroupsApi.data?.postGroups?.map(
-              (postGroup: IPostGroup) => postGroup.name
+              (postGroup: IOther) => postGroup.name
             ) ?? [],
           submitApi: submitApis["post-group"],
         };
@@ -159,7 +157,7 @@ const useNewData = <T extends NewProps["type"]>(
         return {
           postTypes:
             postTypesApi.data?.postTypes?.map(
-              (postType: IPostType) => postType.name
+              (postType: IOther) => postType.name
             ) ?? [],
           submitApi: submitApis["post-type"],
         };

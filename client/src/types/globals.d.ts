@@ -113,8 +113,8 @@ export type FormField<T> = {
 export type FormProps<T> = {
   fields: FormField<T>[];
   state: T;
-  setState: (state: T) => void | React.Dispatch<React.SetStateAction<T>>;
-  submitEndpoint: string;
+  setState: (state: T) => void | React.Dispatch<React.SetStateAction<OtherState>>;
+  submitEndpoint: string | ApiState<any>;
   error?: string;
   submitText?: string;
   loadingText?: string;
@@ -180,7 +180,7 @@ export type LoadingContextType = {
   stopLoading: () => void;
 };
 
-export type DetailsType = PostDetailsType | CultureDetailsType | EventDetailsType | TagState | PostGroupState | PostTypeState | LocationDetailsType;
+export type DetailsType = PostDetailsType | CultureDetailsType | EventDetailsType | OtherState | LocationDetailsType;
 
 export type PostState = {
   details: PostDetailsType | null;
@@ -281,17 +281,7 @@ export type LocationDetailsType = {
   name: string;
 };
 
-export interface ITag {
-  id: string;
-  tag: string;
-}
-
-export interface IPostType {
-  id: string;
-  name: string;
-}
-
-export interface IPostGroup {
+export interface IOther {
   id: string;
   name: string;
 }
@@ -321,10 +311,8 @@ export type NewProps = {
   type: "post" | "event" | "culture" | "location" | "tag" | "post-type" | "post-group";
 };
 
-export type TagState = Omit<ITag, "id">;
-export type PostGroupState = Omit<IPostGroup, "id">;
-export type PostTypeState = Omit<IPostType, "id">;
-export type NewState = PostState | CultureState | EventState | LocationState | TagState | PostGroupState | PostTypeState;
+export type OtherState = Omit<IOther, "id">;
+export type NewState = PostState | CultureState | EventState | LocationState | OtherState;
 
 export type NewPostData = {
   titles: string[],

@@ -4,7 +4,7 @@ import Title from "../components/Title";
 import useApi from "../hooks/useApi";
 import { useEffect, useState } from "react";
 import { FilterGroups } from "../components/Filters";
-import { NormalCardProps, PostGroupProps } from "../types/globals";
+import { ICulture, IOther, NormalCardProps, PostGroupProps } from "../types/globals";
 import { NormalCard, NormalSkeletonCard } from "../components/NormalCard";
 import PostGroupCard, { PostGroupSkeleton } from "../components/PostGroupCard";
 import DropDown from "../components/DropDown";
@@ -25,7 +25,7 @@ const Posts = () => {
       setFilterGroups(prev => ({
         ...prev,
         "Culture": { 
-          options: culturesApi.data.cultures.map((c: any) => ({ name: c.title, value: c._id })), 
+          options: culturesApi.data.cultures.map((c: ICulture) => ({ name: c.title, value: c.id })), 
           color: "#fa7b55"
         }
       }));
@@ -35,7 +35,7 @@ const Posts = () => {
       setFilterGroups(prev => ({
         ...prev,
         "Tag": {
-          options: tagsApi.data.tags.map((t: any) => ({ name: t.tag, value: t._id })),
+          options: tagsApi.data.tags.map((t: IOther) => ({ name: t.name, value: t.id })),
           color: "#fce38d"
         }
       }));
@@ -45,7 +45,7 @@ const Posts = () => {
       setFilterGroups(prev => ({
         ...prev,
         "Post type": {
-          options: postTypesApi.data.postTypes.map((pt: any) => ({ name: pt.name, value: pt._id })),
+          options: postTypesApi.data.postTypes.map((pt: IOther) => ({ name: pt.name, value: pt.id })),
           color: "#d0fc8d"
         }
       }));

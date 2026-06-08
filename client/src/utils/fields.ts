@@ -1,9 +1,8 @@
-import { CultureState, EventDetailsType, EventState, FormField, FormFieldOption, LocationState, NewProps, NewState, PostGroupState, PostState, PostTypeState, TagState } from "../types/globals";
+import { EventDetailsType, FormField, FormFieldOption, NewProps } from "../types/globals";
 
-export const getInitialDetails = (type: NewProps['type'], state: NewState) => {
+export const getInitialDetails = (type: NewProps['type']) => {
   return (
     type === "post" ?
-      (state as PostState).details ??
       {
         title: "",
         shortTitle: "",
@@ -17,7 +16,6 @@ export const getInitialDetails = (type: NewProps['type'], state: NewState) => {
         files: []
       } :
       type === "culture" ?
-        (state as CultureState).details ??
         {
           title: "",
           description: "",
@@ -26,7 +24,6 @@ export const getInitialDetails = (type: NewProps['type'], state: NewState) => {
           files: []
         } :
         type === "event" ?
-          (state as EventState).details ??
           {
             title: "",
             description: "",
@@ -38,28 +35,16 @@ export const getInitialDetails = (type: NewProps['type'], state: NewState) => {
             },
             files: []
           } :
-          type === "tag" ?
-            (state as TagState) ??
+          type === "tag" || type === "post-group" || type === "post-type" ?
             {
-              tag: ""
+              name: ""
             } :
-            type === "post-group" ?
-              (state as PostGroupState) ??
+            type === "location" ?
               {
-                name: ""
+                name: "",
+                location: null
               } :
-              type === "post-type" ?
-                (state as PostTypeState) ??
-                {
-                  name: ""
-                } :
-                type === "location" ?
-                  (state as LocationState).details ??
-                  {
-                    name: "",
-                    location: null
-                  } :
-                  null
+              null
   )
 };
 
@@ -252,7 +237,7 @@ export const getFields = <T>(type: NewProps['type'], options: Record<string, For
               type: "files",
               accept: "image/*,application/pdf"
             }
-          ] : 
+          ] :
           type === "location" ?
             [
               {
@@ -263,7 +248,20 @@ export const getFields = <T>(type: NewProps['type'], options: Record<string, For
                 unique: true,
                 existingValues: options.names
               }
-            ] : 
-              []
+            ] :
+            type === "post-type" || type === "post-group" || type === "tag" ?
+              [
+                {
+                  label: "Name",
+                  name: "name",
+                  type: "text",
+                  required: true,
+                  unique: true,
+                  existingValues: options[
+                    type === "post-group" ? "postGroups" :
+                      type === "post-type" ? "postTypes" : "tags"
+                  ]
+                }
+              ] : []
   )
 };

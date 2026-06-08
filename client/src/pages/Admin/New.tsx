@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CultureState, DetailsType, EventState, LocationDetailsType, LocationState, NewProps, NewState, PostState } from "../../types/globals";
+import { CultureState, DetailsType, EventState, NewProps, NewState, PostState } from "../../types/globals";
 import ProgressBar from "../../components/ProgressBar";
 import Editor from "../../components/Editor";
 import { Mode } from "../../types/enums";
@@ -13,11 +13,14 @@ import useDraftLoader from "../../hooks/useDraftLoader";
 import useNewData from "../../hooks/useNewData";
 import { getFields, getInitialDetails } from "../../utils/fields";
 import useApi from "../../hooks/useApi";
+import Title from "../../components/Title";
+import { kebabToTitleCase } from "../../utils/utils";
 
 const New = ({ type }: NewProps) => {
 
   const [progress, setProgress] = useState<number>(0);
   const [step, setShowStep] = useState<string>('');
+  const draftable = type === "culture" || type === "event" || type === "post" || type === "location";
   const [state, setState] = useState<NewState | null>(() => {
     if (type === "post") {
       return {
@@ -42,28 +45,24 @@ const New = ({ type }: NewProps) => {
         },
         location: null
       }
-    } else if (type === "tag") {
+    } else if (type === "tag" || type === "post-group" || type === "post-type") {
       return {
-        tag: ""
-      };
-    } else if (type === "post-group") {
-      return {
-        postGroup: ""
-      };
-    } else if (type === "post-type") {
-      return {
-        postType: ""
+        name: ""
       };
     };
     return null;
   });
 
+  useEffect(() => console.log(state), [state])
+
   const { id } = useParams();
-  useDraftLoader(
-    id,
-    type,
-    setState
-  );
+  if(draftable) {
+    useDraftLoader(
+      id,
+      type,
+      setState
+    );
+  }
   const data = useNewData(type);
 
   const { state: authState } = useAuth();
@@ -73,21 +72,25 @@ const New = ({ type }: NewProps) => {
 
   const steps = useMemo(() => {
     if(!data || !state) return {};
-    console.log(state)
     const { submitApi, ...options } = data;
 
     return {
     "Details":
         <Form<DetailsType>
           fields={getFields(type, options)}
-          state={getInitialDetails(type, state) as DetailsType}
+          state={getInitialDetails(type) as DetailsType}
           setState={(details) => {
-            setState(prev => ({
-              ...prev,
-              details
-            }))
+            draftable ?
+              setState(prev => ({
+                ...prev,
+                details
+              })) :
+              setState(prev => ({
+                ...prev,
+                ...details
+              }))
           }}
-          submitEndpoint={`/${type}s/draft/${id}/details`}
+          submitEndpoint={draftable ? `/${type}s/draft/${id}/details` : data.submitApi}
           submitText="Save Details"
           loadingText="Saving"
           toastMsg={`${type.charAt(0).toUpperCase() + type.slice(1)} details saved successfully`}
@@ -158,19 +161,24 @@ const New = ({ type }: NewProps) => {
 
   return (
     <div className="w-full mt-20 mb-40 flex flex-col gap-20 items-center justify-center">
-      {/* <Title title={state.details ? `New ${type} - ${state.details.title}` : `New Draft ${type}`}/> */}
 
       <div className="w-full flex flex-col items-center justify-center gap-10">
-        <ProgressBar
-          steps={steps}
-          progress={progress}
-          setProgress={setProgress}
-          setShowStep={setShowStep}
-          state={state}
-        />
+        {
+          Object.keys(state).length > 1 ? 
+          <ProgressBar
+            steps={steps}
+            progress={progress}
+            setProgress={setProgress}
+            setShowStep={setShowStep}
+            state={state}
+          /> :
+          <Title 
+            title={`New ${kebabToTitleCase(type)}`}
+          />
+        }
 
         {
-          progress >= 100 &&
+          state && Object.values(state).every(v => Boolean(v)) &&
           <Button
             content={`Upload ${type}`}
             loadingText="Uploading"

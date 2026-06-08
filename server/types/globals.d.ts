@@ -88,7 +88,7 @@ export interface IBlog extends Document {
 }
 
 export interface ITag extends Document {
-  tag: string;
+  name: string;
 };
 
 export interface IPostGroup extends Document {

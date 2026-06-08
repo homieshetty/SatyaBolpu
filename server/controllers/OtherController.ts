@@ -6,10 +6,10 @@ import { Culture } from "../models/Culture.js";
 
 export const getTags = async (req: Request, res: Response) => {
   try {
-    const sortBy = req.query.sortBy?.toString() ?? "tag";
+    const sortBy = req.query.sortBy?.toString() ?? "name";
     const orderBy = req.query.orderBy?.toString() ?? "asc";
     const tagsData = 
-      await Tag.find({}, "tag")
+      await Tag.find({}, "name")
         .collation({ locale: "en", strength: 2 })
         .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 });
     if (!tagsData) {
@@ -33,19 +33,19 @@ export const getTags = async (req: Request, res: Response) => {
 
 export const addTag = async (req: Request, res: Response) => {
   try {
-    const { tag } = req.body;
+    const { name } = req.body?.formData;
 
-    if(!tag) {
+    if(!name) {
       return res.status(400).json({ msg: "Missing required field 'tag'" });
     }
 
-    const doesExist = await Tag.findOne({ tag });
+    const doesExist = await Tag.findOne({ name });
     if(doesExist) {
       return res.status(400).json({ msg: "Tag already exists" });
     }
   
-    const newTag = await Tag.create({ tag });
-    return res.status(200).json({ tag: newTag.tag });
+    const newTag = await Tag.create({ name });
+    return res.status(200).json({ name: newTag.name });
   } catch (err: any) {
     console.error(`Error while adding tag : ${err}`);
     return res.status(500).json({ msg: "Internal sever error while adding tag." });
@@ -82,19 +82,19 @@ export const getPostTypes = async (req: Request, res: Response) => {
 
 export const addPostType = async (req: Request, res: Response) => {
   try {
-    const { postType } = req.body;
+    const { name } = req.body?.formData;
 
-    if(!postType) {
+    if(!name) {
       return res.status(400).json({ msg: "Missing required field." });
     }
 
-    const doesExist = await PostType.findOne({ name: postType });
+    const doesExist = await PostType.findOne({ name: name });
     if(doesExist) {
       return res.status(400).json({ msg: "Post type already exists." });
     }
   
-    const { name } = await PostType.create({ name: postType });
-    return res.status(200).json({ postType: name });
+    const postType = await PostType.create({ name });
+    return res.status(200).json({ name: postType.name });
   } catch (err: any) {
     console.error(`Error while adding post type. : ${err}`);
     return res.status(500).json({ msg: "Internal server error while adding post type." });
@@ -131,19 +131,19 @@ export const getPostGroups = async (req: Request, res: Response) => {
 
 export const addPostGroup = async (req: Request, res: Response) => {
   try {
-    const { postGroup } = req.body;
+    const { name } = req.body?.formData;
 
-    if(!postGroup) {
+    if(!name) {
       return res.status(400).json({ msg: "Missing required field." });
     }
 
-    const doesExist = await PostGroup.findOne({ name: postGroup });
+    const doesExist = await PostGroup.findOne({ name: name });
     if(doesExist) {
       return res.status(400).json({ msg: "Post group already exists." });
     }
 
-    const { name } = await PostGroup.create({ name: postGroup, postCount: 0 });
-    return res.status(200).json({ postGroup: name });
+    const postGroup = await PostGroup.create({ name, postCount: 0 });
+    return res.status(200).json({ name: postGroup.name });
   } catch (err: any) {
     console.error(`Error while adding post group. : ${err}`);
     return res.status(500).json({ msg: "Internal server error while adding post group." });
