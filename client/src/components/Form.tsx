@@ -351,7 +351,7 @@ const Form = <T extends {}>({
     setSaving(false);
   };
 
-  const renderField = (field: FormField<T>) => {
+  const renderField = (field: FormField) => {
     const fieldError = getValue(errors, field.name);
     const fieldValue = getValue(formData, field.name);
 

@@ -12,7 +12,7 @@ import { FaMagnifyingGlassLocation } from "react-icons/fa6";
 import { IoMdDoneAll } from "react-icons/io";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
-import { EventState, ILocation, LocationState, PostState } from "../types/globals";
+import { EventState, ILocation, Location, LocationState, PostState } from "../types/globals";
 import { Mode } from "../types/enums";
 import { FaLock, FaLockOpen, FaPlus, FaMinus } from "react-icons/fa";
 import { IoLocationSharp } from "react-icons/io5";
@@ -89,7 +89,8 @@ const MAP = ({
   const [zoom, setZoom] = useState<number>(MAP_INITIAL_ZOOM);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const [activeVillage, setActiveVillage] = useState<GeoJSON.Feature | null>(null);
-  const [activeLocation, setActivateLocation] = useState<ILocation | null>(null)
+  const [activeLocation, setActiveLocation] = useState<ILocation | null>(null);
+  const [newLocation, setNewLocation] = useState<Location | null>(null);
   const [askForCoordinates, setAskForCoordinates] = useState<boolean>(false);
   const [coordinateErrors, setCoordinateErrors] = useState<coordinatesErrorType>({ lat: "", lng: "" });
   const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
@@ -101,7 +102,6 @@ const MAP = ({
   const activeLayerRef = useRef<Polygon | null>(null);
 
   const { startLoading, stopLoading } = useLoading();
-  const navigate = useNavigate();
 
   const locationsApi = useApi("/locations?fields=name,coordinates,district,taluk,village", { auto: !minimal });
   const locationSubmitApi = useApi("/locations", { auto: false });
@@ -279,16 +279,13 @@ const MAP = ({
       layer.on({
         click: (e: LeafletMouseEvent) => {
           if(editMode !== Mode.LOCATION) return;
-          setState?.(prev => ({
-            ...prev,
-            location: {
-              district: feature.properties?.DISTRICT,
-              taluk: feature.properties?.TALUK,
-              maagane: feature.properties?.MAAGANE,
-              village: feature.properties?.VILLAGE,
-              coordinates: [e.latlng.lat, e.latlng.lng]
-            }
-          }) as LocationState)
+          setNewLocation({
+            district: feature.properties?.DISTRICT,
+            taluk: feature.properties?.TALUK,
+            maagane: feature.properties?.MAAGANE,
+            village: feature.properties?.VILLAGE,
+            coordinates: [e.latlng.lat, e.latlng.lng]
+          });
         }
       })
     }
@@ -353,13 +350,10 @@ const MAP = ({
     if (isNaN(Number(value)))
       return
 
-    setState?.(prev => ({
-      ...prev,
-      location: {
-        ...prev.location!,
-        [name]: value
-      }
-    }) as LocationState)
+    setActiveLocation(prev => ({
+      ...prev!,
+      [name]: value
+    }))
   };
 
   const pointInPolygon = (point: number[], polygon: number[][]) => {
@@ -426,8 +420,8 @@ const MAP = ({
       lng: ""
     }
 
-    const lat = state?.location?.coordinates?.[0];
-    const lng = state?.location?.coordinates?.[1];
+    const lat = newLocation?.coordinates?.[0];
+    const lng = newLocation?.coordinates?.[1];
     if (!lat) {
       newErrors.lat = "Latitude is required."
     }
@@ -460,19 +454,17 @@ const MAP = ({
     }
 
     map?.flyTo([lat, lng], 18);
-    setState?.(prev => ({
-      ...prev,
-      location: {
-        ...prev.location!,
-        district: containingLayer?.properties.DISTRICT,
-        taluk: containingLayer?.properties.TALUK,
-        village: containingLayer?.properties.VILLAGE
-      }
-    }) as LocationState);
+    setNewLocation(prev => ({
+      ...prev!,
+      district: containingLayer?.properties.DISTRICT,
+      taluk: containingLayer?.properties.TALUK,
+      village: containingLayer?.properties.VILLAGE,
+      maagane: containingLayer?.properties.MAAGANE
+    }));
   };
 
   const handleSubmit = async () => {
-    if (!state?.location?.district) {
+    if (editMode === Mode.LOCATION && !(state as LocationState)?.location?.district) {
       toast.error("You need to submit the location details first.")
       return;
     }
@@ -484,6 +476,19 @@ const MAP = ({
     } else if (editMode === Mode.LOCATION) {
       await locationSubmitApi.refetch({ endpoint: `/locations/draft/${id}/location`, method: "POST", body: { location: state?.location }})
     }
+    if(editMode === Mode.LOCATION)
+      setState?.(prev => ({
+        ...prev,
+        location: {
+          ...(prev as LocationState).location,
+          ...newLocation
+        }
+      }) as LocationState);
+    else
+      setState?.(prev => ({
+        ...prev,
+        location: activeLocation?.id
+      }) as PostState | EventState);
     toast.success("Location stored successfully.");
   }
 
@@ -592,8 +597,8 @@ const MAP = ({
     if(!map || !toolTipPane.current) return;
     if(editMode === undefined || editMode === Mode.LOCATION) return;
 
-    if((state as PostState | EventState)?.location?.name) {
-      const selectedMarker = markers.current[(state as PostState | EventState).location!.name];
+    if(activeLocation?.name) {
+      const selectedMarker = markers.current[activeLocation.name];
       if(selectedMarker) {
         selectedMarker.setIcon(orangeMarker);
       }
@@ -602,10 +607,7 @@ const MAP = ({
     const marker = e.target as L.Marker;
     marker.setIcon(blueMarker);
     if(editMode !== undefined) {
-      setState?.(prev => ({
-        ...prev,
-        location: loc
-      }));
+      setActiveLocation(loc);
       return;
     }
 
@@ -664,14 +666,14 @@ const MAP = ({
             editMode !== undefined && location &&
             <IoMdDoneAll
               className={`text-[2.5rem] 
-                  ${state?.location?.district ? "text-white hover:scale-110" : "cursor-not-allowed text-gray-400"}`}
+                  ${activeLocation?.district || newLocation?.district ? "text-white hover:scale-110" : "cursor-not-allowed text-gray-400"}`}
               onClick={handleSubmit}
             />
           }
         </div>
       )}
 
-      {!minimal && editMode !== undefined && (
+      {!minimal && editMode !== undefined && editMode === Mode.LOCATION && (
         !askForCoordinates ?
           (
             <div
@@ -701,7 +703,7 @@ const MAP = ({
                   id="lat"
                   name="lat"
                   autoComplete="off"
-                  value={state?.location?.coordinates[0] ?? ""}
+                  value={newLocation?.coordinates[0] ?? ""}
                   onChange={handleCoordinateChange}
                 />
                 {coordinateErrors.lat && <p className="text-red-500">{coordinateErrors.lat}</p>}
@@ -714,7 +716,7 @@ const MAP = ({
                   id="lng"
                   name="lng"
                   autoComplete="off"
-                  value={state?.location?.coordinates[1] ?? ""}
+                  value={newLocation?.coordinates[1] ?? ""}
                   onChange={handleCoordinateChange}
                 />
                 {coordinateErrors.lng && <p className="text-red-500">{coordinateErrors.lng}</p>}
@@ -831,8 +833,8 @@ const MAP = ({
                   mouseover: () => handleMarkerHover(state?.location as ILocation)
                 }}
                 position={[
-                  state?.location?.coordinates?.[0], 
-                  state?.location?.coordinates?.[1]
+                  activeLocation?.coordinates?.[0] || newLocation?.coordinates?.[0], 
+                  activeLocation?.coordinates?.[1] || newLocation?.coordinates?.[1]
                 ]}
               />
           }

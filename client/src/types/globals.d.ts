@@ -86,7 +86,7 @@ export type FormFieldOption = {
   label: string;
 };
 
-export type FormField<T> = {
+export type FormField = {
   name: string;
   label: string;
   type: "text" | "email" | "password" | "textarea" | "select" | "file" | "files" | "url" | "number" | "radio" | "multi-select" | "date";
@@ -106,12 +106,12 @@ export type FormField<T> = {
   maxWords?: number;
   minItems?: number;
   maxItems?: number;
-  validation?: (formData: T, value: any) => string | undefined;
+  validation?: (formData: any, value: any) => string | undefined;
   disabled?: boolean;
 };
 
 export type FormProps<T> = {
-  fields: FormField<T>[];
+  fields: FormField[];
   state: T;
   setState: (state: T) => void | React.Dispatch<React.SetStateAction<OtherState>>;
   submitEndpoint: string | ApiState<any>;
@@ -135,7 +135,7 @@ export type User = {
   verified: boolean;
 };
 
-export type Location = Omit<ILocation, "id">;
+export type Location = Omit<ILocation, "id" | "name" | "attachments">;
 
 export type AuthState = {
   user: User | null;
@@ -178,12 +178,12 @@ export type DetailsType = PostDetailsType | CultureDetailsType | EventDetailsTyp
 export type PostState = {
   details: PostDetailsType | null;
   content: string;
-  location: Location | null;
+  location: string;
 };
 
 export type EventState = {
   details: EventDetailsType | null;
-  location: Location | null;
+  location: string;
 };
 
 export type CultureState = {
@@ -195,7 +195,7 @@ export type LocationState = {
   details: {
     name: string;
   },
-  location: Omit<Location, "name"> | null;
+  location: Location | null;
 }
 
 export type SignUpProps = {
@@ -270,9 +270,7 @@ export interface IEvent {
 };
 
 export type EventDetailsType = Omit<IEvent, "id" | "location">;
-export type LocationDetailsType = {
-  name: string;
-};
+export type LocationDetailsType = Pick<ILocation, "id" | "name" | "attachments">;
 
 export interface IOther {
   id: string;
@@ -354,7 +352,7 @@ type NewDataMap = {
   };
 };
 
-type NewData<T extends NewProps["type"]> =
+export type NewData<T extends NewProps["type"]> =
   NewDataMap[T] & {
     submitApi: ApiState<any>;
   };

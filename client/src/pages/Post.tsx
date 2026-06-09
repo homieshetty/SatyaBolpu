@@ -3,7 +3,6 @@ import Title from "../components/Title";
 import { useEffect, useState } from "react";
 import useApi from "../hooks/useApi";
 import { IPost } from "../types/globals";
-import { useLoading } from "../context/LoadingContext";
 
 const Post = () => {
   const { postId } = useParams();

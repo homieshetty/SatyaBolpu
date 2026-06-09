@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { BlogCardProps } from "../types/globals";
-import useApi from "../hooks/useApi";
 
 export const BlogSkeletonCard = () => {
   return (

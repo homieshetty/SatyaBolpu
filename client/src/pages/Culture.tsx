@@ -1,7 +1,6 @@
 import { Navigate, useParams } from "react-router-dom";
 import useApi from "../hooks/useApi";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useLoading } from "../context/LoadingContext";
 import gsap from "gsap";
 import Button from "../components/Button";
 import { CultureDetailsType } from "../types/globals";

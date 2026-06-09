@@ -15,7 +15,6 @@ import { Marker, Popup } from 'react-leaflet';
 import SVGHeader2 from '../constants/SVGHeader2';
 import { EventDetailsType, RotatingCardProps } from '../types/globals';
 import useApi from '../hooks/useApi';
-import { toast } from 'react-toastify';
 import RotatingCard from '../components/RotatingCard';
 import { BASE_URL } from "../App";
 import MAP from "./MAP";
