@@ -214,7 +214,7 @@ export const getFields = <T>(type: NewProps['type'], options: Record<string, For
               required: true,
               validation(formData, value) {
                 if (value && (formData as EventDetailsType).duration.end &&
-                  value > (formData as EventDetailsType).duration.end!) {
+                  new Date(value) > new Date((formData as EventDetailsType).duration.end!)) {
                   return "Start date cant be after end date.";
                 }
               },
@@ -226,7 +226,7 @@ export const getFields = <T>(type: NewProps['type'], options: Record<string, For
               required: true,
               validation(formData, value) {
                 if (value && (formData as EventDetailsType).duration.start &&
-                  value < (formData as EventDetailsType).duration.start!) {
+                  new Date(value) < new Date((formData as EventDetailsType).duration.start!)) {
                   return "End date cant be before start date.";
                 }
               },

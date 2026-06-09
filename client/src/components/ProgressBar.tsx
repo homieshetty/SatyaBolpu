@@ -29,7 +29,7 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, setSho
       width += offset
     }
 
-    setProgress(Math.min(width, 100))
+    setProgress(width)
   },[state]);
 
   return (
@@ -40,7 +40,7 @@ const ProgressBar: React.FC<PropsType> = ({ steps, progress, setProgress, setSho
         <div
           className="absolute z-10 rounded-lg bg-primary h-1"
           style={{
-            width: `${progress}%`
+            width: `${Math.min(progress, 100)}%`
           }}
         >
 

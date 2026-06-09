@@ -354,11 +354,7 @@ export const savePostLocation = async (req: Request, res: Response) => {
       {
         location: {
           type: "Point",
-          district: location.district,
-          taluk: location.taluk,
-          maagane: location.maagane,
-          village: location.village,
-          coordinates: [location.lat, location.lng]
+          ...location
         }
       },
       { new: true }

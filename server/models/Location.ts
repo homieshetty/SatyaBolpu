@@ -39,5 +39,6 @@ export const locationSchema = new Schema<ILocation>({
     type: [String]
   }
 }, { timestamps: true });
+locationSchema.index({ district: 1 })
 
 export const Location = mongoose.model<ILocation>("Location", locationSchema);

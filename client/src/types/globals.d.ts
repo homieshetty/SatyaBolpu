@@ -135,14 +135,7 @@ export type User = {
   verified: boolean;
 };
 
-export type Location = {
-  name: string;
-  district: string;
-  taluk?: string;
-  maagane?: string;
-  village: string;
-  coordinates: number[2]
-};
+export type Location = Omit<ILocation, "id">;
 
 export type AuthState = {
   user: User | null;
@@ -242,7 +235,7 @@ export interface ILocation {
   taluk: string;
   maagane: string;
   village: string;
-  coordinates: number[];
+  coordinates: number[2];
   attachments: File[] | string[];
 };
 
@@ -290,6 +283,7 @@ export type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 export interface ApiOptions extends Omit<RequestInit, "body" | "method"> {
   method?: Method;
+  globalLoad?: boolean;
   endpoint?: string;
   body?: any;
   auto?: boolean;

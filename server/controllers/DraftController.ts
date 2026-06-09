@@ -90,16 +90,12 @@ export const getDraft = async (req: Request, res: Response) => {
         },
 
         location: {
-          details: {
-            name: d?.location?.name ?? "",
-          },
-          location: {
-            district: d?.location?.district ?? "",
-            taluk: d?.location?.taluk ?? "",
-            maagane: d?.location?.maagane ?? "",
-            village: d?.location?.village ?? "",
-            coordinates: d?.location?.coordinates ?? []
-          }
+          name: d?.location?.name ?? "",
+          district: d?.location?.district ?? "",
+          taluk: d?.location?.taluk ?? "",
+          maagane: d?.location?.maagane ?? "",
+          village: d?.location?.village ?? "",
+          coordinates: d?.location?.coordinates ?? []
         }
       };
     }
@@ -123,16 +119,12 @@ export const getDraft = async (req: Request, res: Response) => {
         },
 
         location: {
-          details: {
-            name: d?.location?.name ?? "",
-          },
-          location: {
-            district: d?.location?.district ?? "",
-            taluk: d?.location?.taluk ?? "",
-            maagane: d?.location?.maagane ?? "",
-            village: d?.location?.village ?? "",
-            coordinates: d?.location?.coordinates ?? []
-          }
+          name: d?.location?.name ?? "",
+          district: d?.location?.district ?? "",
+          taluk: d?.location?.taluk ?? "",
+          maagane: d?.location?.maagane ?? "",
+          village: d?.location?.village ?? "",
+          coordinates: d?.location?.coordinates ?? []
         },
 
         content: d?.content ?? ""
@@ -146,11 +138,11 @@ export const getDraft = async (req: Request, res: Response) => {
           name: d?.name ?? "",
         },
         location: {
-          district: d?.district,
-          taluk: d?.taluk,
-          maagane: d?.maagane,
-          village: d?.village,
-          coordinates: d?.coordinates
+          district: d?.district ?? "",
+          taluk: d?.taluk ?? "",
+          maagane: d?.maagane ?? "",
+          village: d?.village ?? "",
+          coordinates: d?.coordinates ?? []
         }
       };
     }

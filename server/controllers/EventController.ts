@@ -5,7 +5,7 @@ import { Culture } from "../models/Culture.js";
 import { EventDraft } from "../models/Draft.js";
 import { Types } from "mongoose";
 import { Location } from "../models/Location.js";
-import { validateEventDetails, validateLocation } from "../utils/validate.js";
+import { validateDates, validateEventDetails, validateLocation } from "../utils/validate.js";
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
@@ -89,6 +89,10 @@ export const saveEventDetails = async (req: Request, res: Response) => {
       return res.status(400).json({ msg: "Missing required field." });
     }
 
+    if(!validateDates(details.start, details.end)) {
+      return res.status(500).json({ msg: "Start date cant be after end date." });
+    }
+
     const exists = await Event.findOne({ title: details.title });
     if (exists) {
       return res.status(409).json({ msg: `Event '${details.title}' already exists.` })
@@ -156,11 +160,7 @@ export const saveEventLocation = async (req: Request, res: Response) => {
       { 
         location: {
           type: "Point",
-          district: location.district,
-          taluk: location.taluk,
-          maagane: location.maagane,
-          village: location.village,
-          coordinates: [location.lat, location.lng]
+          ...location
         }
       },
       { new: true }
@@ -221,6 +221,10 @@ export const uploadEvent = async (req: AuthRequest, res: Response) => {
     const { details, location } = req.body;
     if(!details || !validateEventDetails(details) || !validateLocation(location)) {
       return res.status(400).json({ msg: "Missing required field." });
+    }
+
+    if(!validateDates(details.start, details.end)) {
+      return res.status(500).json({ msg: "Start date cant be after end date." });
     }
 
     const exists = await Event.findOne({ title: details.title });

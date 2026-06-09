@@ -25,11 +25,14 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
     };
   }, []);
 
-  const fetchData = useCallback(async (options: ApiOptions = {}): Promise<T | null> => {
-    startLoading();
+  const fetchData = useCallback(async (options: ApiOptions = { globalLoad: true }): Promise<T | null> => {
+    if(options.globalLoad) 
+      startLoading();
+
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
-      stopLoading();
+      if(options.globalLoad) 
+        stopLoading();
     }
 
     abortControllerRef.current = new AbortController();
@@ -41,7 +44,8 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
     };
 
     if (!isMountedRef.current) {
-      stopLoading();
+      if(options.globalLoad) 
+        stopLoading();
       return null;
     };
 
@@ -120,7 +124,8 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
       }
       return null;
     } finally {
-      stopLoading();
+      if(options.globalLoad) 
+        stopLoading();
     }
   }, [endpoint, initOptions]);
 

@@ -27,3 +27,7 @@ export const validateLocationFields = (location: ILocation) => {
 export const validateLocation = (location: ILocation) => {
   return validateLocationDetails(location) && validateLocationFields(location);
 }
+
+export const validateDates = (start: Date, end: Date) => {
+  return new Date(start) <= new Date(end); 
+}

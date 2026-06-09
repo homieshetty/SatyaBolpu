@@ -24,6 +24,7 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import useApi from "../hooks/useApi";
+import { validateLocationFields } from "../utils/validate";
 
 //the below line is because someone caches something
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -88,6 +89,7 @@ const MAP = ({
   const [zoom, setZoom] = useState<number>(MAP_INITIAL_ZOOM);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const [activeVillage, setActiveVillage] = useState<GeoJSON.Feature | null>(null);
+  const [activeLocation, setActivateLocation] = useState<ILocation | null>(null)
   const [askForCoordinates, setAskForCoordinates] = useState<boolean>(false);
   const [coordinateErrors, setCoordinateErrors] = useState<coordinatesErrorType>({ lat: "", lng: "" });
   const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
@@ -148,10 +150,10 @@ const MAP = ({
     };
   }, [map]);
 
-  useEffect(() => {
-    if (map && zoom > 15)
-      setActiveVillage(null);
-  }, [zoom]);
+  // useEffect(() => {
+  //   if (map && zoom > 15)
+  //     setActiveVillage(null);
+  // }, [zoom]);
 
   useEffect(() => {
     const handleFullScreenChange = () => {
@@ -220,7 +222,7 @@ const MAP = ({
     if (layer instanceof Polygon) {
       layer.setStyle(styles.default);
       layer.on({
-        mouseover: (e: LeafletMouseEvent) => {
+        mouseover: () => {
           if (feature.properties?.VILLAGE && layer !== activeLayerRef.current) {
             const tooltip = new Tooltip({
               permanent: false,
@@ -228,7 +230,7 @@ const MAP = ({
               className: `global-tooltip village-name-tooltip ${feature.properties?.VILLAGE.split(" ").join("-")}`
             })
               .setContent(feature.properties.VILLAGE)
-              .setLatLng(layer.getBounds().getCenter());
+              .setLatLng(layer.getCenter());
 
             if (map) {
               tooltip.addTo(map);
@@ -286,7 +288,7 @@ const MAP = ({
               village: feature.properties?.VILLAGE,
               coordinates: [e.latlng.lat, e.latlng.lng]
             }
-          }) as LocationState);
+          }) as LocationState)
         }
       })
     }
@@ -821,9 +823,13 @@ const MAP = ({
                 :
                 villageLayers
           )}
+
           {
-            !minimal && editMode !== undefined && state?.location?.district &&
+            !minimal && editMode !== undefined && state?.location && validateLocationFields(state.location as ILocation) &&
               <Marker
+                eventHandlers={{
+                  mouseover: () => handleMarkerHover(state?.location as ILocation)
+                }}
                 position={[
                   state?.location?.coordinates?.[0], 
                   state?.location?.coordinates?.[1]
@@ -832,7 +838,7 @@ const MAP = ({
           }
           {
             !minimal && activeVillage && zoom >= 14 && existingLocations?.length > 0 && (
-              existingLocations.filter(loc => loc.village === activeVillage.properties?.VILLAGE).map((loc, index) => (
+              existingLocations.filter(loc => loc.village === activeVillage.properties?.VILLAGE).map(loc => (
                 <Marker
                   key={loc.id}
                   ref={(el) => {
@@ -849,26 +855,16 @@ const MAP = ({
                     mouseout: () => handleMarkerOut(loc),
                     mousedown: (e) => handleMarkerClick(e, loc)
                   }}
-                  icon={orangeMarker}
+                  icon={
+                    editMode !== Mode.LOCATION && (state?.location as ILocation)?.name === loc.name ? 
+                      blueMarker : 
+                      orangeMarker
+                  }
                 />
               ))
             )
           }
-          {!minimal && editMode !== undefined && (
-            editMode === Mode.EVENT ?
-              <div
-                className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
-               cursor-pointer hover:text-primary"
-                onClick={() => navigate(`/add/event/${id}/details`)}>
-                {`< Event Details`}
-              </div> :
-              <div
-                className="absolute text-[1.2rem] sm:text-[1.75rem] text-white z-400 bottom-0 m-5
-               cursor-pointer hover:text-primary"
-                onClick={() => navigate(`/add/post/${id}/editor`)}>
-                {`< Editor`}
-              </div>
-          )}
+
           {React.Children.toArray(children)}
         </MapContainer>
       </div>
