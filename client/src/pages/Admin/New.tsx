@@ -90,7 +90,7 @@ const New = ({ type }: NewProps) => {
             <Editor
               state={state as PostState}
               setState={setState as React.Dispatch<React.SetStateAction<PostState | CultureState>>}
-              endpoint="posts"
+              endpoint={`${type}s`}
             />
         }
         : type === "location" ?

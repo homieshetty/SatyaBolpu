@@ -259,7 +259,7 @@ export const savePostDetails = async (req: Request, res: Response) => {
       { new: true }
     );
 
-    const { _id, __v } = draft!.toObject();
+    const { _id } = draft!.toObject();
     return res.status(201).json({ post: { id: _id, details } });
 
   } catch (err: any) {
@@ -304,16 +304,24 @@ export const savePostEditorContent = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     const { content } = req.body;
+    console.log("'" + id + "'")
     
     if (!content || !id) {
       return res.status(400).json({ msg: "Missing Required Field" });
     }
-    
+
+    console.log("id:", id);
+
+    const before = await PostDraft.findById(id);
+    console.log("before:", before);
+
     const draft = await PostDraft.findByIdAndUpdate(
       id,
       { content },
       { new: true }
     );
+
+    console.log("after:", draft);
 
     const { _id } = draft!.toObject();
     return res.status(201).json({ post: { id: _id, content } });
