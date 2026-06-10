@@ -88,7 +88,8 @@ export const postDraftSchema = new Schema<IPost & { locationSpecific: boolean }>
     type: String
   },
   location: {
-    type: locationDraftSchema
+    type: Schema.Types.ObjectId,
+    ref: 'Location'
   }
 }, { timestamps: true });
 export const PostDraft = Draft.discriminator<IPost & { locationSpecific: boolean }>("post", postDraftSchema);
@@ -114,7 +115,8 @@ const eventSchema = new Schema<IEvent>({
     type: [String]
   },
   location: {
-    type: locationDraftSchema
+    type: Schema.Types.ObjectId,
+    ref: "Location"
   }
 }, { timestamps: true });
 export const EventDraft = Draft.discriminator<IEvent>("event", eventSchema);

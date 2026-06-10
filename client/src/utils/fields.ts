@@ -1,7 +1,7 @@
-import { EventDetailsType, FormField, FormFieldOption, NewProps } from "../types/globals";
+import { CultureState, EventState, FormField, FormFieldOption, LocationState, NewProps, NewState, OtherState, PostState } from "../types/globals";
 
-export const initialDetailsConfig = {
-  post: {
+export const initialDetailsConfig = (state: NewState | null) => ({
+  post: (state as PostState)?.details ?? {
     title: "",
     shortTitle: "",
     culture: "",
@@ -11,16 +11,17 @@ export const initialDetailsConfig = {
     tags: [],
     locationSpecific: false,
     coverImage: null,
-    files: []
+    files: [],
+    location: null
   },
-  culture: {
+  culture: (state as CultureState)?.details ?? {
     title: "",
     description: "",
     coverImage: null,
     galleryImages: [],
     files: []
   },
-  event: {
+  event: (state as EventState) ?? {
     title: "",
     description: "",
     culture: "",
@@ -29,25 +30,26 @@ export const initialDetailsConfig = {
       start: null,
       end: null
     },
-    files: []
+    files: [],
+    location: null
   },
-  location: {
+  location: (state as LocationState)?.details ?? {
     name: "",
     attachments: []
   },
-  "post-type": {
+  "post-type": (state as OtherState) ?? {
     name: ""
   },
-  "post-group": {
+  "post-group": (state as OtherState) ?? {
     name: ""
   },
-  tag: {
+  tag: (state as OtherState) ?? {
     name: ""
   }
-};
+});
 
-export const getInitialDetails = (type: NewProps['type']) => {
-  return initialDetailsConfig[type];
+export const getDetails = (state: NewState | null, type: NewProps['type']) => {
+  return initialDetailsConfig(state)[type];
 };
 
 const titleField = (existingValues: string[]): FormField => ({
@@ -97,7 +99,7 @@ const filesField = (label: string, name: string): FormField => ({
   name,
   type: "files",
   accept: "image/*,application/pdf"
-})
+});
 
 const fieldConfigs = {
   post: (options: Record<string, FormFieldOption[] | string[]>) => [
@@ -151,6 +153,14 @@ const fieldConfigs = {
         }
       ]
     },
+    {
+      label: "Location",
+      name: "location",
+      type: "select",
+      options: options.locations,
+      renderCondition: (formData: any) => formData.locationSpecific === "true",
+      required: true
+    },
     coverImageField,
     filesField("Related Files", "files") 
   ],
@@ -167,19 +177,25 @@ const fieldConfigs = {
     },
     filesField("Related files", "files")
   ],
-  event: (options: Record<string, FormFieldOption[] | string[]>) => {
+  event: (options: Record<string, FormFieldOption[] | string[]>) => [
     titleField(options.titles as string[]),
     descriptionField,
     cultureField(options.cultures as FormFieldOption[]),
-    coverImageField,
+    {
+      label: "Location",
+      name: "location",
+      type: "select",
+      required: true,
+      options: options.locations
+    },
     {
       label: "Start date",
       name: "duration.start",
       type: "date",
       required: true,
       validation(formData: any, value: any) {
-        if (value && (formData as EventDetailsType).duration.end &&
-          new Date(value) > new Date((formData as EventDetailsType).duration.end!)) {
+        if (value && (formData as EventState).duration.end &&
+        new Date(value) > new Date((formData as EventState).duration.end!)) {
           return "Start date cant be after end date.";
         }
       },
@@ -190,27 +206,28 @@ const fieldConfigs = {
       type: "date",
       required: true,
       validation(formData: any, value: any) {
-        if (value && (formData as EventDetailsType).duration.start &&
-          new Date(value) < new Date((formData as EventDetailsType).duration.start!)) {
+        if (value && (formData as EventState).duration.start &&
+        new Date(value) < new Date((formData as EventState).duration.start!)) {
           return "End date cant be before start date.";
         }
       },
     },
+    coverImageField,
     filesField("Related files", "files")
-  },
-  location: (options: Record<string, string[] | FormFieldOption[]>) => {
+  ],
+  location: (options: Record<string, string[] | FormFieldOption[]>) => [
     nameField(options.names as string[]),
     filesField("Attachments", "attachments")
-  },
-  "post-type": (options: Record<string, string[] | FormFieldOption[]>) => {
+  ],
+  "post-type": (options: Record<string, string[] | FormFieldOption[]>) => [
     nameField(options.names as string[])
-  },
-  "post-group": (options: Record<string, string[] | FormFieldOption[]>) => {
+  ],
+  "post-group": (options: Record<string, string[] | FormFieldOption[]>) => [
     nameField(options.names as string[])
-  },
-  "tag": (options: Record<string, string[] | FormFieldOption[]>) => {
+  ],
+  "tag": (options: Record<string, string[] | FormFieldOption[]>) => [
     nameField(options.names as string[])
-  }
+  ]
 }
 
 export const getFields = (type: NewProps['type'], options: Record<string, FormFieldOption[] | string[]>): FormField[] => {

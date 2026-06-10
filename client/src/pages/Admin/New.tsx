@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CultureState, DetailsType, EventState, NewProps, NewState, PostState } from "../../types/globals";
+import { CultureState, DetailsType, NewProps, NewState, PostState } from "../../types/globals";
 import ProgressBar from "../../components/ProgressBar";
 import Editor from "../../components/Editor";
 import { Mode } from "../../types/enums";
@@ -11,7 +11,7 @@ import Button from "../../components/Button";
 import { toast } from "react-toastify";
 import useDraftLoader from "../../hooks/useDraftLoader";
 import useNewData from "../../hooks/useNewData";
-import { getFields, getInitialDetails } from "../../utils/fields";
+import { getFields, getDetails } from "../../utils/fields";
 import useApi from "../../hooks/useApi";
 import Title from "../../components/Title";
 import { kebabToTitleCase } from "../../utils/utils";
@@ -20,23 +20,18 @@ const New = ({ type }: NewProps) => {
 
   const [progress, setProgress] = useState<number>(0);
   const [step, setShowStep] = useState<string>('');
-  const draftable = type === "culture" || type === "event" || type === "post" || type === "location";
+  const draftable = type === "culture" || type === "post" || type === "location";
+  const multipleSteps = type === "post" || type === "culture" || type === "location";
   const [state, setState] = useState<NewState | null>(() => {
     if (type === "post") {
       return {
         details: null,
-        content: "",
-        location: null
+        content: ""
       }
     } else if (type === "culture") {
       return {
         details: null,
         content: ""
-      }
-    } else if (type === "event") {
-      return {
-        details: null,
-        location: null
       }
     } else if (type === "location") {
       return {
@@ -45,15 +40,9 @@ const New = ({ type }: NewProps) => {
         },
         location: null
       }
-    } else if (type === "tag" || type === "post-group" || type === "post-type") {
-      return {
-        name: ""
-      };
-    };
-    return null;
+    }
+    return getDetails(null, type);
   });
-
-  useEffect(() => console.log(state), [state])
 
   const { id } = useParams();
   if(draftable) {
@@ -78,69 +67,51 @@ const New = ({ type }: NewProps) => {
     "Details":
         <Form<DetailsType>
           fields={getFields(type, options)}
-          state={getInitialDetails(type) as DetailsType}
-          setState={(details) => {
-            draftable ?
-              setState(prev => ({
-                ...prev,
-                details
-              })) :
-              setState(prev => ({
-                ...prev,
-                ...details
-              }))
-          }}
+          state={getDetails(state, type) as DetailsType}
           submitEndpoint={draftable ? `/${type}s/draft/${id}/details` : data.submitApi}
+          onSubmit={(_, setFormData, res) => {
+            if(!draftable) {
+              setFormData(getDetails(null, type) as DetailsType);
+              setState(null);
+            } else
+              setState(prev => ({
+                ...prev,
+                details: res[type].details
+              }));
+          }}
           submitText="Save Details"
           loadingText="Saving"
           toastMsg={`${type.charAt(0).toUpperCase() + type.slice(1)} details saved successfully`}
         />,
     ...(
-      type === "post" ?
+      type === "post" || type === "culture" ?
         {
           "Editor":
             <Editor
               state={state as PostState}
               setState={setState as React.Dispatch<React.SetStateAction<PostState | CultureState>>}
               endpoint="posts"
-            />,
-          ...((state as PostState).details?.locationSpecific && { "Location": <MAP editMode={Mode.POST} /> })
+            />
         }
-        : type === "culture" ?
+        : type === "location" ?
           {
-            "Editor":
-              <Editor
-                state={state as CultureState}
-                setState={setState as React.Dispatch<React.SetStateAction<PostState | CultureState>>}
-                endpoint="cultures"
-              />,
-          }
-          : type === "event" ?
-            {
-              "Location": 
+            "Location":
               <MAP
-                state={state as EventState}
+                state={state as PostState}
                 setState={setState as React.Dispatch<React.SetStateAction<typeof state>>}
-                editMode={Mode.EVENT} 
+                editMode={Mode.LOCATION}
               />
-            }
-            : type === "location" ?
-              {
-                "Location": 
-                <MAP 
-                  state={state as PostState}
-                  setState={setState as React.Dispatch<React.SetStateAction<typeof state>>}
-                  editMode={Mode.LOCATION} 
-                />
-              }
-              : {}
+          }
+          : {}
     )
-  }}, [ state ]);
+  }}, [ state, data ]);
 
   useEffect(() => {
     if (Object.keys(steps).length <= 0) return;
     setShowStep(Object.keys(steps)[Math.min(progress, 100) / (100 / (Object.keys(steps).length - 1))]);
   }, [progress]);
+
+  useEffect(() => console.log(state), [state])
 
 
   const handleUpload = async () => {
@@ -164,7 +135,7 @@ const New = ({ type }: NewProps) => {
 
       <div className="w-full flex flex-col items-center justify-center gap-10">
         {
-          Object.keys(state).length > 1 ? 
+          multipleSteps ? 
           <ProgressBar
             steps={steps}
             progress={progress}
@@ -178,7 +149,7 @@ const New = ({ type }: NewProps) => {
         }
 
         {
-          state && Object.values(state).every(v => Boolean(v)) &&
+          state && multipleSteps && Object.values(state).every(v => Boolean(v)) &&
           <Button
             content={`Upload ${type}`}
             loadingText="Uploading"

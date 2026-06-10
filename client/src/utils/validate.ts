@@ -1,4 +1,4 @@
-import { ICulture, IEvent, ILocation, IPost } from "../types/globals";
+import { ICulture, ILocation, IPost } from "../types/globals";
 
 export const validateCultureDetails = (culture: ICulture) => {
   return culture.title && culture.description &&
@@ -7,12 +7,7 @@ export const validateCultureDetails = (culture: ICulture) => {
 
 export const validatePostDetails = (post: IPost) => {
   return post.title && post.shortTitle && post.postGroup && post.postType && 
-  post.description && post.coverImage && post.tags.length >= 1;
-}
-
-export const validateEventDetails = (event: IEvent) => {
-  return event.culture && event.description && event.duration.start &&
-  event.duration.end && event.title && event.coverImage;
+  post.description && post.coverImage && post.tags.length >= 1 && post.location;
 }
 
 export const validateLocationDetails = (location: ILocation) => {

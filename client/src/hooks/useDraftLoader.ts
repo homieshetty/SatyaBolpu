@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NewProps, NewState } from "../types/globals";
-import { validateCultureDetails, validateEventDetails, validateLocation, validateLocationDetails, validateLocationFields, validatePostDetails } from "../utils/validate";
+import { validateCultureDetails, validateLocationDetails, validateLocationFields, validatePostDetails } from "../utils/validate";
 import useApi from "./useApi";
 import { useNavigate } from "react-router-dom";
 
@@ -22,18 +22,12 @@ const useDraftLoader = (
     if (type === "post") {
       setState({
         details: validatePostDetails(data.details) ? data.details : null,
-        content: data.content ?? "",
-        location: validateLocation(data.location) ? data.location : null
+        content: data.content ?? ""
       })
     } else if (type === "culture") {
       setState({
         details: validateCultureDetails(data.details) ? data.details : null,
         content: data.content ?? ""
-      })
-    } else if (type === "event") {
-      setState({
-        details: validateEventDetails(data.details) ? data.details : null,
-        location: validateLocation(data.location) ? data.location : null
       })
     } else if (type === "location") {
       setState({

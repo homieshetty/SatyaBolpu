@@ -10,9 +10,9 @@ export const validatePostDetails = (post: IPost) => {
   post.description && post.coverImage && post.tags.length >= 1;
 }
 
-export const validateEventDetails = (event: IEvent) => {
+export const validateEventData = (event: IEvent) => {
   return event.culture && event.description && event.duration.start &&
-  event.duration.end && event.title && event.coverImage;
+  event.duration.end && event.title && event.coverImage && event.location;
 }
 
 export const validateLocationDetails = (location: ILocation) => {

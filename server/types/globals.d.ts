@@ -58,7 +58,7 @@ export interface IPost extends Document {
   coverImage: string,
   files?: string[],
   content: string,
-  location?: ILocation
+  location?: Schema.Types.ObjectId
 };
 
 export interface IDuration extends Document {
@@ -74,7 +74,7 @@ export interface IEvent extends Document {
   culture: Schema.Types.ObjectId,
   coverImage?: string,
   files?: string[],
-  location: ILocation
+  location: Schema.Types.ObjectId
 };
 
 export interface IBlog extends Document {
@@ -84,7 +84,7 @@ export interface IBlog extends Document {
   coverImage?: string,
   files?: string,
   content: string,
-  location?: ILocation
+  location?: Schema.Types.ObjectId
 }
 
 export interface ITag extends Document {

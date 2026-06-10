@@ -23,7 +23,7 @@ const useNewData = <T extends NewProps["type"]>(
   });
 
   const locationsApi = useApi("/locations?fields=name", {
-    auto: type === "location"
+    auto: type === "location" || type === "post" || type === "event" || type === "culture"
   });
 
   const tagsApi = useApi("/others/tags", {
@@ -105,6 +105,11 @@ const useNewData = <T extends NewProps["type"]>(
               label: postGroup.name,
               value: postGroup.id,
             })) ?? [],
+          locations:
+            locationsApi.data?.locations?.map((location: ILocation) => ({
+              label: location.name,
+              value: location.id
+            })) ?? [],
           submitApi: submitApis.post,
         };
       }
@@ -115,6 +120,11 @@ const useNewData = <T extends NewProps["type"]>(
             culturesApi.data?.cultures?.map(
               (culture: ICulture) => culture.title
             ) ?? [],
+          locations:
+            locationsApi.data?.locations?.map((location: ILocation) => ({
+              label: location.name,
+              value: location.id
+            })) ?? [],
           submitApi: submitApis.culture,
         };
 
@@ -127,26 +137,29 @@ const useNewData = <T extends NewProps["type"]>(
               label: culture.title,
               value: culture.id,
             })) ?? [],
+          locations:
+            locationsApi.data?.locations?.map((location: ILocation) => ({
+              label: location.name,
+              value: location.id
+            })) ?? [],
           submitApi: submitApis.event,
         };
 
       case "location":
         return {
-          names: locationsApi.data?.locations.map((location: ILocation) => ({
-            name: location.name
-          })),
+          names: locationsApi.data?.locations.map((location: ILocation) => location.name) ?? [],
           submitApi: submitApis.location,
         };
 
       case "tag":
         return {
-          tags: tagsApi.data?.tags.map((tag: IOther) => tag.name) ?? [],
+          names: tagsApi.data?.tags.map((tag: IOther) => tag.name) ?? [],
           submitApi: submitApis.tag,
         };
 
       case "post-group":
         return {
-          postGroups:
+          names:
             postGroupsApi.data?.postGroups?.map(
               (postGroup: IOther) => postGroup.name
             ) ?? [],
@@ -155,7 +168,7 @@ const useNewData = <T extends NewProps["type"]>(
 
       case "post-type":
         return {
-          postTypes:
+          names:
             postTypesApi.data?.postTypes?.map(
               (postType: IOther) => postType.name
             ) ?? [],
@@ -169,6 +182,7 @@ const useNewData = <T extends NewProps["type"]>(
     type,
     postsApi.data,
     eventsApi.data,
+    locationsApi.data,
     tagsApi.data,
     culturesApi.data,
     postGroupsApi.data,

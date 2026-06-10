@@ -248,14 +248,19 @@ export const savePostDetails = async (req: Request, res: Response) => {
       return res.status(400).json({ msg: "Post type not found." });
     }
 
+    const locationsExists = await Location.findById(details.location);
+    if(!locationsExists) {
+      return res.status(400).json({ msg: "Location doesnt exist" });
+    }
+
     const draft = await PostDraft.findByIdAndUpdate(
       id,
       details,
       { new: true }
     );
 
-    const { _id, __v, ...rest } = draft!.toObject();
-    return res.status(201).json({ post: { id: _id, ...rest } });
+    const { _id, __v } = draft!.toObject();
+    return res.status(201).json({ post: { id: _id, details } });
 
   } catch (err: any) {
     console.error("Error while saving post details: ", err.message);
@@ -283,7 +288,8 @@ export const deletePostDetails = async (req: Request, res: Response) => {
           tags: [],
           coverImage: "",
           files: "",
-          locationSpecific: false
+          locationSpecific: false,
+          location: ""
         }
       }
     );
@@ -298,19 +304,19 @@ export const savePostEditorContent = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     const { content } = req.body;
-
+    
     if (!content || !id) {
       return res.status(400).json({ msg: "Missing Required Field" });
     }
-
+    
     const draft = await PostDraft.findByIdAndUpdate(
       id,
       { content },
       { new: true }
     );
 
-    const { _id, __v, ...rest } = draft!.toObject();
-    return res.status(201).json({ post: { id: _id, ...rest } });
+    const { _id } = draft!.toObject();
+    return res.status(201).json({ post: { id: _id, content } });
 
   } catch (err: any) {
     console.error("Error while saving post editor content: ", err.message);
@@ -337,57 +343,6 @@ export const deletePostEditorContent = async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error("Error while deleting post editor content: " + err.message);
     return res.status(500).json({ msg: "Internal Server Error while deleting post editor content." });
-  }
-}
-
-export const savePostLocation = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const { location } = req.body;
-
-    if (!location || !id) {
-      return res.status(400).json({ msg: "Missing Required Field" });
-    }
-
-    const draft = await PostDraft.findByIdAndUpdate(
-      id,
-      {
-        location: {
-          type: "Point",
-          ...location
-        }
-      },
-      { new: true }
-    );
-
-    const { _id, __v, ...rest } = draft!.toObject();
-    return res.status(201).json({ post: { id: _id, ...rest } });
-
-  } catch (err: any) {
-    console.error("Error while saving post location: ", err.message);
-    return res.status(500).json({ msg: "Internal Server error while saving post location." });
-  }
-}
-
-export const deletePostLocation = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    if (!id) {
-      return res.status(400).json({ msg: "Missing required field." });
-    }
-
-    await PostDraft.findByIdAndUpdate(
-      id,
-      {
-        $unset: {
-          location: ""
-        }
-      }
-    );
-    res.status(200).json({ success: true });
-  } catch (err: any) {
-    console.error("Error while deleting post location: " + err.message);
-    return res.status(500).json({ msg: "Internal Server Error while deleting post location." });
   }
 }
 
@@ -447,20 +402,15 @@ export const uploadPost = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ msg: "Post type not found." });
     }
 
-    const { _id: locationId } = await Location.create({
-      type: "Point",
-      district: location.district,
-      taluk: location.taluk,
-      maagane: location.maagane,
-      village: location.village,
-      coordinates: [location.lat, location.lng]
-    });
+    const locationsExists = await Location.findById(details.location);
+    if(!locationsExists) {
+      return res.status(400).json({ msg: "Location doesnt exist" });
+    }
 
     const newPost = await Post.create({
       userId,
       ...details,
-      content,
-      location: locationId
+      content
     });
 
     await PostGroup.updateOne(

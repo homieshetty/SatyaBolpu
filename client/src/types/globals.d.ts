@@ -108,13 +108,15 @@ export type FormField = {
   maxItems?: number;
   validation?: (formData: any, value: any) => string | undefined;
   disabled?: boolean;
+  renderCondition?: (formData: any) => boolean;
 };
 
 export type FormProps<T> = {
   fields: FormField[];
   state: T;
-  setState: (state: T) => void | React.Dispatch<React.SetStateAction<OtherState>>;
+  setState?: (state: T) => void | React.Dispatch<React.SetStateAction<OtherState>>;
   submitEndpoint: string | ApiState<any>;
+  onSubmit?: (formData: T, setFormData: React.Dispatch<React.SetStateAction<T>>, res: any) => void;
   error?: string;
   submitText?: string;
   loadingText?: string;
@@ -173,18 +175,14 @@ export type LoadingContextType = {
   stopLoading: () => void;
 };
 
-export type DetailsType = PostDetailsType | CultureDetailsType | EventDetailsType | OtherState | LocationDetailsType;
+export type DetailsType = PostDetailsType | CultureDetailsType | EventState | OtherState | LocationDetailsType;
 
 export type PostState = {
   details: PostDetailsType | null;
   content: string;
-  location: string;
 };
 
-export type EventState = {
-  details: EventDetailsType | null;
-  location: string;
-};
+export type EventState = Omit<IEvent, "id" | "location"> & { location: string };
 
 export type CultureState = {
   details: CultureDetailsType | null;
@@ -254,9 +252,10 @@ export interface IPost {
   location?: ILocation;
 };
 
-export type PostDetailsType = Omit<IPost, "id" | "content" | "location"> & { locationSpecific: boolean }
+export type PostDetailsType = Omit<IPost, "id" | "content"> & { locationSpecific: boolean, location?: string }
 
 export interface IEvent {
+  id: string;
   title: string;
   description: string;
   duration: {
@@ -269,7 +268,6 @@ export interface IEvent {
   location: ILocation;
 };
 
-export type EventDetailsType = Omit<IEvent, "id" | "location">;
 export type LocationDetailsType = Pick<ILocation, "id" | "name" | "attachments">;
 
 export interface IOther {
@@ -313,6 +311,7 @@ export type NewPostData = {
   cultures: FormFieldOption[],
   postTypes: FormFieldOption[],
   postGroups: FormFieldOption[],
+  locations: FormFieldOption[]
 };
 
 export type NewCultureData = {
@@ -321,7 +320,8 @@ export type NewCultureData = {
 
 export type NewEventData = {
   titles: string[],
-  cultures: FormFieldOption[]
+  cultures: FormFieldOption[],
+  locations: FormFieldOption[]
 }
 
 export type NewTagData = {

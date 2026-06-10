@@ -11,8 +11,8 @@ import { cn } from "../utils/merge";
 const Form = <T extends {}>({
   fields,
   state,
-  setState,
   submitEndpoint,
+  onSubmit,
   error,
   submitText = "Submit",
   toastMsg = "Saved successfully",
@@ -25,7 +25,7 @@ const Form = <T extends {}>({
   const [formData, setFormData] = useState<T>(state);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [allowedOptions, setAllowedOptions] = useState<Record<string, FormFieldOption[]>>({});
-  const [activeOption, setActiveOption] = useState<Record<string, string>>({});
+  const [activeOption, setActiveOption] = useState<Record<string, string | null>>({});
   const [activeIndex, setActiveIndex] = useState<Record<string, number>>({});
   const [visibleStart, setVisibleStart] = useState<Record<string, number>>({});
   const [showOptions, setShowOptions] = useState<Record<string, boolean>>({});
@@ -37,10 +37,6 @@ const Form = <T extends {}>({
   const submitApi = typeof submitEndpoint === "string" ? useApi(submitEndpoint, { auto: false }) : submitEndpoint;
   const uploadSingleApi = useApi('/upload/single', { auto: false });
   const uploadMultipleApi = useApi('/upload/multiple', { auto: false });
-
-  useEffect(() => {
-    setFormData(state);
-  }, [state]);
 
   useEffect(() => {
     Object.values(textAreaRefs.current).forEach(ref => {
@@ -102,15 +98,16 @@ const Form = <T extends {}>({
 
   useEffect(() => {
     if (!fields.length) return;
-    let initialAllowed: Record<string, FormFieldOption[]> = {};
+    let allowed: Record<string, FormFieldOption[]> = {};
 
     fields.forEach(field => {
-      if (field.type === "multi-select") {
-        const selectedValues = getValue(formData, field.name) || [];
+      if (field.type === "select" || field.type === "multi-select") {
+        const rawValue = getValue(formData, field.name);
+        const selectedValues = Array.isArray(rawValue) ? rawValue : (rawValue ? [rawValue] : []);
         const searchVal = getValue(activeOption, field.name) || "";
 
-        initialAllowed = setValue(
-          initialAllowed,
+        allowed = setValue(
+          allowed,
           field.name,
           (field.options ?? []).filter(opt =>
             !selectedValues.includes(opt.value) &&
@@ -119,7 +116,7 @@ const Form = <T extends {}>({
         );
       }
     });
-    setAllowedOptions(initialAllowed);
+    setAllowedOptions(allowed);
   }, [fields, formData, activeOption]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -149,31 +146,36 @@ const Form = <T extends {}>({
     setVisibleStart(prev => setValue(prev, name, 0));
   };
 
-  const handleAddTag = (name: string, option: FormFieldOption) => {
+  const handleSelectOption = (name: string, option: FormFieldOption, fieldType: string) => {
     setErrors(prev => setValue(prev, name, ""))
 
-    const currentSelection = getValue(formData, name) || [];
-    if (!currentSelection.includes(option.value)) {
-      setFormData(
-        prev =>
-          setValue(
-            prev,
-            name,
-            [...(prev as any)[name], option.value]
-          ) as T
-      );
-      setActiveOption(prev => setValue(prev, name, ""));
-
-      if (optionRefs.current[name]) {
-        optionRefs.current[name].value = "";
+    if (fieldType === "select") {
+      setFormData(prev => setValue(prev, name, option.value) as T);
+    } else {
+      const currentSelection = getValue(formData, name) || [];
+      if (!currentSelection.includes(option.value)) {
+        setFormData(
+          prev =>
+            setValue(
+              prev,
+              name,
+              [...(prev as any)[name], option.value]
+            ) as T
+        );
       }
-
-      setActiveIndex(prev => setValue(prev, name, 0));
-      setVisibleStart(prev => setValue(prev, name, 0));
     }
+
+    setActiveOption(prev => setValue(prev, name, null));
+
+    if (optionRefs.current[name]) {
+      optionRefs.current[name].value = "";
+    }
+
+    setActiveIndex(prev => setValue(prev, name, 0));
+    setVisibleStart(prev => setValue(prev, name, 0));
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, name: string) => {
+  const handleKeyDown = (e: React.KeyboardEvent, name: string, fieldType: string) => {
     const options = getValue(allowedOptions, name);
     if (!options) return;
     const curIndex = getValue(activeIndex, name) ?? 0;
@@ -200,7 +202,7 @@ const Form = <T extends {}>({
     }
     if (e.key === "Enter" && options[curIndex]) {
       e.preventDefault();
-      handleAddTag(name, options[curIndex]);
+      handleSelectOption(name, options[curIndex], fieldType);
     }
   };
 
@@ -343,17 +345,20 @@ const Form = <T extends {}>({
     }
 
     const res = await submitApi.post({ formData: finalFormData });
-    if(!res) { setSaving(false); return; }
+    if(!res) { 
+      setSaving(false); 
+      return; 
+    }
     toast.success(toastMsg);
-    setState(res);
-    setFormData(state);
     setErrors({});
+    onSubmit?.(formData, setFormData, res);
     setSaving(false);
   };
 
   const renderField = (field: FormField) => {
     const fieldError = getValue(errors, field.name);
     const fieldValue = getValue(formData, field.name);
+    if(!(field.renderCondition?.(formData) ?? true)) return;
 
     switch (field.type) {
       case "textarea":
@@ -382,34 +387,71 @@ const Form = <T extends {}>({
           </div>
         );
 
-      case "select":
+      case "select": {
+        const curStart = getValue(visibleStart, field.name) ?? 0;
+        const curActive = getValue(activeIndex, field.name) ?? 0;
+        const selectedLabel = field.options?.find(opt => opt.value === fieldValue)?.label;
+        const searchValue = getValue(activeOption, field.name);
         return (
-          <div key={field.name} className="flex flex-col w-full gap-3">
+          <div key={field.name} className="w-full relative flex flex-col gap-3">
             <label htmlFor={field.name} className="text-primary font-semibold text-[1.5rem]">
               {field.label} {field.required && <span className="text-red-500">*</span>}
             </label>
-            <select
+            <input
+              className="text-black w-1/2 font-semibold bg-white p-2 overflow-hidden resize-none disabled:bg-gray-400"
+              type="text"
               id={field.name}
-              name={field.name}
-              value={fieldValue ?? ""}
-              onChange={handleInputChange}
-              className="p-2 cursor-pointer disabled:bg-gray-300 bg-white"
               disabled={field.disabled}
+              name={field.name}
+              ref={(el) => {
+                if (el)
+                  optionRefs.current[field.name] = el;
+              }}
+              autoComplete="off"
+              onKeyDown={(e) => handleKeyDown(e, field.name, field.type)}
+              onFocus={(e) => {
+                setShowOptions(prev => setValue(prev, field.name, true));
+                e.target.select();
+              }}
+              onBlur={() => {
+                setShowOptions(prev => setValue(prev, field.name, false));
+                setActiveOption(prev => setValue(prev, field.name, null));
+                setActiveIndex(prev => setValue(prev, field.name, 0));
+                setVisibleStart(prev => setValue(prev, field.name, 0));
+              }}
+              value={searchValue ?? (fieldValue ? selectedLabel ?? "" : "")}
+              onChange={(e) => handleOptionChange(e, field.name)}
+              placeholder={field.placeholder}
+            />
+            <div
+              className={`bg-white w-1/2 flex flex-col items-center justify-center absolute top-full z-10
+                ${getValue(showOptions, field.name) ? "visible" : "hidden"}`}
             >
-              <option value="" hidden className="text-white">
-                {field.placeholder || `-- Choose ${field.label.toLowerCase()} --`}
-              </option>
-              {field.options?.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              {getValue(allowedOptions, field.name)
+                ?.slice(curStart, curStart + pageSize)
+                .map((option: FormFieldOption, index: number) => {
+                  const globalIndex = curStart + index;
+                  return (
+                    <div
+                      key={globalIndex}
+                      className={`w-full flex items-center justify-center cursor-pointer hover:bg-primary
+                        ${globalIndex === curActive ? "bg-primary" : ""}`}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleSelectOption(field.name, option, field.type);
+                      }}
+                    >
+                      {option.label}
+                    </div>
+                  );
+                })}
+            </div>
             {fieldError && (
               <p className="text-red-500">{fieldError}</p>
             )}
           </div>
         );
+      }
 
       case "date":
         return (
@@ -493,11 +535,11 @@ const Form = <T extends {}>({
             />
             <div className="flex flex-wrap text-white">
               {
-                fieldValue.length > 0 && fieldValue.map((file: File | string, index: number) => {
+                fieldValue?.length > 0 && fieldValue.map((file: File | string, index: number) => {
                   const isFile = file instanceof File;
                   const fileUrl = isFile
                     ? URL.createObjectURL(file)
-                    : file;
+                    : `${BASE_URL}${file}`;
 
                   const fileType = isFile
                     ? file.type
@@ -510,7 +552,7 @@ const Form = <T extends {}>({
                         fileType.startsWith("image") ? (
                           <img
                             className="w-full aspect-square object-cover object-center"
-                            src={`${BASE_URL}${fileUrl}`}
+                            src={fileUrl}
                             alt={`file-${index}`}
                           />
                         ) : (
@@ -595,7 +637,7 @@ const Form = <T extends {}>({
           </div>
         );
 
-      case "multi-select":
+      case "multi-select": {
         const curStart = getValue(visibleStart, field.name) ?? 0;
         const curActive = getValue(activeIndex, field.name) ?? 0;
         return (
@@ -628,7 +670,7 @@ const Form = <T extends {}>({
                   optionRefs.current[field.name] = el;
               }}
               autoComplete="off"
-              onKeyDown={(e) => handleKeyDown(e, field.name)}
+              onKeyDown={(e) => handleKeyDown(e, field.name, field.type)}
               onFocus={() => setShowOptions(prev => setValue(prev, field.name, true))}
               onBlur={() => setShowOptions(prev => setValue(prev, field.name, false))}
               value={getValue(activeOption,field.name) ?? ""}
@@ -649,7 +691,7 @@ const Form = <T extends {}>({
                         ${globalIndex === curActive ? "bg-primary" : ""}`}
                       onMouseDown={(e) => {
                         e.preventDefault();
-                        handleAddTag(field.name, option)
+                        handleSelectOption(field.name, option, field.type)
                       }}
                     >
                       {option.label}
@@ -659,6 +701,7 @@ const Form = <T extends {}>({
             </div>
           </div>
         )
+      }
 
       default:
         return (
@@ -693,11 +736,7 @@ const Form = <T extends {}>({
         className
       )}
     >
-      {fields.map(field => (
-        <div key={field.name}>
-          {renderField(field)}
-        </div>
-      ))}
+      {fields.map(field => renderField(field) )}
 
       {error && (
         <p className="text-red-500">{error}</p>

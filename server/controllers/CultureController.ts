@@ -74,8 +74,8 @@ export const saveCultureDetails = async (req: Request, res: Response) => {
       { new: true, upsert: true }
     );
 
-    const { _id, __v, ...rest } = draft.toObject();
-    return res.status(201).json({ culture: { id: _id, ...rest } });
+    const { _id } = draft.toObject();
+    return res.status(201).json({ culture: { id: _id, details } });
 
   } catch (err: any) {
     console.error("Error while saving culture details: " + err.message);
@@ -146,8 +146,8 @@ export const saveCultureEditorContent = async (req: Request, res: Response) => {
       { new: true, upsert: true }
     );
 
-    const { _id, __v, ...rest } = draft.toObject();
-    return res.status(201).json({ culture: { id: _id, ...rest } });
+    const { _id } = draft.toObject();
+    return res.status(201).json({ culture: { id: _id, content } });
 
   } catch (err: any) {
     console.error("Error while saving culture editor content: ", err.message);

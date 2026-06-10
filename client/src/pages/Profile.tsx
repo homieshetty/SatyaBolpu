@@ -66,11 +66,11 @@ const Profile = () => {
           p-10 [box_shadow:1px_1px_6px_primary] shadow-primary rounded-2xl gap-10"
       >
         <div className="flex flex-col items-center justify-center">
-          <div className="absolute -top-[10%] md:-top-[15%] bg-white/90 outline outline-4 outline-primary px-2 pt-2 overflow-hidden rounded-full">
+          <div className="absolute -top-[10%] md:-top-[15%] bg-white/90 outline outline-primary px-2 pt-2 overflow-hidden rounded-full">
             <FaUserAlt className="w-full text-[8rem] md:text-[10rem]" />
           </div>
 
-          <div className="text-center pt-[5rem]">
+          <div className="text-center pt-20">
             <div className="text-[2rem]/[2rem] flex items-center gap-2 justify-center font-black">
               <p>{state.user?.name}</p>
               {state.user?.verified && <MdVerified className="text-blue-500" />}
@@ -86,14 +86,14 @@ const Profile = () => {
 
         <div className="min-w-[40%]">
           <p className="text-[1.2rem] font-semibold">Email:</p>
-          <div className="bg-white p-2 rounded-lg outline outline-primary break-words">
+          <div className="bg-white p-2 rounded-lg outline outline-primary wrap-break-word">
             {state.user?.email}
           </div>
         </div>
 
         <div className="min-w-[40%]">
           <p className="text-[1.2rem] font-semibold">Phone:</p>
-          <div className="bg-white p-2 rounded-lg outline outline-primary break-words">
+          <div className="bg-white p-2 rounded-lg outline outline-primary wrap-break-word">
             {
               state.user?.phone ? 
                 "+" + state.user.phone.dialCode + " " + state.user.phone.number :
