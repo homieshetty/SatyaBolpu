@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { CultureState, DetailsType, NewProps, NewState, PostState } from "../../types/globals";
+import { CultureState, DetailsType, LocationState, NewProps, NewState, PostState } from "../../types/globals";
 import ProgressBar from "../../components/ProgressBar";
 import Editor from "../../components/Editor";
 import { Mode } from "../../types/enums";
@@ -88,7 +88,7 @@ const New = ({ type }: NewProps) => {
         {
           "Editor":
             <Editor
-              state={state as PostState}
+              state={state as PostState | CultureState}
               setState={setState as React.Dispatch<React.SetStateAction<PostState | CultureState>>}
               endpoint={`${type}s`}
             />
@@ -97,7 +97,7 @@ const New = ({ type }: NewProps) => {
           {
             "Location":
               <MAP
-                state={state as PostState}
+                state={state as LocationState}
                 setState={setState as React.Dispatch<React.SetStateAction<typeof state>>}
                 editMode={Mode.LOCATION}
               />
