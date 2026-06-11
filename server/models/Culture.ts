@@ -1,10 +1,19 @@
 import mongoose, { Schema } from "mongoose";
 import { ICulture } from "../types/globals.js";
+import { User } from "./User.js";
+import { validateExistence } from "../utils/validate.js";
 
 const cultureSchema = new Schema<ICulture>({
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    validate: validateExistence(User)
+  },
   title: {
     type: String,
-    required: true,
+    minLength: 5,
+    required: true
   },
   description: {
     type: String,

@@ -1,4 +1,22 @@
+import { Model, Schema } from "mongoose";
 import { ICulture, IEvent, ILocation, IPost } from "../types/globals.js";
+
+export const validateExistence = (model: Model<any>) => {
+  return {
+    validator: async function (value: Schema.Types.ObjectId | Schema.Types.ObjectId[]) {
+      if(Array.isArray(value)) {
+        const count = await model.countDocuments({
+          _id: { $in: value }
+        });
+
+        return count === value.length;
+      } else {
+        await model.exists({ _id: value });
+      }
+    },
+    message: `${model.modelName} does not exist.`
+  }
+}
 
 export const validateCultureDetails = (culture: ICulture) => {
   return culture.title && culture.description &&

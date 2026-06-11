@@ -12,7 +12,7 @@ export const adminMiddleware = async (req: AuthRequest, res: Response, next: Nex
   try {
     const decoded = jwt.verify(token, process.env.JWT_REFRESH_TOKEN_SECRET!) as { id: string };
 
-    const user = await User.findById(decoded.id, "_id role").lean();
+    const user = await User.findById(decoded.id).lean();
     if (!user) {
       return res.status(404).json({ msg: "User not found, go home." });
     }

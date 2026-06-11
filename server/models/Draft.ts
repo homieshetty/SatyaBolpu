@@ -1,12 +1,20 @@
 import mongoose, { Schema } from "mongoose";
 import { durationSchema } from "./Event.js";
 import { ICulture, IDraftBase, IEvent, ILocation, IPost } from "../types/globals.js";
+import { validateExistence } from "../utils/validate.js";
+import { Culture } from "./Culture.js";
+import { PostGroup } from "./PostGroup.js";
+import { PostType } from "./PostType.js";
+import { Tag } from "./Tag.js";
+import { Location } from "./Location.js";
+import { User } from "./User.js";
 
 const draftSchema = new Schema<IDraftBase>({
   userId: {
     type: Schema.Types.ObjectId,
     ref: "User",
-    required: true
+    required: true,
+    validate: validateExistence(User)
   },
   draftType: {
     type: String,
@@ -52,28 +60,38 @@ export const LocationDraft = Draft.discriminator<ILocation>("location", location
 
 export const postDraftSchema = new Schema<IPost & { locationSpecific: boolean }>({
   title: {
-    type: String
-  },
-  shortTitle: {
-    type: String
+    type: String,
+    minLength: 5
   },
   culture: {
     type: Schema.Types.ObjectId,
-    ref: "Culture"
+    ref: "Culture",
+    validate: validateExistence(Culture)
   },
   postGroup: {
     type: Schema.Types.ObjectId,
-    ref: "PostGroup"
+    ref: "PostGroup",
+    validate: validateExistence(PostGroup)
   },
   postType: {
     type: Schema.Types.ObjectId,
-    ref: "PostType"
+    ref: "PostType",
+    validate: validateExistence(PostType)
   },
   description: {
     type: String
   },
   tags: {
-    type: [{ type: Schema.Types.ObjectId, ref: "Tag" }]
+    type: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
+    validate:[
+      validateExistence(Tag) as any,
+      {
+        validator: function (val: Schema.Types.ObjectId[]) {
+          return val && val.length > 0;
+        },
+        message: "At least one tag required"
+      }
+    ]
   },
   locationSpecific: {
     type: Boolean
@@ -89,7 +107,8 @@ export const postDraftSchema = new Schema<IPost & { locationSpecific: boolean }>
   },
   location: {
     type: Schema.Types.ObjectId,
-    ref: 'Location'
+    ref: 'Location',
+    validate: validateExistence(Location)
   }
 }, { timestamps: true });
 export const PostDraft = Draft.discriminator<IPost & { locationSpecific: boolean }>("post", postDraftSchema);
@@ -103,7 +122,8 @@ const eventSchema = new Schema<IEvent>({
   },
   culture: {
     type: Schema.Types.ObjectId,
-    ref: "Culture"
+    ref: "Culture",
+    validate: validateExistence(Culture)
   },
   duration: {
     type: durationSchema
@@ -116,7 +136,8 @@ const eventSchema = new Schema<IEvent>({
   },
   location: {
     type: Schema.Types.ObjectId,
-    ref: "Location"
+    ref: "Location",
+    validate: validateExistence(Location)
   }
 }, { timestamps: true });
 export const EventDraft = Draft.discriminator<IEvent>("event", eventSchema);
