@@ -59,57 +59,101 @@ const Profile = () => {
   if (!state.token) return <Navigate to="/login" replace />;
 
   return (
-    <div className="w-full h-screen flex items-center justify-center">
+    <div className="relative w-full min-h-screen bg-black flex items-center justify-center px-4 py-20 overflow-hidden">
+
+      <div className="absolute w-150 h-150 rounded-full bg-primary/10 blur-3xl" />
+
       <div
         ref={profileRef}
-        className="w-[95%] sm:w-2/3 md:w-3/5 lg:w-2/5 2xl:w-1/3 relative flex flex-col items-center justify-center bg-white/80 
-          p-10 [box_shadow:1px_1px_6px_primary] shadow-primary rounded-2xl gap-10"
+        className="relative w-full sm:w-[85%] md:w-2/3 lg:w-1/2 xl:w-[42%] max-w-3xl border border-zinc-500/60
+          rounded-3xl px-8 py-14 flex flex-col items-center gap-8 overflow-hidden"
       >
-        <div className="flex flex-col items-center justify-center">
-          <div className="absolute -top-[10%] md:-top-[15%] bg-white/90 outline outline-primary px-2 pt-2 overflow-hidden rounded-full">
-            <FaUserAlt className="w-full text-[8rem] md:text-[10rem]" />
+
+        <div className="flex flex-col items-center text-center relative">
+          <div
+            className="w-32 h-32 rounded-full bg-black/40 border-2 border-primary/40
+               flex items-center justify-center"
+          >
+            <FaUserAlt className="text-primary text-6xl" />
           </div>
 
-          <div className="text-center pt-20">
-            <div className="text-[2rem]/[2rem] flex items-center gap-2 justify-center font-black">
-              <p>{state.user?.name}</p>
-              {state.user?.verified && <MdVerified className="text-blue-500" />}
+          <div className="mt-6">
+            <div className="flex items-center justify-center gap-2">
+              <h1
+                className="text-3xl md:text-4xl font-black text-white"
+              >
+                {state.user?.name}
+              </h1>
+
+              {state.user?.verified && (
+                <MdVerified className="text-blue-500 text-2xl" />
+              )}
             </div>
-            <p className="text-[1.2rem] italic">@{state.user?.uname}</p>
+
+            <p className="text-zinc-400 italic mt-1">
+              @{state.user?.uname}
+            </p>
+
             {state.user?.role !== "user" && (
-              <p className="text-green-500 font-semibold">
-                {state.user?.role.toUpperCase()}
-              </p>
+              <div
+                className="mt-3 inline-flex px-4 py-1 rounded-full text-green-400 
+                  text-xs font-bold tracking-widest uppercase"
+              >
+                {state.user?.role}
+              </div>
             )}
           </div>
         </div>
 
-        <div className="min-w-[40%]">
-          <p className="text-[1.2rem] font-semibold">Email:</p>
-          <div className="bg-white p-2 rounded-lg outline outline-primary wrap-break-word">
-            {state.user?.email}
+        <div className="flex items-center justify-center w-full">
+          <div className="flex-1 h-px bg-linear-to-r from-transparent via-primary/60 to-transparent" />
+        </div>
+
+        <div className="w-full grid gap-5">
+          <div
+            className="bg-black/30 border border-zinc-800 rounded-2xl p-5"
+          >
+            <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">
+              Email Address
+            </p>
+
+            <p className="text-white break-all">
+              {state.user?.email}
+            </p>
+          </div>
+
+          <div
+            className="bg-black/30 border border-zinc-800 rounded-2xl p-5"
+          >
+            <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">
+              Phone Number
+            </p>
+
+            <p className="text-white">
+              {state.user?.phone ? (
+                "+" +
+                state.user.phone.dialCode +
+                " " +
+                state.user.phone.number
+              ) : (
+                <span className="italic text-zinc-500">
+                  Not Provided
+                </span>
+              )}
+            </p>
           </div>
         </div>
 
-        <div className="min-w-[40%]">
-          <p className="text-[1.2rem] font-semibold">Phone:</p>
-          <div className="bg-white p-2 rounded-lg outline outline-primary wrap-break-word">
-            {
-              state.user?.phone ? 
-                "+" + state.user.phone.dialCode + " " + state.user.phone.number :
-                <span className="italic text-gray-500">Not Provided</span>
-            }
-          </div>
+        <div className="w-full pt-2">
+          <Button
+            loading={buttonLoad}
+            loadingText="Leaving Portal..."
+            onClick={handleLogout}
+            className="w-full py-3.5 rounded-full bg-primary hover:bg-[#d46f2a] text-black
+             font-mono font-bold tracking-widest uppercase"
+            content="Log Out"
+          />
         </div>
-
-        <Button
-          theme="light"
-          loading={buttonLoad}
-          loadingText="Logging Out"
-          onClick={handleLogout}
-          className="text-[1.25rem]"
-          content="Log Out"
-        />
       </div>
     </div>
   );

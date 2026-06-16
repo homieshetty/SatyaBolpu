@@ -13,7 +13,7 @@ import { buildAnimationProps } from '../constants/Animations';
 import { useNavigate } from 'react-router-dom';
 import { Marker, Popup } from 'react-leaflet';
 import SVGHeader2 from '../constants/SVGHeader2';
-import { EventDetailsType, RotatingCardProps } from '../types/globals';
+import { IEvent, RotatingCardProps } from '../types/globals';
 import useApi from '../hooks/useApi';
 import RotatingCard from '../components/RotatingCard';
 import { BASE_URL } from "../App";
@@ -46,7 +46,7 @@ const Home = () => {
   
   const [swiperData, setSwiperData] = useState<swiperDataType[]>([]);
   const [recentPosts, setRecentPosts] = useState<RotatingCardProps[]>([]);
-  const [upcomingEvents, setUpcomingEvents] = useState<EventDetailsType[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<IEvent[]>([]);
   const [isHovering,setHovering] = useState<boolean>(false);
 
   const recentPostsApi = useApi("/posts?fields=shortTitle,description,coverImage&limit=5");

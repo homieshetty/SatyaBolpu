@@ -1,6 +1,100 @@
 import { Request, Response } from "express";
-import { AuthRequest, ICulture, IEvent, ILocation, IPost } from "../types/globals.js";
-import { Draft } from "../models/Draft.js";
+import { AddData, AddType, AuthRequest, IDraft, ILocation } from "../types/globals.js";
+import { validateData, validateForeignFields } from "../utils/validate.js";
+import { CultureDraft, Draft, LocationDraft, PostDraft } from "../models/Draft.js";
+import { Model } from "mongoose";
+import { Post } from "../models/Post.js";
+import { Culture } from "../models/Culture.js";
+import { Blog } from "../models/Blog.js";
+import { Location } from "../models/Location.js";
+
+const DraftMap = {
+  post: PostDraft,
+  culture: CultureDraft,
+  location: LocationDraft
+};
+
+const ModelMap = {
+  post: Post,
+  culture: Culture,
+  location: Location,
+  blog: Blog
+}
+
+const fields = {
+  post: {
+    details: [
+      "title",
+      "culture",
+      "postGroup",
+      "postType",
+      "description",
+      "tags",
+      "coverImage",
+      "files",
+    ],
+    content: [
+      "content"
+    ],
+    location: [
+      "location"
+    ]
+  },
+
+  culture: {
+    details: [
+      "title",
+      "description",
+      "coverImage",
+      "galleryImage",
+      "files"
+    ],
+    content: [
+      "content"
+    ]
+  },
+
+  blog: {
+    details: [
+      "title",
+      "description",
+      "coverImage",
+      "files"
+    ],
+    content: [
+      "content"
+    ],
+    location: [
+      "location"
+    ]
+  },
+
+  location: {
+    details: [
+      "name"
+    ],
+    location: [
+      "district",
+      "taluk",
+      "maagane",
+      "village",
+      "coordinates",
+      "attachments"
+    ]
+  }
+}
+
+export const createDraft = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user._id;
+    const { type: draftType } = req.body;
+    const { _id } = (await Draft.create({ userId, draftType })).toObject();
+    return res.status(201).json({ id: _id });
+  } catch(err: any) {
+    console.error("Error while creating draft: " + err.message);
+    return res.status(500).json({ msg: "Internal Server Error while creating draft." });
+  }
+}
 
 export const getDrafts = async (req: AuthRequest, res: Response) => {
   try {
@@ -28,142 +122,120 @@ export const getDrafts = async (req: AuthRequest, res: Response) => {
 
 export const getDraft = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id, type } =req.params;
+
+    const DraftModel = DraftMap[type as keyof typeof DraftMap] as Model<any>;
+    const refs = Object.keys(DraftModel.schema.paths).filter(
+      (path) => DraftModel.schema.paths[path].options?.ref
+    );
+
+    let query = Draft.findById(id);
+    refs.forEach((path) => {
+      if(path === 'userId') return;
+      query = query.populate(path);
+    });
+
+    const draft = await query.lean<Record<string, any>>();
+    if(!draft) {
+      return res.status(400).json({ msg: "Draft not found." });
+    }
+    
+    const selectedFields = fields[type as keyof typeof fields] as Record<string, string[]>;
+
+    return res.status(200).json({
+      draft: Object.fromEntries(
+        Object.entries(selectedFields).map(([key, fieldKeys]) => [
+          key,
+          Object.fromEntries(fieldKeys.map((fieldKey) => [fieldKey, draft[fieldKey]]))
+        ])
+      )
+    });
+  } catch (err: any) {
+    console.error("Fetch Error:", err.message);
+    return res.status(500).json({ msg: `Fetch error: ${err.message}` });
+  }
+}
+
+export const updateDraft = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?._id;
+    const { id, type, step } = req.params;
+    const { data }: { data: AddData } = req.body;
+
+    if (!userId) {
+      return res.json(404).json({ msg: "Missing user id." });
+    }
+
+    const validator = validateData[type as AddType] as Record<string, (data: AddData) => boolean>;
+    if (!validator[step](data)) {
+      return res.status(404).json({ msg: "Validation failed." });
+    }
+
+    const foreignValidator = validateForeignFields[type as AddType] as (data: AddData) => Promise<boolean>;
+    if (!(await foreignValidator(data))) {
+      return res.status(404).json({ msg: "Foreign validation failed." });
+    }
 
     if (!id) {
-      return res.status(400).json({
-        msg: "Missing required field."
-      });
+      return res.json(404).json({ msg: "Missing draft id." });
     }
 
-    const draft = await Draft.findById(id);
-
+    const DraftModel = DraftMap[type as keyof typeof DraftMap] as Model<any>;
+    const draft = await DraftModel.findByIdAndUpdate(
+      id,
+      data,
+      { new: true }
+    );
     if (!draft) {
-      return res.status(404).json({ msg: "Draft not found." });
+      return res.status(500).json({ msg: "Error whie updating draft." });
     }
 
-    let draftRes;
+    return res.status(200).json({ draft });
+  } catch (err: any) {
+    console.error("Update Error:", err.message);
+    return res.status(500).json({ msg: `Update error: ${err.message}` });
+  }
+}
 
-    if (draft.draftType === "culture") {
-      const d = draft.toObject() as ICulture;
-
-      draftRes = {
-        type: "culture",
-        details: {
-          title: d?.title ?? "",
-          description: d?.description ?? "",
-          coverImage: d?.coverImage ?? null,
-          galleryImages: d?.galleryImages ?? [],
-          files: d?.files ?? []
-        },
-        content: d.content ?? ""
-      };
-    }
-
-    else if (draft.draftType === "event") {
-      const d = draft.toObject() as IEvent;
-
-      draftRes = {
-        type: "event",
-        details: {
-          title: d?.title ?? "",
-          culture: d?.culture ?? "",
-          description: d?.description ?? "",
-          duration:
-            d?.duration?.start && d?.duration?.end
-              ? {
-                  start: d.duration.start
-                    .toISOString()
-                    .split("T")[0],
-
-                  end: d.duration.end
-                    .toISOString()
-                    .split("T")[0]
-                }
-              : {
-                  start: null,
-                  end: null
-                },
-
-          coverImage: d?.coverImage ?? "",
-          files: d?.files ?? []
-        },
-
-        location: {
-          name: d?.location?.name ?? "",
-          district: d?.location?.district ?? "",
-          taluk: d?.location?.taluk ?? "",
-          maagane: d?.location?.maagane ?? "",
-          village: d?.location?.village ?? "",
-          coordinates: d?.location?.coordinates ?? []
+export const removeFromDraft = async (req: Request, res: Response) => {
+  try {
+    const { id, type, step } = req.params;
+    const DraftModel = DraftMap[type as keyof typeof DraftMap] as Model<any>;
+    const deleteFields = fields[type as keyof typeof fields] as Record<string, {}>;
+    await DraftModel.findByIdAndUpdate(
+      id,
+      {
+        $unset: {
+          ...deleteFields[step]
         }
-      };
+      }
+    );
+
+    return res.status(200).json({ success: true });
+  } catch (err: any) {
+    console.error("Delete Error:", err.message);
+    return res.status(500).json({ msg: `Delete error: ${err.message}` });
+  }
+}
+
+export const moveToDraft = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const { type } : { type: AddType } = req.body;
+
+    const Model = ModelMap[type as keyof typeof ModelMap] as Model<any>;
+    const data = (await Model.findById(id).lean());
+    if(!data) {
+      return res.status(404).json(`${type} not found.`);
     }
 
-    else if (draft.draftType === "post") {
-      const d = draft.toObject() as (IPost & { locationSpecific: boolean });
-
-      draftRes = {
-        type: "post",
-        details: {
-          title: d?.title ?? "",
-          shortTitle: d?.shortTitle ?? "",
-          culture: d?.culture ?? "",
-          postGroup: d?.postGroup ?? "",
-          postType: d?.postType ?? "",
-          description: d?.description ?? "",
-          tags: d?.tags ?? [],
-          coverImage: d?.coverImage ?? "",
-          files: d?.files ?? [],
-          locationSpecific: d?.locationSpecific
-        },
-
-        location: {
-          name: d?.location?.name ?? "",
-          district: d?.location?.district ?? "",
-          taluk: d?.location?.taluk ?? "",
-          maagane: d?.location?.maagane ?? "",
-          village: d?.location?.village ?? "",
-          coordinates: d?.location?.coordinates ?? []
-        },
-
-        content: d?.content ?? ""
-      };
-    } else if (draft.draftType === "location") {
-      const d = draft.toObject() as ILocation;
-
-      draftRes = {
-        type: "location",
-        details: {
-          name: d?.name ?? "",
-        },
-        location: {
-          district: d?.district ?? "",
-          taluk: d?.taluk ?? "",
-          maagane: d?.maagane ?? "",
-          village: d?.village ?? "",
-          coordinates: d?.coordinates ?? []
-        }
-      };
-    }
-
-    return res.status(200).json({ draft: draftRes });
+    const DraftModel = DraftMap[type as keyof typeof DraftMap] as Model<any>;
+    const { _id } = await DraftModel.create({ ...data });
+    return res.status(201).json({ _id });
 
   } catch (err: any) {
-    console.error( "Error while fetching draft:", err.message);
-    return res.status(500).json({ msg: "Internal Server error while fetching draft." });
-  }
-};
-
-export const createDraft = async (req: AuthRequest, res: Response) => {
-  try {
-    const userId = req.user._id;
-    const { type: draftType } = req.body;
-    const { _id } = (await Draft.create({ userId, draftType })).toObject();
-    return res.status(201).json({ id: _id });
-  } catch(err: any) {
-    console.error("Error while creating draft: " + err.message);
-    return res.status(500).json({ msg: "Internal Server Error while creating draft." });
+    console.error("Error while creating pdraft: ", err.message);
+    return res.status(500).json({ msg: "Internal Server error while creating draft." });
   }
 }
 

@@ -1,13 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 import { durationSchema } from "./Event.js";
 import { ICulture, IDraftBase, IEvent, ILocation, IPost } from "../types/globals.js";
-import { validateExistence } from "../utils/validate.js";
 import { Culture } from "./Culture.js";
 import { PostGroup } from "./PostGroup.js";
 import { PostType } from "./PostType.js";
 import { Tag } from "./Tag.js";
 import { Location } from "./Location.js";
 import { User } from "./User.js";
+import { validateExistence } from "../utils/db.js";
 
 const draftSchema = new Schema<IDraftBase>({
   userId: {
@@ -83,15 +83,7 @@ export const postDraftSchema = new Schema<IPost & { locationSpecific: boolean }>
   },
   tags: {
     type: [{ type: Schema.Types.ObjectId, ref: "Tag" }],
-    validate:[
-      validateExistence(Tag) as any,
-      {
-        validator: function (val: Schema.Types.ObjectId[]) {
-          return val && val.length > 0;
-        },
-        message: "At least one tag required"
-      }
-    ]
+    validate: validateExistence(Tag) as any
   },
   locationSpecific: {
     type: Boolean

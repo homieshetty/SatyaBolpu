@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { CultureState, DetailsType, LocationState, NewProps, NewState, PostState } from "../../types/globals";
 import ProgressBar from "../../components/ProgressBar";
 import Editor from "../../components/Editor";
-import { Mode } from "../../types/enums";
 import MAP from "../MAP";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
@@ -68,11 +67,10 @@ const New = ({ type }: NewProps) => {
         <Form<DetailsType>
           fields={getFields(type, options)}
           state={getDetails(state, type) as DetailsType}
-          submitEndpoint={draftable ? `/${type}s/draft/${id}/details` : data.submitApi}
+          submitEndpoint={draftable ? `/drafts/${type}/${id}/details` : data.submitApi}
           onSubmit={(_, setFormData, res) => {
             if(!draftable) {
               setFormData(getDetails(null, type) as DetailsType);
-              setState(null);
             } else
               setState(prev => ({
                 ...prev,
@@ -90,7 +88,7 @@ const New = ({ type }: NewProps) => {
             <Editor
               state={state as PostState | CultureState}
               setState={setState as React.Dispatch<React.SetStateAction<PostState | CultureState>>}
-              endpoint={`${type}s`}
+              endpoint={`/drafts/${type}/${id}`}
             />
         }
         : type === "location" ?
@@ -99,7 +97,7 @@ const New = ({ type }: NewProps) => {
               <MAP
                 state={state as LocationState}
                 setState={setState as React.Dispatch<React.SetStateAction<typeof state>>}
-                editMode={Mode.LOCATION}
+                editMode
               />
           }
           : {}

@@ -37,12 +37,11 @@ export const BlogCard = ({
   subtitle,
   type,
   image,
-  userId,
   createdAt
 }: BlogCardProps) => {
   console.log(image)
 
-  const [user, setUser] = useState<{ name: string, image: string } | null>(null);
+  const [user] = useState<{ name: string, image: string } | null>(null);
 
   // const userApi = useApi(`/users/${userId}?fields=name,image`);
 

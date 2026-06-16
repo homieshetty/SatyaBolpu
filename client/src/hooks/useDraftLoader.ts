@@ -9,7 +9,7 @@ const useDraftLoader = (
   type: NewProps['type'],
   setState: React.Dispatch<React.SetStateAction<NewState | null>>,
 ) => {
-  const draftsApi = useApi(`/drafts/${id}`);
+  const draftsApi = useApi(`/drafts/${type}/${id}`);
   const navigate = useNavigate();
 
   useEffect(() => {

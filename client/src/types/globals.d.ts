@@ -180,6 +180,7 @@ export type DetailsType = PostDetailsType | CultureDetailsType | EventState | Ot
 export type PostState = {
   details: PostDetailsType | null;
   content: string;
+  location?: string | ILocation | null;
 };
 
 export type EventState = Omit<IEvent, "id" | "location"> & { location: string };

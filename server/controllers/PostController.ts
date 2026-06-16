@@ -8,7 +8,7 @@ import { PostType } from "../models/PostType.js";
 import { Types } from "mongoose";
 import { Culture } from "../models/Culture.js";
 import { Location } from "../models/Location.js";
-import { validateLocation, validatePostDetails } from "../utils/validate.js";
+import { validateData, validateForeignFields } from "../utils/validate.js";
 
 export const getPosts = async (req: Request, res: Response) => {
   try {
@@ -47,12 +47,11 @@ export const getPosts = async (req: Request, res: Response) => {
     ]);
 
     const posts = postsData.map(post => {
-      const { _id, shortTitle, coverImage, ...rest } = post.toObject();
+      const { _id, coverImage, ...rest } = post.toObject();
 
       return {
         ...rest,
         image: coverImage,
-        title: shortTitle,
         id: _id
       };
     });
@@ -189,7 +188,7 @@ export const getPost = async (req: Request, res: Response) => {
       .populate("culture")
       .populate("postType")
       .populate("postGroup")
-      .populate("tags", "tag")
+      .populate("tags", "name")
       .populate("location");
 
     if (!postRes) {
@@ -209,148 +208,6 @@ export const getPost = async (req: Request, res: Response) => {
   } catch (err: any) {
     console.error(`Error while fetching post with id ${req.params.id}: `, err.message);
     return res.status(500).json({ msg: `Internal Server error while fetching post with id ${req.params.id}.` });
-  }
-}
-
-export const savePostDetails = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const { formData: details } = req.body;
-
-    if ( !id || !details || !validatePostDetails(details)) {
-      return res.status(400).json({ msg: "Missing Required Field" });
-    }
-
-    const exists = await Post.findOne({ title: details.title });
-    if(exists) {
-      return res.status(409).json({ msg: `Post '${details.title}' already exists.` });
-    }
-
-    for (const tag of details.tags) {
-      const t = await Tag.findById(tag);
-      if (!t) {
-        return res.status(400).json({ msg: "Invalid tag." });
-      }
-    }
-
-    const culture = await Culture.findById(details.culture);
-    if(!culture) {
-      return res.status(400).json({ msg: "Culture not found." });
-    }
-
-    const postGroup = await PostGroup.findById(details.postGroup);
-    if (!postGroup) {
-      return res.status(400).json({ msg: "Post group not found." });
-    }
-
-    const postType = await PostType.findById(details.postType);
-    if (!postType) {
-      return res.status(400).json({ msg: "Post type not found." });
-    }
-
-    const locationsExists = await Location.findById(details.location);
-    if(!locationsExists) {
-      return res.status(400).json({ msg: "Location doesnt exist" });
-    }
-
-    const draft = await PostDraft.findByIdAndUpdate(
-      id,
-      details,
-      { new: true }
-    );
-
-    const { _id } = draft!.toObject();
-    return res.status(201).json({ post: { id: _id, details } });
-
-  } catch (err: any) {
-    console.error("Error while saving post details: ", err.message);
-    return res.status(500).json({ msg: "Internal Server error while saving post details." });
-  }
-}
-
-export const deletePostDetails = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id
-    if (!id) {
-      return res.status(400).json({ msg: "Missing required field." });
-    }
-
-    await PostDraft.findByIdAndUpdate(
-      id,
-      {
-        $unset: {
-          title: "",
-          shortTitle: "",
-          description: "",
-          culture: "",
-          postGroup: "",
-          postType: "",
-          tags: [],
-          coverImage: "",
-          files: "",
-          locationSpecific: false,
-          location: ""
-        }
-      }
-    );
-    res.status(200).json({ success: true });
-  } catch (err: any) {
-    console.error("Error while deleting post details: " + err.message);
-    return res.status(500).json({ msg: "Internal Server Error while deleting post details." });
-  }
-}
-
-export const savePostEditorContent = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    const { content } = req.body;
-    console.log("'" + id + "'")
-    
-    if (!content || !id) {
-      return res.status(400).json({ msg: "Missing Required Field" });
-    }
-
-    console.log("id:", id);
-
-    const before = await PostDraft.findById(id);
-    console.log("before:", before);
-
-    const draft = await PostDraft.findByIdAndUpdate(
-      id,
-      { content },
-      { new: true }
-    );
-
-    console.log("after:", draft);
-
-    const { _id } = draft!.toObject();
-    return res.status(201).json({ post: { id: _id, content } });
-
-  } catch (err: any) {
-    console.error("Error while saving post editor content: ", err.message);
-    return res.status(500).json({ msg: "Internal Server error while saving post editor content." });
-  }
-}
-
-export const deletePostEditorContent = async (req: Request, res: Response) => {
-  try {
-    const id = req.params.id;
-    if (!id) {
-      return res.status(400).json({ msg: "Missing required field." });
-    }
-
-    await PostDraft.findByIdAndUpdate(
-      id,
-      {
-        $unset: {
-          content: ""
-        }
-      }
-    );
-    res.status(200).json({ success: true });
-  } catch (err: any) {
-    console.error("Error while deleting post editor content: " + err.message);
-    return res.status(500).json({ msg: "Internal Server Error while deleting post editor content." });
   }
 }
 
@@ -377,9 +234,9 @@ export const createDraft = async (req: Request, res: Response) => {
 export const uploadPost = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user._id;
-    const { details, content, location } = req.body;
-
-    if (!details || !validatePostDetails(details) || !content || !validateLocation(location)) {
+    const { details, content } = req.body;
+    const validator = validateData['post'];
+    if (!details || !validator['details'](details) || !validator['content'](content)) {
       return res.status(400).json({ msg: "Missing Required Field" });
     }
 
@@ -388,31 +245,8 @@ export const uploadPost = async (req: AuthRequest, res: Response) => {
       return res.status(409).json({ msg: `Post '${details.title}' already exists.` });
     }
 
-    for (const tag of details.tags) {
-      const t = await Tag.findById(tag);
-      if (!t) {
-        return res.status(400).json({ msg: "Invalid tag." });
-      }
-    }
-
-    const culture = await Culture.findById(details.culture);
-    if(!culture) {
-      return res.status(400).json({ msg: "Culture not found." });
-    }
-
-    const postGroup = await PostGroup.findById(details.postGroup);
-    if (!postGroup) {
-      return res.status(400).json({ msg: "Post group not found." });
-    }
-
-    const postType = await PostType.findById(details.postType);
-    if (!postType) {
-      return res.status(400).json({ msg: "Post type not found." });
-    }
-
-    const locationsExists = await Location.findById(details.location);
-    if(!locationsExists) {
-      return res.status(400).json({ msg: "Location doesnt exist" });
+    if(!validateForeignFields['post'](details)) {
+      return res.status(400).json("Foreign fields error.");
     }
 
     const newPost = await Post.create({

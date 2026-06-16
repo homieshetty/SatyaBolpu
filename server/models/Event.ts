@@ -1,9 +1,9 @@
 import mongoose, { Schema } from "mongoose";
 import { IDuration, IEvent } from "../types/globals.js";
-import { validateExistence } from "../utils/validate.js";
 import { Culture } from "./Culture.js";
 import { Location } from "./Location.js";
 import { User } from "./User.js";
+import { validateExistence } from "../utils/db.js";
 
 export const durationSchema = new Schema<IDuration>({
   start: {

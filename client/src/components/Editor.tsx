@@ -185,12 +185,6 @@ const Editor = ({
       .replace(/(<br>\s*)+$/g, "");
   };
 
-  // const decodeHtml = (html: string) => {
-  //   const txt = document.createElement("textarea")
-  //   txt.innerHTML = html;
-  //   return txt.value;
-  // }
-
   const uploadFiles = async (content: string): Promise<string> => {
     if (!content.trim()) return "";
     if(content === "<p></p>") return "";
@@ -219,7 +213,7 @@ const Editor = ({
   const content = await uploadFiles(editor.getHTML());
   if (title !== state.details?.title) {
     await api.refetch({
-      endpoint: `/${endpoint}/draft/${id}/details`,
+      endpoint,
       method: "POST",
       body: {
         details: {
@@ -231,7 +225,7 @@ const Editor = ({
   }
 
   const res = await api.refetch({
-    endpoint: `/${endpoint}/draft/${id}/content`,
+    endpoint,
     method: "POST",
     body: { content }
   });

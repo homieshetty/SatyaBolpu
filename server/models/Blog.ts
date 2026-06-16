@@ -1,8 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 import { IBlog } from "../types/globals.js";
-import { validateExistence } from "../utils/validate.js";
 import { Location } from "./Location.js";
 import { User } from "./User.js";
+import { validateExistence } from "../utils/db.js";
 
 const blogSchema = new Schema<IBlog>({
   userId: {

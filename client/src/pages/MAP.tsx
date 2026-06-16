@@ -11,9 +11,8 @@ import { MdCancel } from "react-icons/md";
 import { FaMagnifyingGlassLocation } from "react-icons/fa6";
 import { IoMdDoneAll } from "react-icons/io";
 import { toast } from "react-toastify";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { EventState, ILocation, Location, LocationState, PostState } from "../types/globals";
-import { Mode } from "../types/enums";
 import { FaLock, FaLockOpen, FaPlus, FaMinus } from "react-icons/fa";
 import { IoLocationSharp } from "react-icons/io5";
 
@@ -71,14 +70,14 @@ const MAP = ({
   minimal = false,
   children,
   ref,
-  editMode,
+  editMode = false,
   state,
   setState
 }: {
   minimal?: boolean;
   children?: ReactNode;
   ref?: React.RefObject<HTMLDivElement | null>;
-  editMode?: Mode.EVENT | Mode.POST | Mode.LOCATION;
+  editMode: boolean;
   state?: PostState | EventState | LocationState;
   setState?: React.Dispatch<React.SetStateAction<EventState | PostState | LocationState>>
 }) => {
@@ -105,8 +104,6 @@ const MAP = ({
 
   const locationsApi = useApi("/locations?fields=name,coordinates,district,taluk,village", { auto: !minimal });
   const locationSubmitApi = useApi("/locations", { auto: false });
-  const postsApi = useApi("/posts", { auto: false });
-  const eventsApi = useApi("/events", { auto: false });
 
   useEffect(() => {
     if(locationsApi.data) {
@@ -275,10 +272,9 @@ const MAP = ({
 
   const districtKeys = ["dakshina_kannada", "udupi", "kasaragod"];
   const onEachUniteractiveVillage = (feature: GeoJSON.Feature, layer: Layer) => {
-    if (editMode !== undefined) {
+    if (editMode) {
       layer.on({
         click: (e: LeafletMouseEvent) => {
-          if(editMode !== Mode.LOCATION) return;
           setNewLocation({
             district: feature.properties?.DISTRICT,
             taluk: feature.properties?.TALUK,
@@ -464,31 +460,22 @@ const MAP = ({
   };
 
   const handleSubmit = async () => {
-    if (editMode === Mode.LOCATION && !(state as LocationState)?.location?.district) {
+    if(!editMode) return;
+
+    if (editMode && !(state as LocationState)?.location?.district) {
       toast.error("You need to submit the location details first.")
       return;
     }
 
-    if (editMode === Mode.POST) {
-      await postsApi.refetch({ endpoint: `/posts/draft/${id}/location`, method: "POST", body: { location: state?.location }})
-    } else if (editMode === Mode.EVENT) {
-      await eventsApi.refetch({ endpoint: `/events/draft/${id}/location`, method: "POST", body: { location: state?.location }})
-    } else if (editMode === Mode.LOCATION) {
-      await locationSubmitApi.refetch({ endpoint: `/locations/draft/${id}/location`, method: "POST", body: { location: state?.location }})
-    }
-    if(editMode === Mode.LOCATION)
-      setState?.(prev => ({
-        ...prev,
-        location: {
-          ...(prev as LocationState).location,
-          ...newLocation
-        }
-      }) as LocationState);
-    else
-      setState?.(prev => ({
-        ...prev,
-        location: activeLocation?.id
-      }) as PostState | EventState);
+    await locationSubmitApi.refetch({ endpoint: `/drafts/location/${id}/location`, method: "POST", body: { location: state?.location } })
+    setState?.(prev => ({
+      ...prev,
+      location: {
+        ...(prev as LocationState).location,
+        ...newLocation
+      }
+    }) as LocationState);
+
     toast.success("Location stored successfully.");
   }
 
@@ -595,7 +582,7 @@ const MAP = ({
 
   const handleMarkerClick = (e: LeafletMouseEvent, loc: ILocation) => {
     if(!map || !toolTipPane.current) return;
-    if(editMode === undefined || editMode === Mode.LOCATION) return;
+    if(editMode) return;
 
     if(activeLocation?.name) {
       const selectedMarker = markers.current[activeLocation.name];
@@ -673,7 +660,7 @@ const MAP = ({
         </div>
       )}
 
-      {!minimal && editMode !== undefined && editMode === Mode.LOCATION && (
+      {!minimal && editMode && (
         !askForCoordinates ?
           (
             <div
@@ -858,9 +845,7 @@ const MAP = ({
                     mousedown: (e) => handleMarkerClick(e, loc)
                   }}
                   icon={
-                    editMode !== Mode.LOCATION && (state?.location as ILocation)?.name === loc.name ? 
-                      blueMarker : 
-                      orangeMarker
+                    orangeMarker
                   }
                 />
               ))

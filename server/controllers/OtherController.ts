@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { Tag } from "../models/Tag.js";
 import { PostType } from "../models/PostType.js";
 import { PostGroup } from "../models/PostGroup.js";
-import { Culture } from "../models/Culture.js";
 
 export const getTags = async (req: Request, res: Response) => {
   try {
@@ -11,13 +10,14 @@ export const getTags = async (req: Request, res: Response) => {
     const tagsData = 
       await Tag.find({}, "name")
         .collation({ locale: "en", strength: 2 })
-        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 });
+        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 })
+        .lean();
     if (!tagsData) {
       res.status(404).json({ msg: "No tags found" });
     }
 
     const tags = tagsData.map(tag => {
-      const { _id, ...rest } = tag.toObject();
+      const { _id, ...rest } = tag;
       return {
         id: _id,
         ...rest

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { ILocation } from "../types/globals.js";
-import { validateExistence } from "../utils/validate.js";
 import { User } from "./User.js";
+import { validateExistence } from "../utils/db.js";
 
 export const locationSchema = new Schema<ILocation>({
   userId: {

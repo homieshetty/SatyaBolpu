@@ -3,7 +3,7 @@ import Button from "../components/Button";
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
 import useApi from "../hooks/useApi";
 import { useAuth } from "../context/AuthContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { LoginProps } from "../types/globals";
 
@@ -15,7 +15,7 @@ const initialLoginData = {
 const Login = () => {
   const [formData, setFormData] = useState<LoginProps>(initialLoginData);
   const [errors, setErrors] = useState<LoginProps>(initialLoginData);
-  const [apiError,setApiError] = useState<string>("");
+  const [apiError, setApiError] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [buttonLoad, setButtonLoad] = useState<boolean>(false);
   const passwordRef = useRef<HTMLInputElement | null>(null);
@@ -83,86 +83,121 @@ const Login = () => {
           token: data.accessToken,
         },
       });
-      const names: string[] = data.user.name.split(" ");
-      let finalName;
-      if(names.length < 2) {
-        finalName = names[0];
-      } else {
-        finalName = names.find(n => n.length > 5 );
+
+      const userName = data.user?.name || "Explorer";
+      const names: string[] = userName.split(" ");
+      let finalName = names[0];
+
+      if (names.length >= 2) {
+        const structuralName = names.find(n => n.length > 5);
+        if (structuralName) finalName = structuralName;
       }
-      finalName = finalName!.length > 10 ? `${finalName!.slice(0, 10)}...` : finalName;
+
+      finalName = finalName.length > 10 ? `${finalName.slice(0, 10)}...` : finalName;
       toast.success(`Welcome back ${finalName}`);
 
-      setFormData({
-        email: "",
-        password: "",
-      });
-
+      setFormData(initialLoginData);
       navigate("/profile");
     }
-  }, [data, error, loading]);
+  }, [data, error, loading, dispatch, navigate]);
 
   if (state.token) return <Navigate to={"/profile"} replace />;
 
   return (
-    <div className="w-full min-h-screen text-primary flex items-center justify-center px-4 py-10">
+    <div className="relative w-full min-h-screen bg-black flex items-center justify-center px-4 py-16 overflow-hidden select-none">
+      
       <form
         onSubmit={handleSubmit}
-        className="w-full sm:w-[90%] md:w-2/3 lg:w-2/5 xl:w-1/3 border border-white border-solid rounded-2xl 
-        flex flex-col items-center gap-8 px-6 py-10 bg-white/5 backdrop-blur-md shadow-lg"
+        className="relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 xl:w-[30%] max-w-lg border border-zinc-600/60 rounded-3xl 
+        flex flex-col items-stretch gap-6 px-8 py-12 bg-[#111112]/60 backdrop-blur-xl shadow-2xl z-10"
       >
-        <h1 className="text-[2.5rem] sm:text-[3rem] font-bold">Login</h1>
+        <div className="flex flex-col items-center gap-2 mb-2 text-center">
+          <span className="text-xl text-primary font-bold tracking-widest drop-shadow-[0_0_8px_rgba(232,126,54,0.5)]">
+            ॐ
+          </span>
+          <h1 
+            className="text-4xl font-serif font-black uppercase tracking-tight text-white"
+            style={{ WebkitTextStroke: '0.5px rgba(255, 255, 255, 0.05)' }}
+          >
+            Welcome Back
+          </h1>
+        </div>
 
-        {
-          apiError && <p className="text-sm text-red-600">{apiError}</p>
-        }
+        {apiError && (
+          <div className="w-full bg-red-950/40 border border-red-800/50 rounded-xl p-3 text-center">
+            <p className="text-xs font-mono tracking-wide text-red-400">{apiError}</p>
+          </div>
+        )}
 
-        <div className="w-full flex flex-col gap-2">
-          <label htmlFor="email" className="text-[1.2rem]">Email:</label>
+        <div className="w-full flex flex-col gap-1.5">
+          <label htmlFor="email" className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+            Email Address
+          </label>
           <input
-            className="text-white p-3 text-[1.2rem] border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-white"
+            className="w-full text-white bg-black/40 px-4 py-3.5 text-base border border-zinc-800 rounded-xl 
+              focus:outline-none focus:border-primary/80 focus:ring-1 focus:ring-primary/40 transition-all duration-300"
             type="email"
             id="email"
             name="email"
+            placeholder="name@domain.com"
             value={formData.email}
             onChange={handleFormDataChange}
           />
-          {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+          {errors.email && <p className="text-red-500 text-xs font-mono mt-0.5">{errors.email}</p>}
         </div>
 
-        <div className="w-full flex flex-col gap-2">
-          <label htmlFor="password" className="flex items-center justify-between text-[1.2rem]">
-            Password:
-            <span
-              className="cursor-pointer text-[1.5rem]"
+        <div className="w-full flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+              Password
+            </label>
+            <button
+              type="button"
+              className="text-zinc-500 hover:text-primary text-xl transition-colors focus:outline-none"
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <GrFormViewHide /> : <GrFormView />}
-            </span>
-          </label>
+            </button>
+          </div>
           <input
-            className="text-white p-3 text-[1.2rem] border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-white"
+            className="w-full text-white bg-black/40 px-4 py-3.5 text-base border border-zinc-800 rounded-xl 
+              focus:outline-none focus:border-primary/80 focus:ring-1 focus:ring-primary/40 transition-all duration-300"
             type={showPassword ? "text" : "password"}
             id="password"
             name="password"
+            placeholder="••••••••"
             ref={passwordRef}
             value={formData.password}
             onChange={handleFormDataChange}
           />
-          {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+          {errors.password && <p className="text-red-500 text-xs font-mono mt-0.5">{errors.password}</p>}
         </div>
 
-        <Button
-          loading={buttonLoad}
-          loadingText="Logging In"
-          className="text-[1.3rem] px-6 py-2"
-          type="submit"
-          content="Login"
-        />
+        <div className="flex items-center justify-between text-xs font-mono text-zinc-500 px-1 -mt-1">
+          <Link to="/forgot-password" className="hover:text-white transition-colors">
+            Forgot Password?
+          </Link>
+          <div className="flex items-center gap-1">
+            <span>New here?</span>
+            <Link to="/signup" className="text-primary hover:underline">
+              Create Account
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <Button
+            loading={buttonLoad}
+            loadingText="Authenticating Portal..."
+            className="w-full text-sm font-mono font-bold tracking-widest uppercase py-3.5 rounded-full bg-primary hover:bg-[#d46f2a] text-black transition-colors"
+            type="submit"
+            content="Access Portal"
+          />
+        </div>
+
       </form>
     </div>
   );
 };
 
 export default Login;
-

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { ICulture } from "../types/globals.js";
 import { User } from "./User.js";
-import { validateExistence } from "../utils/validate.js";
+import { validateExistence } from "../utils/db.js";
 
 const cultureSchema = new Schema<ICulture>({
   userId: {

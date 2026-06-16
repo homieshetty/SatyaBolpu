@@ -6,7 +6,7 @@ import { PostGroup } from "./PostGroup.js";
 import { PostType } from "./PostType.js";
 import { Location } from "./Location.js";
 import { Tag } from "./Tag.js";
-import { validateExistence } from "../utils/validate.js";
+import { validateExistence } from "../utils/db.js";
 
 const postSchema = new Schema<IPost>({
   userId: {

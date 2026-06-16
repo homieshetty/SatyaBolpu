@@ -4,14 +4,17 @@ import { MinimalCardProps } from "../types/globals";
 
 export const MinimalSkeletonCard = () => {
   return (
-    <div className="w-[90%] h-15 lg:w-2/3 p-2 flex bg-gray-700 animate-pulse">
+    <div 
+      className="w-[90%] h-15 lg:w-2/3 p-2 px-5 flex bg-gray-500 animate-pulse
+        items-center justify-between text-[1.5rem] text-white rounded-full"
+    >
     </div>
   )
 }
 
 export const MinimalCard = ({ id, title, handleEdit, handleDelete }: MinimalCardProps) => {
   return (
-    <div className="w-[90%] lg:w-1/2 flex items-cente justify-between">
+    <div className="w-[90%] lg:w-1/2 flex items-center justify-between">
       <div className="text-primary text-[2rem] font-bold">
         {title || "Empty Draft"}
       </div>

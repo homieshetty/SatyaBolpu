@@ -49,7 +49,6 @@ export interface ILocation extends Document {
 export interface IPost extends Document {
   userId: Schema.Types.ObjectId,
   title: string,
-  shortTitle: string,
   culture: Schema.Types.ObjectId,
   postGroup: Schema.Types.ObjectId,
   postType: Schema.Types.ObjectId,
@@ -110,3 +109,6 @@ export type CardDataType = {
 export interface AuthRequest extends Request {
   user?: any;
 }
+
+export type AddType = "post" | "culture" | "event" | "blog" | "tag" | "post-type" | "location" | "post-group";
+export type AddData = IPost | ICulture | IEvent | ILocation | IBlog | ITag | IPostGroup | IPostType;

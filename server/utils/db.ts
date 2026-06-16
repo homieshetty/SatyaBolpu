@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
 import "dotenv/config";
 
 type envProps = {
@@ -13,4 +13,21 @@ export const connectDB = async () => {
         console.log(`Unable to connect to MongoDb Database: ${error}`);
         process.exit(1)
     }
+}
+
+export const validateExistence = (model: Model<any>) => {
+  return {
+    validator: async function (value: Schema.Types.ObjectId | Schema.Types.ObjectId[]) {
+      if (Array.isArray(value)) {
+        const count = await model.countDocuments({
+          _id: { $in: value }
+        });
+
+        return count === value.length;
+      } else {
+        return !!(await model.exists({ _id: value }));
+      }
+    },
+    message: `${model.modelName} does not exist.`
+  }
 }

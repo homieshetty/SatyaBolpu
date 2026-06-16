@@ -1,10 +1,8 @@
 import { Request, Response} from "express";
 import { Event } from "../models/Event.js";
 import { AuthRequest, IEvent } from "../types/globals.js";
-import { Culture } from "../models/Culture.js";
 import { Types } from "mongoose";
-import { Location } from "../models/Location.js";
-import { validateDates, validateEventData } from "../utils/validate.js";
+import { validateData, validateDates, validateForeignFields } from "../utils/validate.js";
 
 export const getEvents = async (req: Request, res: Response) => {
   try {
@@ -84,7 +82,7 @@ export const uploadEvent = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user._id;
     const { formData: eventData } = req.body;
-    if(!eventData|| !validateEventData(eventData)) {
+    if(!eventData|| !validateData['event'](eventData)) {
       return res.status(400).json({ msg: "Missing required field." });
     }
 
@@ -97,14 +95,8 @@ export const uploadEvent = async (req: AuthRequest, res: Response) => {
       return res.status(409).json({ msg: `Event '${eventData.title}' already exists.` })
     }
 
-    const culture = await Culture.findById(eventData.culture);
-    if(!culture) {
-      return res.status(400).json({ msg: "Culture not found." });
-    }
-
-    const locationsExists = await Location.findById(eventData.location);
-    if(!locationsExists) {
-      return res.status(400).json({ msg: "Location not found." });
+    if(!validateForeignFields['event'](eventData)) {
+      return res.status(400).json("Foreign fields error.");
     }
 
     const newEvent = await Event.create({ userId, ...eventData });

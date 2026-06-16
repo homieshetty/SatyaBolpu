@@ -54,7 +54,7 @@ const Posts = () => {
 
   const handleEdit = async (id: string) => {
     if(!id) return;
-    const res = await postsApi.refetch({ endpoint: `/posts/draft/${id}`, method: "POST" });
+    const res = await postsApi.refetch({ endpoint: `/drafts/post/${id}`, method: "POST" });
     if(!res) return;
     navigate(`/add/post/${res._id}`);
   }
