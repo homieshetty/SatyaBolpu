@@ -44,7 +44,7 @@ const NavLinks = ({ pathname, onCloseMenu }: { pathname: string; onCloseMenu: ()
   return (
     <div
       className={`flex flex-col text-xl font-semibold absolute lg:relative top-0 
-                       lg:flex-row items-center justify-center h-screen lg:h-auto gap-5`}
+       lg:flex-row items-center justify-center h-screen lg:h-auto gap-5`}
     >
       <NavLink
         style={{ textShadow: "1px 1px 6px black" }}
@@ -106,7 +106,7 @@ const Navbar = () => {
   });
 
   useLayoutEffect(() => {
-    if(pathname === "/" || pathname.startsWith("/cultures")) {
+    if(pathname === "/") {
       setNavbarStyles({
         position: "fixed",
         backgroundColor: "transparent",
@@ -121,11 +121,6 @@ const Navbar = () => {
 
   useEffect(() => {
     if(!navbarRef.current) return;
-
-    if(pathname.startsWith("/cultures")) {
-      setCollapsed(true);
-      return;
-    }
 
     if(pathname !== "/") {
       setCollapsed(false);

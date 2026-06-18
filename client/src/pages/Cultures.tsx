@@ -49,7 +49,7 @@ const Cultures = () => {
     <div className="w-screen min-h-screen bg-black pt-20 pb-32 flex flex-col items-center gap-10 px-4">
       <div className="w-full flex flex-col justify-center items-center gap-4">
         <h1 className="text-4xl sm:text-5xl md:text-6xl text-center font-black tracking-tight
-          text-transparent bg-clip-text bg-gradient-to-r from-primary via-amber-400 to-primary
+          text-transparent bg-clip-text bg-linear-to-r from-primary via-amber-400 to-primary
           whitespace-pre-wrap text-wrap leading-tight">
           Cultures
         </h1>
@@ -59,9 +59,9 @@ const Cultures = () => {
           Cultures
         </h1>
         <div className="flex items-center justify-center gap-3 w-4/5 sm:w-2/3 lg:w-1/2">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/60" />
+          <div className="flex-1 h-px bg-linear-to-r from-transparent to-primary/60" />
           <span className="text-lg sm:text-xl text-primary/80 font-bold drop-shadow-[0_0_8px_rgba(232,129,54,0.4)]">ॐ</span>
-          <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/60" />
+          <div className="flex-1 h-px bg-linear-to-l from-transparent to-primary/60" />
         </div>
         <p className="text-white/40 text-center text-sm sm:text-base mt-2">
           The living traditions of Tulunadu
@@ -81,14 +81,14 @@ const Cultures = () => {
                 transition-all duration-500 cursor-pointer"
               onClick={() => navigate(`/cultures/${culture.title.toLowerCase()}`)}
             >
-              <div className="relative w-full aspect-[21/9] overflow-hidden">
+              <div className="relative w-full aspect-21/9 overflow-hidden">
                 <img
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   src={`${BASE_URL}${culture.coverImage}`}
                   alt={culture.title}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-r from-black/60 to-transparent" />
               </div>
 
               <div className="absolute bottom-0 left-0 w-full p-6 sm:p-8 flex flex-col gap-3">

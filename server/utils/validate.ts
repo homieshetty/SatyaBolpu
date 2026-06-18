@@ -34,8 +34,8 @@ export const validateData = {
   },
   culture: {
     details: (culture: ICulture) =>
-      culture.title && culture.title.length > 5 && culture.description &&
-      culture.description.split(' ').length > 20 && culture.coverImage &&
+      culture.title && culture.title.length >= 5 && culture.description &&
+      culture.description.split(' ').length >= 20 && culture.coverImage &&
       culture.galleryImages.length >= 15,
     content: (culture: ICulture) =>
       culture.content && culture.content.split(' ').length > 20

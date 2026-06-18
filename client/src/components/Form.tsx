@@ -543,7 +543,7 @@ const Form = <T extends {}>({
 
                   const fileType = isFile
                     ? file.type
-                    : file.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+                    : file.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)
                       ? "image"
                       : "other";
                   return (
@@ -561,7 +561,7 @@ const Form = <T extends {}>({
                               scrollbarWidth: "none"
                             }}
                             className="w-full aspect-square object-cover object-center"
-                            src={`${BASE_URL}${fileUrl}`}
+                            src={`${fileUrl}`}
                           />
                         )
                       }

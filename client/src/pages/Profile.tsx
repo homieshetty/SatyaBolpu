@@ -150,7 +150,7 @@ const Profile = () => {
             loadingText="Leaving Portal..."
             onClick={handleLogout}
             className="w-full py-3.5 rounded-full bg-primary hover:bg-[#d46f2a] text-black
-             font-mono font-bold tracking-widest uppercase"
+             font-bold tracking-widest uppercase"
             content="Log Out"
           />
         </div>

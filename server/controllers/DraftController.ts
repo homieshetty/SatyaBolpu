@@ -46,7 +46,7 @@ const fields = {
       "title",
       "description",
       "coverImage",
-      "galleryImage",
+      "galleryImages",
       "files"
     ],
     content: [
@@ -88,6 +88,10 @@ export const createDraft = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user._id;
     const { type: draftType } = req.body;
+    if(!draftType) {
+      return res.status(400).json({ msg: "Missing required field." });
+    }
+
     const { _id } = (await Draft.create({ userId, draftType })).toObject();
     return res.status(201).json({ id: _id });
   } catch(err: any) {
@@ -99,6 +103,9 @@ export const createDraft = async (req: AuthRequest, res: Response) => {
 export const getDrafts = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user._id;
+    if(!userId) {
+      return res.status(400).json({ msg: "Missing user id." });
+    }
 
     const drafts =
       (await Draft
@@ -120,9 +127,33 @@ export const getDrafts = async (req: AuthRequest, res: Response) => {
   }
 }
 
+export const getDraftType = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+  
+    if(!id) {
+      return res.status(400).json({ msg: "Missing required field." });
+    }
+
+    const draft = await Draft.findById(id).select("draftType");
+    if(!draft) {
+      return res.status(400).json({ msg: "Draft not found." });
+    }
+
+    return res.status(200).json({ type: draft.draftType });
+  } catch (err: any) {
+    console.error("Fetch Error:", err.message);
+    return res.status(500).json({ msg: `Fetch error: ${err.message}` });
+  }
+}
+
 export const getDraft = async (req: Request, res: Response) => {
   try {
     const { id, type } =req.params;
+
+    if(!id || !type) {
+      return res.status(400).json({ msg: "Missing required field." });
+    }
 
     const DraftModel = DraftMap[type as keyof typeof DraftMap] as Model<any>;
     const refs = Object.keys(DraftModel.schema.paths).filter(
@@ -146,7 +177,9 @@ export const getDraft = async (req: Request, res: Response) => {
       draft: Object.fromEntries(
         Object.entries(selectedFields).map(([key, fieldKeys]) => [
           key,
-          Object.fromEntries(fieldKeys.map((fieldKey) => [fieldKey, draft[fieldKey]]))
+          fieldKeys.length > 1 ? 
+            Object.fromEntries(fieldKeys.map((fieldKey) => [fieldKey, draft[fieldKey]])) :
+            null
         ])
       )
     });
@@ -160,11 +193,20 @@ export const updateDraft = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?._id;
     const { id, type, step } = req.params;
-    const { data }: { data: AddData } = req.body;
+    const { formData } = req.body;
+
+    if(!id || !type || !step) {
+      return res.status(400).json({ msg: "Missing required field." });
+    }
 
     if (!userId) {
       return res.json(404).json({ msg: "Missing user id." });
     }
+
+    const data: AddData = {
+      userId,
+      ...formData
+    };
 
     const validator = validateData[type as AddType] as Record<string, (data: AddData) => boolean>;
     if (!validator[step](data)) {
@@ -190,7 +232,16 @@ export const updateDraft = async (req: AuthRequest, res: Response) => {
       return res.status(500).json({ msg: "Error whie updating draft." });
     }
 
-    return res.status(200).json({ draft });
+    const selectedFields = fields[type as keyof typeof fields] as Record<string, string[]>;
+
+    return res.status(200).json({
+      draft: Object.fromEntries(
+        Object.entries(selectedFields).map(([key, fieldKeys]) => [
+          key,
+          Object.fromEntries(fieldKeys.map((fieldKey) => [fieldKey, draft[fieldKey]]))
+        ])
+      )
+    });
   } catch (err: any) {
     console.error("Update Error:", err.message);
     return res.status(500).json({ msg: `Update error: ${err.message}` });
@@ -200,6 +251,10 @@ export const updateDraft = async (req: AuthRequest, res: Response) => {
 export const removeFromDraft = async (req: Request, res: Response) => {
   try {
     const { id, type, step } = req.params;
+    if(!id || !type || !step) {
+      return res.status(400).json({ msg: "Missing required field." });
+    }
+
     const DraftModel = DraftMap[type as keyof typeof DraftMap] as Model<any>;
     const deleteFields = fields[type as keyof typeof fields] as Record<string, {}>;
     await DraftModel.findByIdAndUpdate(
@@ -222,6 +277,9 @@ export const moveToDraft = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     const { type } : { type: AddType } = req.body;
+    if(!id || !type) {
+      return res.status(400).json({ msg: "Missing required field." });
+    }
 
     const Model = ModelMap[type as keyof typeof ModelMap] as Model<any>;
     const data = (await Model.findById(id).lean());

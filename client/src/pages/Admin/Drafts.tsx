@@ -13,7 +13,7 @@ const Drafts = () => {
   const handleEdit = async (id: string) => {
     const res = await draftsApi.refetch({ endpoint: `/drafts/${id}`, method: "GET" });
     if(!res) return;
-    navigate(`/add/${res.draft.type.toLowerCase()}/${id}`)
+    navigate(`/add/${res.type.toLowerCase()}/${id}`)
   }
 
   const handleDelete = async (id: string) => {

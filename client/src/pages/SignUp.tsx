@@ -155,38 +155,18 @@ const SignUp = () => {
 
     <form
       onSubmit={handleSubmit}
-      className="
-        relative
-        w-full
-        sm:w-[85%]
-        md:w-2/3
-        lg:w-2/5
-        max-w-xl
-
-        border border-zinc-600/60
-        rounded-3xl
-
-        flex flex-col
-        gap-6
-
-        px-8
-        py-12
-
-        bg-[#111112]/60
-        backdrop-blur-xl
-        shadow-2xl
-
-        z-10
+      className="relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 max-w-xl border border-zinc-600/60
+        rounded-3xl flex flex-col gap-6 px-8 py-12 bg-[#111112]/60 backdrop-blur-xl
+        shadow-2xl z-10
       "
     >
-      {/* Header */}
       <div className="flex flex-col items-center gap-2 text-center">
         <span className="text-xl text-primary font-bold tracking-widest drop-shadow-[0_0_8px_rgba(232,126,54,0.5)]">
           ॐ
         </span>
 
         <h1
-          className="text-4xl font-serif font-black uppercase tracking-tight text-white"
+          className="text-4xl font-black uppercase tracking-tight text-white"
           style={{
             WebkitTextStroke: "0.5px rgba(255,255,255,0.05)",
           }}
@@ -199,16 +179,13 @@ const SignUp = () => {
         </p>
       </div>
 
-      {/* Stepper */}
       <div className="flex justify-center items-center gap-3">
         {steps.map((label, i) => (
           <div key={i} className="flex items-center gap-2">
             <div
               className={`
-                w-9 h-9 rounded-full
-                flex items-center justify-center
-                text-sm font-bold
-                transition-all duration-300
+                w-9 h-9 rounded-full flex items-center justify-center
+                text-sm font-bold transition-all duration-300
 
                 ${
                   step === i
@@ -236,25 +213,18 @@ const SignUp = () => {
         ))}
       </div>
 
-      {/* STEP 1 */}
       {step === 0 && (
         <>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+            <label className="text-xs uppercase tracking-widest text-zinc-400">
               Full Name
             </label>
 
             <input
               className="
-                w-full text-white bg-black/40
-                px-4 py-3.5
-                border border-zinc-800
-                rounded-xl
-                focus:outline-none
-                focus:border-primary/80
-                focus:ring-1
-                focus:ring-primary/40
-                transition-all duration-300
+                w-full text-white bg-black/40 px-4 py-3.5 border border-zinc-800
+                rounded-xl focus:outline-none focus:border-primary/80 focus:ring-1
+                focus:ring-primary/40 transition-all duration-300
               "
               type="text"
               name="name"
@@ -263,28 +233,22 @@ const SignUp = () => {
             />
 
             {errors.name && (
-              <p className="text-red-500 text-xs font-mono">
+              <p className="text-red-500 text-xs">
                 {errors.name}
               </p>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+            <label className="text-xs uppercase tracking-widest text-zinc-400">
               Username (Optional)
             </label>
 
             <input
               className="
-                w-full text-white bg-black/40
-                px-4 py-3.5
-                border border-zinc-800
-                rounded-xl
-                focus:outline-none
-                focus:border-primary/80
-                focus:ring-1
-                focus:ring-primary/40
-                transition-all duration-300
+                w-full text-white bg-black/40 px-4 py-3.5 border border-zinc-800
+                rounded-xl focus:outline-none focus:border-primary/80 focus:ring-1
+                focus:ring-primary/40 transition-all duration-300
               "
               type="text"
               name="uname"
@@ -295,25 +259,18 @@ const SignUp = () => {
         </>
       )}
 
-      {/* STEP 2 */}
       {step === 1 && (
         <>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+            <label className="text-xs uppercase tracking-widest text-zinc-400">
               Email Address
             </label>
 
             <input
               className="
-                w-full text-white bg-black/40
-                px-4 py-3.5
-                border border-zinc-800
-                rounded-xl
-                focus:outline-none
-                focus:border-primary/80
-                focus:ring-1
-                focus:ring-primary/40
-                transition-all duration-300
+                w-full text-white bg-black/40 px-4 py-3.5 border border-zinc-800
+                rounded-xl focus:outline-none focus:border-primary/80 focus:ring-1
+                focus:ring-primary/40 transition-all duration-300
               "
               type="email"
               name="email"
@@ -322,14 +279,14 @@ const SignUp = () => {
             />
 
             {errors.email && (
-              <p className="text-red-500 text-xs font-mono">
+              <p className="text-red-500 text-xs">
                 {errors.email}
               </p>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+            <label className="text-xs uppercase tracking-widest text-zinc-400">
               Phone Number (Optional)
             </label>
 
@@ -361,7 +318,7 @@ const SignUp = () => {
 
             {errors.phone &&
               typeof errors.phone === "string" && (
-                <p className="text-red-500 text-xs font-mono">
+                <p className="text-red-500 text-xs">
                   {errors.phone}
                 </p>
               )}
@@ -369,12 +326,11 @@ const SignUp = () => {
         </>
       )}
 
-      {/* STEP 3 */}
       {step === 2 && (
         <>
           <div className="flex flex-col gap-1.5">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+              <label className="text-xs uppercase tracking-widest text-zinc-400">
                 Password
               </label>
 
@@ -395,15 +351,9 @@ const SignUp = () => {
 
             <input
               className="
-                w-full text-white bg-black/40
-                px-4 py-3.5
-                border border-zinc-800
-                rounded-xl
-                focus:outline-none
-                focus:border-primary/80
-                focus:ring-1
-                focus:ring-primary/40
-                transition-all duration-300
+                w-full text-white bg-black/40 px-4 py-3.5 border border-zinc-800
+                rounded-xl focus:outline-none focus:border-primary/80 focus:ring-1
+                focus:ring-primary/40 transition-all duration-300
               "
               type={showPassword ? "text" : "password"}
               name="password"
@@ -412,28 +362,22 @@ const SignUp = () => {
             />
 
             {errors.password && (
-              <p className="text-red-500 text-xs font-mono">
+              <p className="text-red-500 text-xs">
                 {errors.password}
               </p>
             )}
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+            <label className="text-xs uppercase tracking-widest text-zinc-400">
               Confirm Password
             </label>
 
             <input
               className="
-                w-full text-white bg-black/40
-                px-4 py-3.5
-                border border-zinc-800
-                rounded-xl
-                focus:outline-none
-                focus:border-primary/80
-                focus:ring-1
-                focus:ring-primary/40
-                transition-all duration-300
+                w-full text-white bg-black/40 px-4 py-3.5 border border-zinc-800
+                rounded-xl focus:outline-none focus:border-primary/80 focus:ring-1
+                focus:ring-primary/40 transition-all duration-300
               "
               type={showPassword ? "text" : "password"}
               name="confirmPassword"
@@ -442,7 +386,7 @@ const SignUp = () => {
             />
 
             {errors.confirmPassword && (
-              <p className="text-red-500 text-xs font-mono">
+              <p className="text-red-500 text-xs">
                 {errors.confirmPassword}
               </p>
             )}
@@ -450,21 +394,15 @@ const SignUp = () => {
         </>
       )}
 
-      {/* Navigation */}
       <div className="flex justify-between items-center mt-4">
         {step > 0 ? (
           <button
             type="button"
             onClick={() => setStep((prev) => prev - 1)}
             className="
-              flex items-center gap-2
-              px-5 py-3
-              rounded-full
-              border border-zinc-700
-              text-zinc-300
-              hover:border-primary
-              hover:text-primary
-              transition-all
+              flex items-center gap-2 px-5 py-3 rounded-full border
+              border-zinc-700 text-zinc-300 hover:border-primary
+              hover:text-primary transition-all
             "
           >
             <FaArrowLeft />
@@ -479,14 +417,8 @@ const SignUp = () => {
             type="button"
             onClick={() => handleNext(step + 1)}
             className="
-              flex items-center gap-2
-              px-5 py-3
-              rounded-full
-              border border-zinc-700
-              text-zinc-300
-              hover:border-primary
-              hover:text-primary
-              transition-all
+              flex items-center gap-2 px-5 py-3 rounded-full border border-zinc-700
+              text-zinc-300 hover:border-primary hover:text-primary transition-all
             "
           >
             Next
@@ -497,21 +429,8 @@ const SignUp = () => {
             loading={buttonLoad}
             loadingText="Creating Account..."
             className="
-              text-sm
-              font-mono
-              font-bold
-              tracking-widest
-              uppercase
-
-              py-3.5
-              px-8
-
-              rounded-full
-
-              bg-primary
-              hover:bg-[#d46f2a]
-
-              text-black
+              text-sm font-bold tracking-widest uppercase py-3.5
+              px-8 rounded-full bg-primary hover:bg-[#d46f2a] text-black
             "
             type="submit"
             content="Create Account"
@@ -519,8 +438,7 @@ const SignUp = () => {
         )}
       </div>
 
-      {/* Footer */}
-      <div className="flex items-center justify-center gap-2 text-xs font-mono text-zinc-500">
+      <div className="flex items-center justify-center gap-2 text-xs text-zinc-500">
         <span>Already have an account?</span>
 
         <a

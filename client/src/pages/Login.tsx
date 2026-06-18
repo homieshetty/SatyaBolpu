@@ -104,7 +104,7 @@ const Login = () => {
   if (state.token) return <Navigate to={"/profile"} replace />;
 
   return (
-    <div className="relative w-full min-h-screen bg-black flex items-center justify-center px-4 py-16 overflow-hidden select-none">
+    <div className="relative w-full bg-black flex items-center justify-center px-4 py-16 overflow-hidden select-none">
       
       <form
         onSubmit={handleSubmit}
@@ -116,7 +116,7 @@ const Login = () => {
             ॐ
           </span>
           <h1 
-            className="text-4xl font-serif font-black uppercase tracking-tight text-white"
+            className="text-4xl font-black uppercase tracking-tight text-white"
             style={{ WebkitTextStroke: '0.5px rgba(255, 255, 255, 0.05)' }}
           >
             Welcome Back
@@ -125,12 +125,12 @@ const Login = () => {
 
         {apiError && (
           <div className="w-full bg-red-950/40 border border-red-800/50 rounded-xl p-3 text-center">
-            <p className="text-xs font-mono tracking-wide text-red-400">{apiError}</p>
+            <p className="text-xs tracking-wide text-red-400">{apiError}</p>
           </div>
         )}
 
         <div className="w-full flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+          <label htmlFor="email" className="text-xs uppercase tracking-widest text-zinc-400">
             Email Address
           </label>
           <input
@@ -143,12 +143,12 @@ const Login = () => {
             value={formData.email}
             onChange={handleFormDataChange}
           />
-          {errors.email && <p className="text-red-500 text-xs font-mono mt-0.5">{errors.email}</p>}
+          {errors.email && <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>}
         </div>
 
         <div className="w-full flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+            <label htmlFor="password" className="text-xs uppercase tracking-widest text-zinc-400">
               Password
             </label>
             <button
@@ -170,10 +170,10 @@ const Login = () => {
             value={formData.password}
             onChange={handleFormDataChange}
           />
-          {errors.password && <p className="text-red-500 text-xs font-mono mt-0.5">{errors.password}</p>}
+          {errors.password && <p className="text-red-500 text-xs mt-0.5">{errors.password}</p>}
         </div>
 
-        <div className="flex items-center justify-between text-xs font-mono text-zinc-500 px-1 -mt-1">
+        <div className="flex items-center justify-between text-xs text-zinc-500 px-1 -mt-1">
           <Link to="/forgot-password" className="hover:text-white transition-colors">
             Forgot Password?
           </Link>
@@ -188,10 +188,10 @@ const Login = () => {
         <div className="mt-4">
           <Button
             loading={buttonLoad}
-            loadingText="Authenticating Portal..."
-            className="w-full text-sm font-mono font-bold tracking-widest uppercase py-3.5 rounded-full bg-primary hover:bg-[#d46f2a] text-black transition-colors"
+            loadingText="Logging in..."
+            className="w-full text-sm font-bold tracking-widest uppercase py-3.5 rounded-full bg-primary hover:bg-[#d46f2a] text-black transition-colors"
             type="submit"
-            content="Access Portal"
+            content="Log in"
           />
         </div>
 

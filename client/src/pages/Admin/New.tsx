@@ -74,7 +74,7 @@ const New = ({ type }: NewProps) => {
             } else
               setState(prev => ({
                 ...prev,
-                details: res[type].details
+                details: res.draft.details
               }));
           }}
           submitText="Save Details"
