@@ -1,8 +1,8 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaHandsHelping, FaRegCalendar, FaRegBookmark } from "react-icons/fa";
+import { FaHandsHelping, FaRegBookmark } from "react-icons/fa";
 import { TfiWrite } from "react-icons/tfi";
-import { FaArrowUpLong, FaLocationDot } from "react-icons/fa6";
+import { FaArrowUpLong } from "react-icons/fa6";
 import { MdOutlineExplore } from "react-icons/md";
 import { VscFileSubmodule } from "react-icons/vsc";
 import FilterTable from "../components/FilterTable";

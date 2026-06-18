@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useCallback, useContext, useEffect, useReducer, useRef } from "react";
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
 import useApi from "../hooks/useApi";
 import { jwtDecode } from "jwt-decode";
 import { AuthAction, AuthContextType, AuthState } from "../types/globals";
@@ -42,8 +42,11 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const { data, error, post } = useApi("/auth/refresh", { auto: false });
-   const [state, dispatch] = useReducer(authReducer, initialState, () => {
+  // Memoize initOptions to prevent unnecessary callback recreation on rerenders
+  const apiOptions = useMemo(() => ({ auto: false }), []);
+  const { post } = useApi("/auth/refresh", apiOptions);
+  
+  const [state, dispatch] = useReducer(authReducer, initialState, () => {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user") || "null");
     
@@ -78,14 +81,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isRefreshingRef.current = true;
       dispatch({ type: "REFRESH_START" });
       
-      await post({});
+      const result = await post({});
+      
+      if (result && result.accessToken) {
+        dispatch({
+          type: "REFRESH_SUCCESS",
+          payload: { user: result.user, token: result.accessToken },
+        });
+      } else {
+        dispatch({ type: "REFRESH_FAILED" });
+      }
     } catch (err) {
       console.error("Token refresh failed:", err);
-      dispatch({ type: "REFRESH_FAILED" });
+      
+      // Only log out if the current token is actually expired, not on transient errors
+      if (state.token) {
+        try {
+          const { exp } = jwtDecode<{ exp: number }>(state.token);
+          if (exp <= Date.now() / 1000) {
+            dispatch({ type: "LOGOUT" });
+          } else {
+            // Token is still valid, just retry on next schedule
+            dispatch({ type: "REFRESH_FAILED" });
+          }
+        } catch {
+          dispatch({ type: "LOGOUT" });
+        }
+      } else {
+        dispatch({ type: "LOGOUT" });
+      }
     } finally {
       isRefreshingRef.current = false;
     }
-  }, [post]);
+  }, [post, state.token]);
 
   const scheduleTokenRefresh = useCallback((token: string) => {
     try {
@@ -126,35 +154,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
   }, [state.token, scheduleTokenRefresh]);
-
-  useEffect(() => {
-    if (data?.accessToken && state.isRefreshing) {
-      console.log("Token refreshed successfully");
-      dispatch({
-        type: "REFRESH_SUCCESS",
-        payload: { user: data.user, token: data.accessToken },
-      });
-    }
-    
-    if (error && state.isRefreshing) {
-      console.error("Refresh error:", error);
-      // Only log out if the current token is expired; otherwise keep the user logged in
-      if (state.token) {
-        try {
-          const { exp } = jwtDecode<{ exp: number }>(state.token);
-          if (exp <= Date.now() / 1000) {
-            dispatch({ type: "LOGOUT" });
-          } else {
-            dispatch({ type: "REFRESH_FAILED" });
-          }
-        } catch {
-          dispatch({ type: "LOGOUT" });
-        }
-      } else {
-        dispatch({ type: "LOGOUT" });
-      }
-    }
-  }, [data, error, state.isRefreshing]);
 
   useEffect(() => {
     if (state.token && state.user) {
