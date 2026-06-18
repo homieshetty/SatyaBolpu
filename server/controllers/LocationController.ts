@@ -20,14 +20,14 @@ export const getLocations = async (req: Request, res: Response) => {
     if (maaganes.length) filterOptions.maaganes = { $in: maaganes.map(maagane => new Types.ObjectId(maagane)) };
     if (villages.length) filterOptions.villages = { $in: villages.map(village => new Types.ObjectId(village)) };
 
-    const locations = await Location.find(filterOptions).select(fields ?? "");
+    const locations = await Location.find(filterOptions).select(fields ?? "").lean();
     if (!locations) {
       return res.status(404).json({ msg: "Failed to fetch locations." });
     }
 
     return res.status(200).json({
       locations: locations.map(loc => {
-        const { _id, ...rest } = loc.toObject();
+        const { _id, ...rest } = loc;
         return {
           id: _id,
           ...rest

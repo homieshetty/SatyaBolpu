@@ -4,8 +4,8 @@ import Title from "../components/Title";
 import useApi from "../hooks/useApi";
 import { useEffect, useState } from "react";
 import { FilterGroups } from "../components/Filters";
-import { ICulture, IOther, NormalCardProps, PostGroupProps } from "../types/globals";
-import { NormalCard, NormalSkeletonCard } from "../components/NormalCard";
+import { ICulture, IOther, PostGroupProps } from "../types/globals";
+import PostCard, { PostCardProps, PostSkeletonCard } from "../components/PostCard";
 import PostGroupCard, { PostGroupSkeleton } from "../components/PostGroupCard";
 import DropDown from "../components/DropDown";
 
@@ -104,10 +104,10 @@ const Posts = () => {
             }}
           /> 
           :
-          <CardList<NormalCardProps>
+          <CardList<PostCardProps>
             key={displayType}
-            Card={NormalCard}
-            SkeletonCard={NormalSkeletonCard}
+            Card={PostCard}
+            SkeletonCard={PostSkeletonCard}
             cardsPerPage={10}
             apiEndpoint={"posts"}
             dataKey="posts"

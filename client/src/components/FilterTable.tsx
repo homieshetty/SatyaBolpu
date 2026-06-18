@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { BlogCardProps } from "../types/globals";
-import { BlogCard, BlogSkeletonCard } from "./BlogCard";
+import { BlogCardProps } from "./BlogCard";
+import BlogCard, { BlogSkeletonCard } from "./BlogCard";
 import CardList from "./CardList";
 
 export type FilterTableProps = {
@@ -47,8 +47,6 @@ const FilterTable = ({ filters }: FilterTableProps) => {
               <div
                 key={id}
                 className="top-0"
-                style={{
-                }}
               >
                 <CardList<BlogCardProps>
                   Card={BlogCard}

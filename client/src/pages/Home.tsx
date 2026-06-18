@@ -13,11 +13,13 @@ import { buildAnimationProps } from '../constants/Animations';
 import { useNavigate } from 'react-router-dom';
 import { Marker, Popup } from 'react-leaflet';
 import SVGHeader2 from '../constants/SVGHeader2';
-import { IEvent, RotatingCardProps } from '../types/globals';
+import { IEvent } from '../types/globals';
+import { PostCardProps } from '../components/PostCard';
 import useApi from '../hooks/useApi';
-import RotatingCard from '../components/RotatingCard';
+import PostCard from '../components/PostCard';
 import { BASE_URL } from "../App";
 import MAP from "./MAP";
+import { FaRegCalendar } from "react-icons/fa";
 
 gsap.registerPlugin(useGSAP); 
 gsap.registerPlugin(ScrollTrigger);
@@ -27,6 +29,21 @@ type swiperDataType = {
   images : string[];
   descr : string;
 }
+
+const SectionHeading = ({ children, fref }: { children: React.ReactNode; fref?: (el: HTMLDivElement | null) => void }) => (
+  <div ref={fref} className="flex flex-col items-center gap-4 mb-8">
+    <h2 className="text-3xl sm:text-4xl md:text-5xl xl:text-6xl text-center font-black tracking-tight
+      text-transparent bg-clip-text bg-gradient-to-r from-primary via-amber-400 to-primary
+      whitespace-pre-wrap text-wrap leading-tight">
+      {children}
+    </h2>
+    <div className="flex items-center justify-center gap-3 w-4/5 sm:w-2/3 lg:w-1/3">
+      <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/60" />
+      <span className="text-primary/80 font-bold drop-shadow-[0_0_8px_rgba(232,129,54,0.4)]">ॐ</span>
+      <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/60" />
+    </div>
+  </div>
+);
 
 const Home = () => {
   const { startLoading, stopLoading } = useLoading();
@@ -45,7 +62,7 @@ const Home = () => {
   const bgRefs = useRef<HTMLDivElement[]>([]);
   
   const [swiperData, setSwiperData] = useState<swiperDataType[]>([]);
-  const [recentPosts, setRecentPosts] = useState<RotatingCardProps[]>([]);
+  const [recentPosts, setRecentPosts] = useState<PostCardProps[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<IEvent[]>([]);
   const [isHovering,setHovering] = useState<boolean>(false);
 
@@ -205,18 +222,12 @@ const Home = () => {
             <div
               className="fixed w-full text-wrap text-[2.5rem] md:text-[5rem] lg:text-[7.5rem] 
               font-black top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-              text-primary text-center z-30"
-              style={{
-                textShadow: "3px 3px 6px black"
-              }}
+              text-transparent bg-clip-text bg-gradient-to-r from-primary via-amber-300 to-primary
+              text-center z-30"
               ref={(el) => { if(el) headingRefs.current[3] = el; }}
             >
-              <p>
-                From The
-              </p>
-              <p>
-                Western Ghats
-              </p>
+              <p>From The</p>
+              <p>Western Ghats</p>
             </div>
             <img
               className="fixed top-0 left-0 w-full h-full object-cover object-center bg-white z-0"
@@ -233,18 +244,12 @@ const Home = () => {
             <div
               className="fixed w-full text-[2.5rem] md:text-[5rem] lg:text-[7.5rem] 
               font-black top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-              text-primary text-center z-30"
+              text-transparent bg-clip-text bg-gradient-to-r from-primary via-amber-300 to-primary
+              text-center z-30"
               ref={(el) => { if(el) headingRefs.current[4] = el; }}
-              style={{
-                textShadow: "3px 3px 6px black"
-              }}
             >
-              <p>
-                To The
-              </p>
-              <p>
-                Eastern Coast
-              </p>
+              <p>To The</p>
+              <p>Eastern Coast</p>
             </div>
             <img 
               className="fixed top-0 w-full h-full object-cover z-40 opacity-0 scale-[2]"
@@ -259,10 +264,8 @@ const Home = () => {
             <div
               className="fixed w-full h-full text-[2.5rem] md:text-[5rem] lg:text-[7.5rem] 
               top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center
-              flex-col text-primary text-center  z-10 font-black "
-              style={{
-                textShadow: "3px 3px 6px black"
-              }}
+              flex-col text-transparent bg-clip-text bg-gradient-to-b from-white to-primary
+              text-center z-10 font-black"
               ref={(el) => { if(el) headingRefs.current[5] = el; }}
             >
               <p>Enter The</p>
@@ -272,16 +275,24 @@ const Home = () => {
         </div>
   
         <div 
-          className="map w-full h-[200vh] top-0 flex flex-col lg:flex-row gap-5 items-center justify-center p-10"
+          className="map w-full min-h-screen flex flex-col lg:flex-row gap-8 items-center justify-center p-10 lg:px-20"
           ref={(el) => {if(el) scrollWatcherRef.current[2] = el }}>
           <div 
-            className="w-full lg:w-1/2 lg:h-full flex items-center justify-center text-center text-primary text-[1.5rem]
-            md:text-[2rem] lg:text-[2.5rem] xl:text-[3rem] xl:p-20" 
+            className="w-full lg:w-1/2 flex items-center justify-center text-center" 
             ref={(el) => {if(el) headingRefs.current[6] = el }}
           >
-            The Spiritual Hub is Spread Across Two States And Three Districts
+            <div className="flex flex-col items-center gap-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight
+                text-transparent bg-clip-text bg-gradient-to-r from-primary via-amber-400 to-primary
+                leading-tight">
+                The Spiritual Hub
+              </h2>
+              <p className="text-white/60 text-base md:text-lg lg:text-xl max-w-lg">
+                Spread across two states and three districts — Udupi, Dakshina Kannada & Kasaragod
+              </p>
+            </div>
           </div>
-          <div className="w-full lg:w-2/3 xl:w-1/2 h-[40%]">
+          <div className="w-full lg:w-2/3 xl:w-1/2 h-[400px] lg:h-[500px]">
             <MAP minimal ref={mapRef}>
               <Marker position={[13.3409, 74.7421]}>
                   <Popup>Udupi - The Heart of Tulunadu</Popup>
@@ -300,9 +311,8 @@ const Home = () => {
           className="cultures w-full h-[200vh] flex flex-col gap-10 items-center justify-center" 
           ref={(el) => {if(el) scrollWatcherRef.current[3] = el }}
         >
-          <div className="text-primary text-center text-[2.25rem]/[2.25rem] md:text-[3rem] xl:text-[5rem] "
-               ref={(el) => {if(el) headingRefs.current[7] = el }}>
-            Cultures And Traditions
+          <div ref={(el) => {if(el) headingRefs.current[7] = el }}>
+            <SectionHeading>Cultures And Traditions</SectionHeading>
           </div>
           
           <div className="w-screen h-1/2 md:h-screen relative flex">
@@ -319,8 +329,8 @@ const Home = () => {
                 clickable: true,
                 type: "bullets",
                 el: ".custom-pagination",
-                bulletClass: "w-2 h-2 bg-white z-10 transition-all duration-150 rounded",
-                bulletActiveClass: "w-5 !bg-primary"
+                bulletClass: "w-2 h-2 bg-white/40 z-10 transition-all duration-300 rounded-full",
+                bulletActiveClass: "w-8 !bg-primary rounded-full"
               }}
               navigation = {{
                 nextEl: ".custom-nav-next",
@@ -329,15 +339,18 @@ const Home = () => {
               modules={[Pagination, Navigation, Keyboard, EffectCoverflow, Autoplay]}
               effect="coverflow"
             >
-              <div className="absolute top-0 w-full h-full bg-black z-0">
               {
                 swiperData && swiperData.map((slide,index) => (
                   <SwiperSlide key={index}>
                     <div className="z-0 relative w-full h-full lg:flex-row flex flex-col-reverse justify-center
                                     lg:justify-around items-center md:p-5">
                       <div className="lg:w-1/3 md:w-5/6 w-full lg:h-full h-1/3 flex flex-col items-center md:justify-center md:gap-5">
-                        <h1 className="text-[2rem] lg:text-[3rem]/[3rem] text-primary">{slide.title}</h1>
-                        <p className="text-justify hidden md:block text-white text-[1rem] p-10">{slide.descr}</p>
+                        <h1 className="text-2xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-amber-400">
+                          {slide.title}
+                        </h1>
+                        <p className="text-justify hidden md:block text-white/60 text-sm md:text-base p-6 lg:p-10 leading-relaxed">
+                          {slide.descr}
+                        </p>
                         <Button content="Explore" onClick={()=>navigate(`/explore/${slide.title}`)}/>
                       </div>
                       <div 
@@ -349,7 +362,8 @@ const Home = () => {
                       >
                         <img 
                           loading="lazy" 
-                          className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 transition-all duration-300 
+                          className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 
+                            rounded-lg shadow-xl transition-all duration-500
                             ${isHovering ? 
                               "lg:translate-y-0 lg:-rotate-12 lg:translate-x-0 -translate-y-28 -rotate-20 translate-x-[90%] " : 
                               "-translate-y-5 rotate-10 translate-x-[90%] lg:translate-x-0 lg:translate-24 lg:rotate-12"
@@ -359,13 +373,15 @@ const Home = () => {
                         />
                         <img 
                           loading="lazy" 
-                          className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-10 `} 
+                          className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-10 
+                            rounded-lg shadow-2xl`} 
                           src={slide.images[1]} 
                           alt={slide.title} 
                         />
                         <img 
                           loading="lazy" 
-                          className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 transition-all duration-300
+                          className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 
+                            rounded-lg shadow-xl transition-all duration-500
                             ${isHovering ? 
                               "lg:translate-y-0 lg:-rotate-12 translate-y-28 -translate-x-[90%] -rotate-20 lg:translate-x-0" : 
                               "translate-y-5 rotate-10 -translate-x-[90%] lg:translate-x-0 lg:-translate-y-24 lg:rotate-12"
@@ -378,7 +394,6 @@ const Home = () => {
                   </SwiperSlide>
                 ))
               }
-              </div>
 
               <div className="flex relative bottom-20 md:bottom-16 gap-3 flex-col-reverse">
                 <div className="nav w-full text-black flex items-center justify-center gap-2 text-3xl">
@@ -398,94 +413,93 @@ const Home = () => {
         </div>
           
         <div 
-          className="recent w-screen h-[300vh] flex flex-col items-center justify-center"
+          className="recent w-screen min-h-screen flex flex-col items-center justify-center py-20"
           ref={(el) => { if(el) scrollWatcherRef.current[4] = el }}
         >
-          <div 
-            className="text-primary text-center text-[2.25rem]/[2.25rem] md:text-[3rem] xl:text-[5rem] "
-            ref={(el) => {if(el) headingRefs.current[8] = el }}
-          >
-            Recent Posts
+          <div ref={(el) => {if(el) headingRefs.current[8] = el }}>
+            <SectionHeading>Recent Posts</SectionHeading>
           </div>
           <div
-            className="w-full flex flex-wrap items-center justify-center my-20 gap-5"
+            className="w-full max-w-7xl flex flex-wrap items-stretch justify-center gap-6 px-6"
           >
             {
               recentPosts.length > 0 && recentPosts.map((post, id) => (
                 <div
-                  className="w-1/4"
+                  className="w-full sm:w-[45%] lg:w-[30%]"
                   key={id}
                   ref={(el) => {
                     if(el)
                       recentPostRefs.current[id] = el
                   }}
                 >
-                  <RotatingCard
-                    {...post}
-                  />
+                  <PostCard {...post} />
                 </div>
               ))
             }
+            {recentPosts.length === 0 && (
+              <p className="text-white/40 text-lg">No posts yet</p>
+            )}
           </div>
         </div>
 
         <div
-          className='w-screen flex flex-col items-center justify-start gap-40'
+          className='w-screen flex flex-col items-center justify-start gap-20 py-20 px-6'
           ref={(el) => { if(el) scrollWatcherRef.current[5] = el; }}
           style={{
-            height: `${upcomingEvents.length * 100}vh`
+            minHeight: `${upcomingEvents.length * 100}vh`
           }}
         >
-          <div 
-            className='text-primary text-center text-[2.25rem]/[2.25rem] md:text-[3rem] xl:text-[5rem]'
-            ref={(el) => { if (el) headingRefs.current[9] = el; }}
-          >
-            Upcoming Events
+          <div ref={(el) => { if (el) headingRefs.current[9] = el; }}>
+            <SectionHeading>Upcoming Events</SectionHeading>
           </div>
 
           <div 
-            className='relative flex flex-col w-full h-full'
+            className='relative flex flex-col w-full max-w-5xl mx-auto'
             style={{
-              justifyContent: upcomingEvents.length > 1 ? 'space-between' : 'center'
+              justifyContent: upcomingEvents.length > 1 ? 'space-between' : 'center',
+              minHeight: upcomingEvents.length > 0 ? `${upcomingEvents.length * 200}px` : 'auto'
             }}
           >
-
             <div
               ref={upcomingEventsLineRef}
-              className='w-2 h-full bg-primary origin-top absolute left-1/2 -translate-x-1/2'
+              className='w-0.5 bg-gradient-to-b from-primary via-amber-400 to-primary origin-top absolute left-1/2 -translate-x-1/2 top-0 bottom-0'
             />
 
             {
               upcomingEvents.length > 0 && upcomingEvents.map((item, id) => (
               <div
                 key={id}
-                className='w-1/2 items-center flex'
+                className='w-1/2 items-center flex justify-end'
                   ref={(el) => {
                     if (el) upcomingEventRefs.current[id] = el;
                   }}
                 style={{
                   flexDirection: id % 2 === 0 ? 'row' : 'row-reverse',
-                  justifyContent: id % 2 === 0 ? 'flex-end' : 'flex-start'
+                  margin: id % 2 === 0 ? '0 auto 0 0' : '0 0 0 auto'
                 }}
               >
                 <div
-                  className="w-1/2 flex flex-col items-center justify-center"
+                  className="w-1/2 flex flex-col items-center justify-center gap-2"
                 >
                   <img
-                    className=""
+                    className="rounded-lg shadow-xl w-full max-w-[200px] aspect-square object-cover"
                     src={`${BASE_URL}${item?.coverImage as string}`} 
                     alt="event" 
                   />
                   <div className="text-center">
-                    <p className="text-primary font-bold">{item.title}</p>
-                    <p className="text-nowrap text-white text-[0.75rem]">
-                      {new Date(item?.duration?.start ?? "").toDateString()} - {new Date(item?.duration?.end ?? "").toDateString()} 
-                    </p>
+                    <p className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-amber-400 font-bold text-lg">{item.title}</p>
+                    <div className="flex items-center justify-center gap-1.5 text-white/50 text-sm mt-1">
+                      <FaRegCalendar className="text-primary/60" />
+                      <span>{new Date(item?.duration?.start ?? "").toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} - {new Date(item?.duration?.end ?? "").toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    </div>
                   </div>
                 </div>
-                  <div className="h-2 w-1/3 bg-primary" />
+                  <div className="h-0.5 w-1/4 bg-gradient-to-r from-primary/60 to-primary" />
               </div>
             ))}
+            {upcomingEvents.length === 0 && (
+              <p className="text-white/40 text-lg text-center">No upcoming events</p>
+            )}
           </div>
         </div>
 
@@ -496,7 +510,7 @@ const Home = () => {
           }}
         >
           <div className="sticky top-0 w-full h-screen">
-            <div className="overlay w-full h-screen absolute top-0 bg-[rgba(0,0,0,0.5)] z-10"></div>
+            <div className="overlay w-full h-screen absolute top-0 bg-black/60 z-10"></div>
             <div className="w-screen h-1/4 md:w-1/4 md:h-screen top-0 left-0 absolute
                             bg-[url('/assets/Home/cta/daivaradhane.jpg')] bg-no-repeat
                             bg-cover bg-center transition-all duration-300" 
@@ -514,33 +528,41 @@ const Home = () => {
                             bg-cover bg-center md:bg-position-[40%] transition-all duration-300"
                  ref={(el) => {if(el) bgRefs.current[3] = el}}></div>
           </div>
-          <div className="sticky top-0 w-full h-screen flex flex-col items-center justify-center gap-3 text-center z-20 p-5">
-            <h1 className="text-white text-[1.5rem] md:text-[2rem] font-semibold">
-            {
+          <div className="sticky top-0 w-full h-screen flex flex-col items-center justify-center gap-6 text-center z-20 p-5">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+              {
                 state.token ?
                 "Embrace The Land of Faith"
                     :
                 "Fully Experience The World Of Faith"
-            }
+              }
             </h1>
+            <div className="flex items-center justify-center gap-3 w-1/2">
+              <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/60" />
+              <span className="text-primary/80 font-bold drop-shadow-[0_0_8px_rgba(232,129,54,0.4)]">ॐ</span>
+              <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/60" />
+            </div>
             {
-                state.token ?
-                <Button 
-                  content="Go To Dashboard"
-                  onClick={() => navigate("/dashboard")}
-                /> 
-                : 
-                <Button 
-                  content="Get Started"
-                  onClick={() => navigate("/signup")}
-                />
+              state.token ?
+              <Button 
+                content="Go To Dashboard"
+                onClick={() => navigate("/dashboard")}
+              /> 
+              : 
+              <Button 
+                content="Get Started"
+                onClick={() => navigate("/signup")}
+              />
             }
           </div>
         </div>
 
-        <div className="quote w-fit ml-auto mr-auto pb-[75vh] text-white">
-          <h1 className="text-center text-[2rem] sm:text-[2.5rem] md:text-[3rem] font-cursive">"Tuluva Manna Satyole Chitta"</h1>
-          <p className="md:text-right text-center font-cursive">- Vijeth M Shetty Manjanady</p>
+        <div className="quote w-fit ml-auto mr-auto pb-[75vh] text-center">
+          <h1 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] font-cursive
+            text-transparent bg-clip-text bg-gradient-to-r from-white via-primary to-white">
+            "Tuluva Manna Satyole Chitta"
+          </h1>
+          <p className="md:text-right text-center font-cursive text-white/50 mt-2">- Vijeth M Shetty Manjanady</p>
         </div>
 
       </div>

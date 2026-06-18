@@ -60,13 +60,14 @@ export const getPostTypes = async (req: Request, res: Response) => {
     const postTypesData = 
       await PostType.find({}, "name")
         .collation({ locale: "en", strength: 2 })
-        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 });
+        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 })
+        .lean();
     if (!postTypesData) {
       res.status(404).json({ msg: "No post types found." });
     }
 
     const postTypes = postTypesData.map(postType => {
-      const { _id, ...rest } = postType.toObject();
+      const { _id, ...rest } = postType;
       return {
         id: _id,
         ...rest
@@ -109,13 +110,14 @@ export const getPostGroups = async (req: Request, res: Response) => {
     const postGroupsData = 
       await PostGroup.find({}, "name")
         .collation({ locale: "en", strength: 2 })  
-        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 });
+        .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 })
+        .lean();
     if (!postGroupsData) {
       res.status(404).json({ msg: "No post groups found." });
     }
 
     const postGroups = postGroupsData.map(postGroup => {
-      const { _id, ...rest } = postGroup.toObject();
+      const { _id, ...rest } = postGroup;
       return {
         id: _id,
         ...rest

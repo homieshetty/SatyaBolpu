@@ -32,16 +32,17 @@ export const getEvents = async (req: Request, res: Response) => {
     }
 
     const [eventsData, total] = await Promise.all([
-      query,
+      query.lean(),
       Event.countDocuments(filterOptions),
     ]);
 
     const events = eventsData.map(event => {
-      const { _id, ...rest } = event.toObject();
+      const { _id, coverImage, ...rest } = event;
 
       return {
+        image: coverImage,
+        id: _id,
         ...rest,
-        id: _id
       };
     });
 

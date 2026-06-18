@@ -77,7 +77,7 @@ const MAP = ({
   minimal?: boolean;
   children?: ReactNode;
   ref?: React.RefObject<HTMLDivElement | null>;
-  editMode: boolean;
+  editMode?: boolean;
   state?: PostState | EventState | LocationState;
   setState?: React.Dispatch<React.SetStateAction<EventState | PostState | LocationState>>
 }) => {

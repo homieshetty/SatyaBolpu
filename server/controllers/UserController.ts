@@ -17,13 +17,14 @@ export const getUsers = async (req: Request, res: Response) => {
         .limit(limit)
         .select(fields ?? "")
         .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 })
+        .lean();
 
     if(!usersData) {
       return res.status(404).json({ msg: "Users not found." });
     }
 
     const users = usersData.map(data => {
-      const { _id, ...rest } = data.toObject();
+      const { _id, ...rest } = data;
       return {
         id: _id,
         ...rest
@@ -46,12 +47,12 @@ export const getUser = async (req: Request, res: Response) => {
       return res.status(404).json({ msg: "User ID required." });
     }
 
-    const userData = await User.findById(userId).select(fields ?? "");
+    const userData = await User.findById(userId).select(fields ?? "").lean();
     if(!userData) {
       return res.status(404).json({ msg: "User not found." });
     }
 
-    const { _id, ...rest } = userData.toObject();
+    const { _id, ...rest } = userData;
 
     return res.status(200).json({ id: _id, ...rest });
   } catch (err: any) {

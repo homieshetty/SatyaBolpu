@@ -16,23 +16,26 @@ export const getBlogs = async (req: Request, res: Response) => {
       .select(fields ?? "")
       .sort({ [sortBy]: orderBy === "asc" ? 1 : -1 })
       .skip(skip)
-      .limit(limit);
-
-    if(fields?.includes(" userId ")) {
-      query  = query.populate('userId');
-    }
+      .limit(limit)
+      .populate("userId", "name image uname")
+      .lean();
 
     const [blogsData, total] = await Promise.all([
       query,
       Blog.countDocuments(),
     ]);
 
-    const blogs = blogsData.map(d => ({
-      id: d._id as string,
-      title: d.title,
-      image: d.coverImage,
-      description: d.description,
-    }));
+    const blogs = blogsData.map(d => {
+      const user = d.userId as any;
+      return {
+        id: d._id as string,
+        title: d.title,
+        subtitle: d.description,
+        image: d.coverImage,
+        user: user ? { name: user.name, image: user.image, uname: user.uname } : null,
+        createdAt: (d as any).createdAt
+      };
+    });
 
     return res.status(200).json({
       blogs,
@@ -48,7 +51,7 @@ export const getBlogs = async (req: Request, res: Response) => {
 export const getBlog = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const blog = await Blog.findById(id);
+    const blog = await Blog.findById(id).populate("userId", "name image uname");
     if (!blog) {
       return res.status(404).json({ msg: "No blog found." });
     }

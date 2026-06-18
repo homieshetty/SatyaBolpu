@@ -6,12 +6,99 @@ import { useAuth } from "../context/AuthContext";
 import { CgProfile } from "react-icons/cg";
 import { IoIosArrowDropdownCircle } from "react-icons/io";
 
+const AuthLinks = ({ extraClass = "", pathname, onCloseMenu }: { extraClass?: string; pathname: string; onCloseMenu: () => void }) => {
+  const { state } = useAuth();
+
+  if (!state.token) {
+    return (
+      <div
+        className={`flex rounded-3xl overflow-hidden cursor-pointer text-sm p-0.75 sm:p-0 sm:text-xl
+          ${pathname !== "/" ? "bg-white text-black" : "bg-black text-white"}
+          ${extraClass}`}
+      >
+        <NavLink to="/login" className="hover:bg-primary p-1 sm:p-2">
+          Log In
+        </NavLink>
+        <NavLink to="/signup" className="hover:bg-primary p-1 sm:p-2">
+          Sign Up
+        </NavLink>
+      </div>
+    );
+  }
+
+  return (
+    <NavLink
+      to={"/profile"}
+      onClick={onCloseMenu}
+      className={`text-[2rem] cursor-pointer hover:text-primary hover:scale-110
+        transition-all duration-200 ${pathname === "/profile" ? "text-primary" : ""}`}
+    >
+      <CgProfile />
+    </NavLink>
+  );
+};
+
+const NavLinks = ({ pathname, onCloseMenu }: { pathname: string; onCloseMenu: () => void }) => {
+  const { state } = useAuth();
+
+  return (
+    <div
+      className={`flex flex-col text-xl font-semibold absolute lg:relative top-0 
+                       lg:flex-row items-center justify-center h-screen lg:h-auto gap-5`}
+    >
+      <NavLink
+        style={{ textShadow: "1px 1px 6px black" }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/" ? "text-primary" : ""}`}
+        to="/"
+        onClick={onCloseMenu}
+      >
+        Home
+      </NavLink>
+      {state.token && (
+        <NavLink
+          style={{ textShadow: "1px 1px 6px black" }}
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/dashboard" ? "text-primary" : ""}`}
+          to="/dashboard"
+          onClick={onCloseMenu}
+        >
+          Dashboard
+        </NavLink>
+      )}
+      {state.token && state.user?.role === "admin" && (
+        <NavLink
+          style={{ textShadow: "1px 1px 6px black" }}
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/add" ? "text-primary" : ""}`}
+          to="/add"
+          onClick={onCloseMenu}
+        >
+          Add
+        </NavLink>
+      )}
+      <NavLink
+        style={{ textShadow: "1px 1px 6px black" }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/explore" ? "text-primary" : ""}`}
+        to="/explore"
+        onClick={onCloseMenu}
+      >
+        Explore
+      </NavLink>
+      <NavLink
+        style={{ textShadow: "1px 1px 6px black" }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/map" ? "text-primary" : ""}`}
+        to="/map"
+        onClick={onCloseMenu}
+      >
+        Map
+      </NavLink>
+    </div>
+  );
+};
+
 const Navbar = () => {
   const [isCollapsed,setCollapsed] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const navbarRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { state } = useAuth();
   const { pathname } = useLocation();
   const [navbarStyles,setNavbarStyles] = useState<CSSProperties>({
     position: "relative",
@@ -71,86 +158,6 @@ const Navbar = () => {
     };
   }, [isMenuOpen]);
 
-  const AuthLinks = ({ extraClass = "" }: { extraClass?: string }) => {
-    if(!state.token) {
-        return (
-          <div
-            className={`flex rounded-3xl overflow-hidden cursor-pointer text-sm p-0.75 sm:p-0 sm:text-xl
-              ${pathname !== "/" ? "bg-white text-black" : "bg-black text-white"}
-              ${extraClass}`}
-          >
-            <NavLink to="/login" className="hover:bg-primary p-1 sm:p-2">
-              Log In
-            </NavLink>
-            <NavLink to="/signup" className="hover:bg-primary p-1 sm:p-2">
-              Sign Up
-            </NavLink>
-          </div>
-        )
-    } else {
-        return (
-          <NavLink to={"/profile"} onClick={() => setIsMenuOpen(false)} className={`text-[2rem] cursor-pointer hover:text-primary hover:scale-110
-            transition-all duration-200 ${pathname === "/profile" ? "text-primary" : ""}`}>
-            <CgProfile />
-          </NavLink>
-        )
-    }
-  };
-
-  const NavLinks = () => (
-    <div
-      className={`flex flex-col text-xl font-semibold absolute lg:relative top-0 
-                       lg:flex-row items-center justify-center h-screen lg:h-auto gap-5`}
-    >
-      <NavLink
-        style={{ textShadow: "1px 1px 6px black" }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/" ? "text-primary" : ""}`}
-        to="/"
-        onClick={() => setIsMenuOpen(false)}
-      >
-        Home
-      </NavLink>
-      {
-        state.token &&
-        <NavLink
-          style={{ textShadow: "1px 1px 6px black" }}
-          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/dashboard" ? "text-primary" : ""}`}
-          to="/dashboard"
-          onClick={() => setIsMenuOpen(false)}
-        >
-          Dashboard
-        </NavLink>
-      }
-      {
-        state.token && state.user?.role === "admin" &&
-        <NavLink
-          style={{ textShadow: "1px 1px 6px black" }}
-          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/add" ? "text-primary" : ""}`}
-          to="/add"
-          onClick={() => setIsMenuOpen(false)}
-        >
-          Add
-        </NavLink>
-      }
-      <NavLink
-        style={{ textShadow: "1px 1px 6px black" }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/explore" ? "text-primary" : ""}`}
-        to="/explore"
-        onClick={() => setIsMenuOpen(false)}
-      >
-        Explore
-      </NavLink>
-      <NavLink
-        style={{ textShadow: "1px 1px 6px black" }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/map" ? "text-primary" : ""}`}
-        to="/map"
-        onClick={() => setIsMenuOpen(false)}
-      >
-        Map
-      </NavLink>
-    </div>
-  );
-
   return (
     <>
       <nav
@@ -171,9 +178,8 @@ const Navbar = () => {
         <div className="flex gap-1 sm:gap-3 font-semibold items-center justify-center">
           <div className="lg:hidden">
             <AuthLinks 
-              extraClass={`${
-                pathname !== "/" ? "bg-white text-black" : "bg-black text-white"
-              }`}
+              pathname={pathname}
+              onCloseMenu={() => setIsMenuOpen(false)}
             />
           </div>
 
@@ -193,8 +199,10 @@ const Navbar = () => {
         </div>
 
         <div className="hidden links lg:flex gap-5 font-semibold items-center justify-center text-xl">
-          <NavLinks />
+          <NavLinks pathname={pathname} onCloseMenu={() => setIsMenuOpen(false)} />
           <AuthLinks
+            pathname={pathname}
+            onCloseMenu={() => setIsMenuOpen(false)}
             extraClass={`hidden lg:flex ${
               pathname !== "/" ? "bg-white text-black" : "bg-black text-white"
             }`}
@@ -208,7 +216,7 @@ const Navbar = () => {
             transition-all duration-500 ${isMenuOpen ? "h-screen" : "h-0"}`}
         ref={menuRef}
       >
-        <NavLinks />
+        <NavLinks pathname={pathname} onCloseMenu={() => setIsMenuOpen(false)} />
       </div>
 
       {

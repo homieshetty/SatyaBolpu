@@ -42,12 +42,12 @@ export const getPosts = async (req: Request, res: Response) => {
     }
 
     const [postsData, total] = await Promise.all([
-      query,
+      query.lean(),
       Post.countDocuments(filterOptions),
     ]);
 
     const posts = postsData.map(post => {
-      const { _id, coverImage, ...rest } = post.toObject();
+      const { _id, coverImage, ...rest } = post;
 
       return {
         ...rest,
@@ -215,7 +215,7 @@ export const createDraft = async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
 
-    const post = (await Post.findById(id))?.toObject();
+    const post = await Post.findById(id).lean();
     if (!post) {
       return res.status(404).json("Post not found.");
     }

@@ -51,7 +51,7 @@ export const buildAnimationProps = (
     name: `upcoming-event-${index}`,
     ref,
     fromVars: {
-      clipPath: "inset(0% 0% 0% 100%)",
+      clipPath: index % 2 === 0 ? "inset(0% 0% 0% 100%)" : "inset(0% 100% 0% 0%)",
     },
     toVars: {
       clipPath: "inset(0% 0% 0% 0%)",
@@ -59,8 +59,8 @@ export const buildAnimationProps = (
       scrollTrigger: {
         trigger: ref,
         scrub: true,
-        start: '-10% center',
-        end: 'center center',
+        start: 'center center',
+        end: 'center+=100px center',
         toggleActions: 'play none none reverse'
       }
     }

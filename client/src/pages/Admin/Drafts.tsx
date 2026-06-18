@@ -3,8 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import Title from "../../components/Title";
 import CardList from "../../components/CardList";
 import useApi from "../../hooks/useApi";
-import { MinimalCardProps } from "../../types/globals";
-import { MinimalCard, MinimalSkeletonCard } from "../../components/MinimalCard";
+import DraftCard, { DraftCardProps, DraftSkeletonCard } from "../../components/DraftCard";
 
 const Drafts = () => {
   const { state: authState } = useAuth();
@@ -29,9 +28,9 @@ const Drafts = () => {
     <div className="py-20 flex flex-col items-center justify-center">
       <Title title="Drafts" />
 
-      <CardList<MinimalCardProps>
-        Card={MinimalCard}
-        SkeletonCard={MinimalSkeletonCard}
+      <CardList<DraftCardProps>
+        Card={DraftCard}
+        SkeletonCard={DraftSkeletonCard}
         handleEdit={handleEdit}
         handleDelete={handleDelete}
         apiEndpoint="drafts"

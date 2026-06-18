@@ -25,37 +25,6 @@ export type BaseCardProps = {
   handleDelete?: (id: string) => {}
 };
 
-export type MinimalCardProps = BaseCardProps & {
-  title: string;
-}
-
-export type NormalCardProps = BaseCardProps & {
-  title: string,
-  description: string,
-  image: string;
-}
-
-export type CollapsingCardProps = BaseCardProps & {
-  title: string,
-  description: string,
-  images: string[]
-}
-
-export type RotatingCardProps = BaseCardProps & {
-  title: string,
-  description: string,
-  image: string
-}
-
-export type BlogCardProps = BaseCardProps & {
-  title: string;
-  type: string;
-  subtitle: string;
-  image: string;
-  userId: string;
-  createdAt: string;
-}
-
 export type PostGroupProps = BaseCardProps & {
   name: string;
   posts: {

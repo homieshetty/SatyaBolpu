@@ -1,7 +1,6 @@
 import CardList from "../components/CardList";
-import { CollapsingCard, CollapsingSkeletonCard } from "../components/CollapsingCard";
+import EventCard, { EventCardProps, EventSkeletonCard } from "../components/EventCard";
 import Title from "../components/Title";
-import { CollapsingCardProps } from "../types/globals";
 
 const Events = () => {
   return (
@@ -11,9 +10,10 @@ const Events = () => {
       <Title 
         title="Events"
       />
-      <CardList<CollapsingCardProps> 
-        Card={CollapsingCard}
-        SkeletonCard={CollapsingSkeletonCard}
+      <CardList<EventCardProps> 
+        Card={EventCard}
+        SkeletonCard={EventSkeletonCard}
+        cardsPerPage={10}
         apiEndpoint="events"
         dataKey="events"
         orientation="row"

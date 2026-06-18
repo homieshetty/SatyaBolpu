@@ -6,7 +6,58 @@ import { useAuth } from "../../context/AuthContext";
 import Title from "../../components/Title";
 import useApi from "../../hooks/useApi";
 import { FaRegCalendar } from "react-icons/fa";
-import { FaLocationDot } from "react-icons/fa6";
+import { FaLocationDot, FaEllipsis } from "react-icons/fa6";
+
+const cards = [
+  {
+    label: "Drafts",
+    desc: "Continue where you left off",
+    icon: MdDrafts,
+    action: "drafts" as const,
+    accent: "from-amber-500/20 to-amber-600/5",
+    iconColor: "text-amber-400",
+  },
+  {
+    label: "Post",
+    desc: "Share stories and articles",
+    icon: BsFilePost,
+    action: "post" as const,
+    accent: "from-orange-500/20 to-orange-600/5",
+    iconColor: "text-orange-400",
+  },
+  {
+    label: "Culture",
+    desc: "Preserve traditions and heritage",
+    icon: GiByzantinTemple,
+    action: "culture" as const,
+    accent: "from-rose-500/20 to-rose-600/5",
+    iconColor: "text-rose-400",
+  },
+  {
+    label: "Event",
+    desc: "Add upcoming celebrations",
+    icon: FaRegCalendar,
+    action: "event" as const,
+    accent: "from-emerald-500/20 to-emerald-600/5",
+    iconColor: "text-emerald-400",
+  },
+  {
+    label: "Location",
+    desc: "Pin places on the map",
+    icon: FaLocationDot,
+    action: "location" as const,
+    accent: "from-sky-500/20 to-sky-600/5",
+    iconColor: "text-sky-400",
+  },
+  {
+    label: "Others",
+    desc: "Tags, post types & groups",
+    icon: FaEllipsis,
+    action: "others" as const,
+    accent: "from-violet-500/20 to-violet-600/5",
+    iconColor: "text-violet-400",
+  },
+];
 
 const Add = () => {
   const navigate = useNavigate();
@@ -16,68 +67,47 @@ const Add = () => {
 
   const handleClick = async (type: "post" | "culture" | "event" | "location") => {
     const res = await draftsApi.post({ type });
-    if(!res) return;
+    if (!res) return;
     navigate(`${type}/${res.id}`);
-  }
+  };
 
-  if(!authState.token || authState.user?.role !== "admin")
-    return <Navigate to={"/404"} replace/>
+  if (!authState.token || authState.user?.role !== "admin")
+    return <Navigate to={"/404"} replace />;
 
   return (
-    <div className="w-screen my-20">
-      <Title title="Add"/>
+    <div className="w-screen min-h-screen py-20 flex flex-col items-center">
+      <Title title="Add" />
 
-      <div className="w-2/3 mx-auto md:w-1/2 lg:w-1/3 flex flex-col items-center justify-center gap-5 text-black my-20">
-        <div 
-          className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
-            cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => navigate("/add/draft")}
-        >
-          <p className="ml-auto">Drafts</p>
-          <MdDrafts className="ml-auto"/>
-        </div>
-        <div 
-          className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
-            cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => handleClick("post")}
-        >
-          <p className="ml-auto">Post</p>
-          <BsFilePost className="ml-auto"/>
-        </div>
-        <div 
-          className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
-            cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => handleClick("culture")}
-        >
-          <p className="ml-auto">Culture</p>
-          <GiByzantinTemple className="ml-auto" />
-        </div>
-        <div 
-          className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
-            cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => handleClick("event")}
-        >
-          <p className="ml-auto">Event</p>
-          <FaRegCalendar className="ml-auto" strokeWidth={"10px"}/>
-        </div>
-        <div 
-          className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
-            cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => handleClick("location")}
-        >
-          <p className="ml-auto">Location</p>
-          <FaLocationDot className="ml-auto" strokeWidth={"10px"}/>
-        </div>
-        <div 
-          className="w-full flex items-center gap-5 font-black text-[1.5rem] md:text-[2rem] bg-white p-5 rounded-2xl
-            cursor-pointer hover:bg-primary hover:text-white hover:scale-105 transition-all"
-          onClick={() => navigate("/add/others")}>
-          <p className="ml-auto">Others</p>
-          <p className="ml-auto">...</p>
-        </div>
+      <div className="w-[90%] sm:w-2/3 lg:w-1/2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-16">
+        {cards.map(({ label, desc, icon: Icon, action, accent, iconColor }, i) => (
+          <div
+            key={label}
+            className={`group relative flex flex-col items-center justify-center gap-3
+              bg-gradient-to-br ${accent} border border-white/10 rounded-2xl p-8
+              cursor-pointer hover:border-primary/50 hover:scale-[1.03] hover:shadow-lg hover:shadow-primary/10
+              transition-all duration-300
+              ${i === cards.length - 1 && cards.length % 3 === 1 ? "lg:col-start-2" : ""}`}
+            onClick={() => {
+              if (action === "drafts") navigate("/add/draft");
+              else if (action === "others") navigate("/add/others");
+              else handleClick(action);
+            }}
+          >
+            <Icon
+              className={`${iconColor} text-4xl group-hover:text-primary transition-colors duration-300`}
+              strokeWidth={label === "Event" ? "10px" : undefined}
+            />
+            <p className="text-white font-bold text-xl group-hover:text-primary transition-colors duration-300">
+              {label}
+            </p>
+            <p className="text-white/50 text-sm text-center group-hover:text-white/70 transition-colors duration-300">
+              {desc}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default Add;

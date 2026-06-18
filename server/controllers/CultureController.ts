@@ -18,13 +18,13 @@ export const getCultures = async (req: Request, res: Response) => {
     if(fields?.includes(" userId ")) {
       query = query.populate('userId');
     }
-    const culturesData = await Promise.resolve(query);
+    const culturesData = await Promise.resolve(query.lean());
     if (!culturesData) {
       return res.status(404).json({ msg: "No cultures found." });
     }
 
     const cultures = culturesData.map(culture => {
-      const { _id, ...rest } = culture.toObject();
+      const { _id, ...rest } = culture;
 
       return {
         ...rest,

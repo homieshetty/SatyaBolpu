@@ -9,20 +9,6 @@ const initialState: AuthState = {
   isRefreshing: false,
 };
 
-const getPersistedAuthState = (): AuthState => {
-  const token = localStorage.getItem("token");
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  if (token) {
-    try {
-      const { exp } = jwtDecode<{ exp: number }>(token);
-      if (exp > Date.now() / 1000) {
-        return { user, token, isRefreshing: false };
-      }
-    } catch {}
-  }
-  return initialState;
-};
-
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
     case "LOGIN":
@@ -49,7 +35,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 };
 
 const AuthContext = createContext<AuthContextType>({
-  state: getPersistedAuthState(),
+  state: initialState,
   dispatch: () => {
     console.warn("dispatch called outside of AuthProvider");
   },

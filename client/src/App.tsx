@@ -20,6 +20,7 @@ import Cultures from "./pages/Cultures"
 import Drafts from "./pages/Admin/Drafts"
 import Others from "./pages/Admin/Others"
 import Events from "./pages/Events"
+import Blogs from "./pages/Blogs"
 import Add from "./pages/Admin/Add"
 import New from "./pages/Admin/New"
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -79,6 +80,7 @@ function App() {
         <Route path="/posts" element={<Posts />} />
         <Route path="/posts/:postId" element={<Post />} />
         <Route path="/events" element={<Events />} />
+        <Route path="/blogs" element={<Blogs />} />
         <Route path="/add" element={<Add />} />
         <Route path="/add/others" element={<Others />} />
         <Route path="/add/draft" element={<Drafts />} />
