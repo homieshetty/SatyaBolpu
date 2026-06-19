@@ -22,7 +22,7 @@ export const validateDates = (start: Date, end: Date) => {
 
 export const validateData = {
   post: {
-    details: (post: IPost) =>
+    details: (post: Partial<IPost>) =>
       post.title &&
       post.title.length > 5 &&
       post.postGroup &&
@@ -30,39 +30,42 @@ export const validateData = {
       post.description &&
       post.description.split(' ').length > 20 &&
       post.coverImage &&
+      post.tags &&
       post.tags.length >= 1,
-    content: (post: IPost) =>
+    content: (post: Partial<IPost>) =>
       post.content && post.content.split(' ').length > 300,
   },
   culture: {
-    details: (culture: ICulture) =>
+    details: (culture: Partial<ICulture>) =>
       culture.title &&
       culture.title.length >= 5 &&
       culture.description &&
       culture.description.split(' ').length >= 20 &&
       culture.coverImage &&
+      culture.galleryImages &&
       culture.galleryImages.length >= 15,
-    content: (culture: ICulture) =>
+    content: (culture: Partial<ICulture>) =>
       culture.content && culture.content.split(' ').length > 20,
   },
   blog: {
-    details: (blog: IBlog) => blog.title && blog.title.length > 5,
-    content: (blog: IBlog) =>
+    details: (blog: Partial<IBlog>) => blog.title && blog.title.length > 5,
+    content: (blog: Partial<IBlog>) =>
       blog.content && blog.content.split(' ').length > 20,
   },
-  event: (event: IEvent) =>
+  event: (event: Partial<IEvent>) =>
     event.title &&
     event.title.length > 5 &&
     event.culture &&
     event.description &&
     event.description.split(' ').length > 20 &&
+    event.duration &&
     event.duration.start &&
     event.duration.end &&
     event.coverImage &&
     event.location,
   location: {
-    details: (location: ILocation) => location.name,
-    location: (location: ILocation) =>
+    details: (location: Partial<ILocation>) => location.name,
+    location: (location: Partial<ILocation>) =>
       location.district && // location.taluk && location.maagane &&
       location.village &&
       location.coordinates?.[0] &&

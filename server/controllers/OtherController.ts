@@ -34,7 +34,7 @@ export const getTags = async (req: Request, res: Response) => {
 
 export const addTag = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body?.formData;
+    const { name } = req.body?.data.details;
 
     if (!name) {
       return res.status(400).json({ msg: "Missing required field 'tag'" });
@@ -87,7 +87,7 @@ export const getPostTypes = async (req: Request, res: Response) => {
 
 export const addPostType = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body?.formData;
+    const { name } = req.body?.data.details;
 
     if (!name) {
       return res.status(400).json({ msg: 'Missing required field.' });
@@ -140,7 +140,7 @@ export const getPostGroups = async (req: Request, res: Response) => {
 
 export const addPostGroup = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body?.formData;
+    const { name } = req.body?.data.details;
 
     if (!name) {
       return res.status(400).json({ msg: 'Missing required field.' });

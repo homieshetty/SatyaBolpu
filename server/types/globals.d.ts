@@ -144,12 +144,9 @@ export type CreateType =
   | 'post-type'
   | 'location'
   | 'post-group';
-export type CreateData =
-  | IPost
-  | ICulture
-  | IEvent
-  | ILocation
-  | IBlog
-  | ITag
-  | IPostGroup
-  | IPostType;
+
+export type CreateData = {
+  details?: Partial<IPost | ICulture | IBlog | ICulture | ILocation>;
+  content?: string;
+  location: string;
+};
