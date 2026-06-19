@@ -1,6 +1,6 @@
-import { CardType } from "../components/CardList";
-import { ReactNode } from "react";
-import { FilterGroups } from "../components/Filters";
+import { CardType } from '../components/CardList';
+import { ReactNode } from 'react';
+import { FilterGroups } from '../components/Filters';
 
 export type Image = {
   src: string;
@@ -11,43 +11,45 @@ export type ButtonProps = {
   content: ReactNode;
   className?: string;
   index?: number;
-  ref?: React.RefObject<HTMLButtonElement[]> | React.RefObject<HTMLButtonElement>;
-  type?: "submit" | "reset" | "button";
+  ref?:
+    | React.RefObject<HTMLButtonElement[]>
+    | React.RefObject<HTMLButtonElement>;
+  type?: 'submit' | 'reset' | 'button';
   onClick?: () => void;
-  theme?: "light" | "dark";
+  theme?: 'light' | 'dark';
   loading?: boolean;
   loadingText?: string;
 };
 
 export type BaseCardProps = {
-  id: string,
-  handleEdit?: (id: string) => {},
-  handleDelete?: (id: string) => {}
+  id: string;
+  handleEdit?: (id: string) => {};
+  handleDelete?: (id: string) => {};
 };
 
 export type PostGroupProps = BaseCardProps & {
   name: string;
   posts: {
-    id: string,
-    title: string
+    id: string;
+    title: string;
   }[];
-}
+};
 
 export type CardListProps<T> = {
-  Card: React.ComponentType<T>,
-  SkeletonCard: React.ComponentType,
-  apiEndpoint: string,
-  dataKey: string,
-  isPosts?: boolean,
-  selectFields?: string,
-  orientation: "row" | "column",
-  cardsPerPage?: number,
-  handleEdit?: (id: string) => void,
-  handleDelete?: (id: string) => void,
-  searchBar?: boolean,
-  pagination?: boolean,
+  Card: React.ComponentType<T>;
+  SkeletonCard: React.ComponentType;
+  apiEndpoint: string;
+  dataKey: string;
+  isPosts?: boolean;
+  selectFields?: string;
+  orientation: 'row' | 'column';
+  cardsPerPage?: number;
+  handleEdit?: (id: string) => void;
+  handleDelete?: (id: string) => void;
+  searchBar?: boolean;
+  pagination?: boolean;
   filterGroups?: FilterGroups;
-  sortOptions?: Record<string, string>
+  sortOptions?: Record<string, string>;
 };
 
 export type FormFieldOption = {
@@ -58,7 +60,19 @@ export type FormFieldOption = {
 export type FormField = {
   name: string;
   label: string;
-  type: "text" | "email" | "password" | "textarea" | "select" | "file" | "files" | "url" | "number" | "radio" | "multi-select" | "date";
+  type:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'textarea'
+    | 'select'
+    | 'file'
+    | 'files'
+    | 'url'
+    | 'number'
+    | 'radio'
+    | 'multi-select'
+    | 'date';
   placeholder?: string;
   options?: FormFieldOption[];
   accept?: string;
@@ -83,9 +97,15 @@ export type FormField = {
 export type FormProps<T> = {
   fields: FormField[];
   state: T;
-  setState?: (state: T) => void | React.Dispatch<React.SetStateAction<OtherState>>;
+  setState?: (
+    state: T,
+  ) => void | React.Dispatch<React.SetStateAction<OtherState>>;
   submitEndpoint: string | ApiState<any>;
-  onSubmit?: (formData: T, setFormData: React.Dispatch<React.SetStateAction<T>>, res: any) => void;
+  onSubmit?: (
+    formData: T,
+    setFormData: React.Dispatch<React.SetStateAction<T>>,
+    res: any,
+  ) => void;
   error?: string;
   submitText?: string;
   loadingText?: string;
@@ -102,11 +122,12 @@ export type User = {
     dialCode: string;
     number: string;
   } | null;
-  role: "user" | "admin";
+  role: 'user' | 'admin';
+  image: string;
   verified: boolean;
 };
 
-export type Location = Omit<ILocation, "id" | "name" | "attachments">;
+export type Location = Omit<ILocation, 'id' | 'name' | 'attachments'>;
 
 export type AuthState = {
   user: User | null;
@@ -115,11 +136,11 @@ export type AuthState = {
 };
 
 export type AuthAction =
-  | { type: "LOGIN"; payload: { user: User; token: string } }
-  | { type: "LOGOUT" }
-  | { type: "REFRESH_START" }
-  | { type: "REFRESH_SUCCESS"; payload: { user: User; token: string } }
-  | { type: "REFRESH_FAILED" };
+  | { type: 'LOGIN'; payload: { user: User; token: string } }
+  | { type: 'LOGOUT' }
+  | { type: 'REFRESH_START' }
+  | { type: 'REFRESH_SUCCESS'; payload: { user: User; token: string } }
+  | { type: 'REFRESH_FAILED' };
 
 export type AuthContextType = {
   state: AuthState;
@@ -129,7 +150,7 @@ export type AuthContextType = {
 export type DialogBoxOptions = {
   title: string;
   description?: string;
-  severity?: "irreversible" | "risky" | "default";
+  severity?: 'irreversible' | 'risky' | 'default';
   form?: FormProps;
   onConfirm?: () => void;
   onCancel?: () => void;
@@ -144,7 +165,12 @@ export type LoadingContextType = {
   stopLoading: () => void;
 };
 
-export type DetailsType = PostDetailsType | CultureDetailsType | EventState | OtherState | LocationDetailsType;
+export type DetailsType =
+  | PostDetailsType
+  | CultureDetailsType
+  | EventState
+  | OtherState
+  | LocationDetailsType;
 
 export type PostState = {
   details: PostDetailsType | null;
@@ -152,7 +178,7 @@ export type PostState = {
   location?: string | ILocation | null;
 };
 
-export type EventState = Omit<IEvent, "id" | "location"> & { location: string };
+export type EventState = Omit<IEvent, 'id' | 'location'> & { location: string };
 
 export type CultureState = {
   details: CultureDetailsType | null;
@@ -162,18 +188,21 @@ export type CultureState = {
 export type LocationState = {
   details: {
     name: string;
-  },
+  };
   location: Location | null;
-}
+};
 
 export type SignUpProps = {
   name: string;
   uname: string;
   email: string;
-  phone?: {
-    dialCode: string;
-    number: string;
-  } | string;
+  phone?:
+    | {
+        dialCode: string;
+        number: string;
+      }
+    | string;
+  image?: File | string;
   password: string;
   confirmPassword: string;
 };
@@ -189,12 +218,12 @@ export interface ICulture {
   description: string;
   coverImage: string | File | null;
   galleryImages: string[] | File[];
-  files: string[] | File[],
+  files: string[] | File[];
   content: string;
   posts: number;
-};
+}
 
-export type CultureDetailsType = Omit<ICulture, "id" | "content" | "posts">;
+export type CultureDetailsType = Omit<ICulture, 'id' | 'content' | 'posts'>;
 
 export interface ILocation {
   id: string;
@@ -205,7 +234,7 @@ export interface ILocation {
   village: string;
   coordinates: number[2];
   attachments: File[] | string[];
-};
+}
 
 export interface IPost {
   id: string;
@@ -220,34 +249,40 @@ export interface IPost {
   files: string[] | File[];
   content: string;
   location?: ILocation;
-};
+}
 
-export type PostDetailsType = Omit<IPost, "id" | "content"> & { locationSpecific: boolean, location?: string }
+export type PostDetailsType = Omit<IPost, 'id' | 'content'> & {
+  locationSpecific: boolean;
+  location?: string;
+};
 
 export interface IEvent {
   id: string;
   title: string;
   description: string;
   duration: {
-    start: Date | string | null,
-    end: Date | string | null
+    start: Date | string | null;
+    end: Date | string | null;
   };
   culture: string;
   coverImage: string | File | null;
   files: string[] | File[];
   location: ILocation;
-};
+}
 
-export type LocationDetailsType = Pick<ILocation, "id" | "name" | "attachments">;
+export type LocationDetailsType = Pick<
+  ILocation,
+  'id' | 'name' | 'attachments'
+>;
 
 export interface IOther {
   id: string;
   name: string;
 }
 
-export type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+export type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 
-export interface ApiOptions extends Omit<RequestInit, "body" | "method"> {
+export interface ApiOptions extends Omit<RequestInit, 'body' | 'method'> {
   method?: Method;
   globalLoad?: boolean;
   endpoint?: string;
@@ -267,44 +302,55 @@ export interface ApiState<T> {
   reset: () => void;
 }
 
-export type NewProps = {
-  type: "post" | "event" | "culture" | "location" | "tag" | "post-type" | "post-group";
-};
+export type NewType =
+  | 'post'
+  | 'culture'
+  | 'event'
+  | 'blog'
+  | 'tag'
+  | 'post-type'
+  | 'location'
+  | 'post-group';
 
-export type OtherState = Omit<IOther, "id">;
-export type NewState = PostState | CultureState | EventState | LocationState | OtherState;
+export type OtherState = Omit<IOther, 'id'>;
+export type NewState =
+  | PostState
+  | CultureState
+  | EventState
+  | LocationState
+  | OtherState;
 
 export type NewPostData = {
-  titles: string[],
-  shortTitles: string[],
-  tags: FormFieldOption[],
-  cultures: FormFieldOption[],
-  postTypes: FormFieldOption[],
-  postGroups: FormFieldOption[],
-  locations: FormFieldOption[]
+  titles: string[];
+  shortTitles: string[];
+  tags: FormFieldOption[];
+  cultures: FormFieldOption[];
+  postTypes: FormFieldOption[];
+  postGroups: FormFieldOption[];
+  locations: FormFieldOption[];
 };
 
 export type NewCultureData = {
-  titles: string[]
-}
+  titles: string[];
+};
 
 export type NewEventData = {
-  titles: string[],
-  cultures: FormFieldOption[],
-  locations: FormFieldOption[]
-}
+  titles: string[];
+  cultures: FormFieldOption[];
+  locations: FormFieldOption[];
+};
 
 export type NewTagData = {
-  tags: string[]
-}
+  tags: string[];
+};
 
 export type NewPostTypeData = {
-  postTypes: string[]
-}
+  postTypes: string[];
+};
 
 export type NewPostGroupData = {
-  postGroups: string[]
-}
+  postGroups: string[];
+};
 
 type NewDataMap = {
   post: NewPostData;
@@ -314,15 +360,14 @@ type NewDataMap = {
   tag: {
     tags: string[];
   };
-  "post-group": {
+  'post-group': {
     postGroups: string[];
   };
-  "post-type": {
+  'post-type': {
     postTypes: string[];
   };
 };
 
-export type NewData<T extends NewProps["type"]> =
-  NewDataMap[T] & {
-    submitApi: ApiState<any>;
-  };
+export type NewData<T extends NewProps['type']> = NewDataMap[T] & {
+  submitApi: ApiState<any>;
+};

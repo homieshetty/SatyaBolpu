@@ -19,9 +19,11 @@ const Title = ({ title }: { title: string }) => {
       </div>
 
       <div className="flex items-center justify-center gap-3 w-4/5 sm:w-2/3 lg:w-1/2">
-        <div className="flex-1 h-px bg-gradient-to-r from-transparent to-primary/60" />
-        <span className="text-lg sm:text-xl text-primary/80 font-bold drop-shadow-[0_0_8px_rgba(232,129,54,0.4)]">ॐ</span>
-        <div className="flex-1 h-px bg-gradient-to-l from-transparent to-primary/60" />
+        <div className="flex-1 h-px bg-linear-to-r from-transparent to-primary/60" />
+        <span className="text-lg sm:text-xl text-primary/80 font-bold drop-shadow-[0_0_8px_rgba(232,129,54,0.4)]">
+          ॐ
+        </span>
+        <div className="flex-1 h-px bg-linear-to-l from-transparent to-primary/60" />
       </div>
     </div>
   );

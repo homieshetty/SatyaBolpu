@@ -1,16 +1,20 @@
-import mongoose, { Schema } from "mongoose";
-import { IPostGroup } from "../types/globals.js";
+import mongoose, { Schema } from 'mongoose';
+import { IPostGroup } from '../types/globals.js';
 
-const postGroupSchema = new Schema<IPostGroup>({
-  name: {
-    type: String,
-    required: true,
-    unique: true
+const postGroupSchema = new Schema<IPostGroup>(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    postCount: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
-  postCount: {
-    type: Number,
-    required: true
-  }
-}, { timestamps: true });
+  { timestamps: true },
+);
 
-export const PostGroup = mongoose.model("PostGroup", postGroupSchema);
+export const PostGroup = mongoose.model('PostGroup', postGroupSchema);

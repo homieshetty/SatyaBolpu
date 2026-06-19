@@ -1,12 +1,12 @@
-import { BaseCardProps, CardListProps } from "../types/globals";
-import { useEffect, useRef, useState } from "react";
-import { GrFormNext, GrFormPrevious } from "react-icons/gr";
-import useApi from "../hooks/useApi";
-import { Option } from "./DropDown";
-import { FaSortAmountDown } from "react-icons/fa";
-import Filters from "./Filters";
-import { MdFilterAlt, MdFilterAltOff } from "react-icons/md";
-import SortOptions from "./SortOptions";
+import { BaseCardProps, CardListProps } from '../types/globals';
+import { useEffect, useRef, useState } from 'react';
+import { GrFormNext, GrFormPrevious } from 'react-icons/gr';
+import useApi from '../hooks/useApi';
+import { Option } from './DropDown';
+import { FaSortAmountDown } from 'react-icons/fa';
+import Filters from './Filters';
+import { MdFilterAlt, MdFilterAltOff } from 'react-icons/md';
+import SortOptions from './SortOptions';
 
 const Pagination = ({
   pageNo,
@@ -14,10 +14,10 @@ const Pagination = ({
   handleArrows,
   handlePageChange,
 }: {
-  pageNo: string,
-  totalPages: number,
-  handleArrows: (action: "+" | "-") => void,
-  handlePageChange: (val: string) => void,
+  pageNo: string;
+  totalPages: number;
+  handleArrows: (action: '+' | '-') => void;
+  handlePageChange: (val: string) => void;
 }) => {
   const isPrevDisabled = Number(pageNo) <= 1;
   const isNextDisabled = Number(pageNo) >= totalPages;
@@ -27,11 +27,12 @@ const Pagination = ({
       <div className="text-[2rem] text-black flex items-center justify-center gap-3">
         <GrFormPrevious
           className={`bg-white py-2 rounded-2xl cursor-pointer transition-colors 
-            ${isPrevDisabled
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-primary"
+            ${
+              isPrevDisabled
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-primary'
             }`}
-          onClick={() => !isPrevDisabled && handleArrows("-")}
+          onClick={() => !isPrevDisabled && handleArrows('-')}
         />
         <div className="flex items-center gap-2">
           <input
@@ -40,20 +41,20 @@ const Pagination = ({
             max={totalPages}
             className="bg-white text-[1.5rem] w-10 h-10 text-center rounded-full hover:bg-primary cursor-pointer"
             value={pageNo}
-
-            onChange={(e) => handlePageChange((e.target as HTMLInputElement).value)}
+            onChange={(e) =>
+              handlePageChange((e.target as HTMLInputElement).value)
+            }
           />
-          <span className="text-white text-lg">
-            / {totalPages}
-          </span>
+          <span className="text-white text-lg">/ {totalPages}</span>
         </div>
         <GrFormNext
           className={`bg-white py-2 rounded-2xl cursor-pointer transition-colors 
-            ${isNextDisabled
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-primary"
+            ${
+              isNextDisabled
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-primary'
             }`}
-          onClick={() => !isNextDisabled && handleArrows("+")}
+          onClick={() => !isNextDisabled && handleArrows('+')}
         />
       </div>
     </div>
@@ -63,18 +64,12 @@ const Pagination = ({
 const PaginationSkeleton = () => (
   <div className="w-full flex items-center justify-center">
     <div className="text-[2rem] text-black flex items-center justify-center gap-3">
-      <GrFormPrevious
-        className="bg-gray-700 w-8 h-8 py-2 rounded-2xl cursor-pointer transition-colors"
-      />
+      <GrFormPrevious className="bg-gray-700 w-8 h-8 py-2 rounded-2xl cursor-pointer transition-colors" />
       <div className="flex items-center gap-2">
         <div className="w-10 h-10 bg-gray-700 animate-pulse rounded-full"></div>
-        <span className="text-white text-lg">
-          / ...
-        </span>
+        <span className="text-white text-lg">/ ...</span>
       </div>
-      <GrFormNext
-        className="bg-gray-700 w-8 h-8 py-2 rounded-2xl cursor-pointer transition-colors"
-      />
+      <GrFormNext className="bg-gray-700 w-8 h-8 py-2 rounded-2xl cursor-pointer transition-colors" />
     </div>
   </div>
 );
@@ -92,22 +87,32 @@ const CardList = <T extends BaseCardProps>({
   pagination = true,
   searchBar = true,
   filterGroups,
-  sortOptions
+  sortOptions,
 }: CardListProps<T>) => {
   const [data, setData] = useState<T[]>([]);
-  const [pageNo, setPageNo] = useState<string>("1");
-  const [showFilters, setShowFilters] = useState<boolean>(sessionStorage.getItem("showFilters") === "true" || false);
-  const [showSortOptions, setShowSortOptions] = useState<boolean>(sessionStorage.getItem("showSortOptions") === "true" || false);
-  const [selectedFilters, setSelectedFilters] = useState<Record<string, Option<string>[]>>(JSON.parse(sessionStorage.getItem("filters") ?? "{}"));
-  const [selectedSortOption, setSelectedSortOption] = useState<string>(sessionStorage.getItem("sortOption") ?? "createdAt");
-  const [order, setOrder] = useState<"asc" | "desc">((sessionStorage.getItem("orderBy") ?? "desc") as "asc" | "desc");
+  const [pageNo, setPageNo] = useState<string>('1');
+  const [showFilters, setShowFilters] = useState<boolean>(
+    sessionStorage.getItem('showFilters') === 'true' || false,
+  );
+  const [showSortOptions, setShowSortOptions] = useState<boolean>(
+    sessionStorage.getItem('showSortOptions') === 'true' || false,
+  );
+  const [selectedFilters, setSelectedFilters] = useState<
+    Record<string, Option<string>[]>
+  >(JSON.parse(sessionStorage.getItem('filters') ?? '{}'));
+  const [selectedSortOption, setSelectedSortOption] = useState<string>(
+    sessionStorage.getItem('sortOption') ?? 'createdAt',
+  );
+  const [order, setOrder] = useState<'asc' | 'desc'>(
+    (sessionStorage.getItem('orderBy') ?? 'desc') as 'asc' | 'desc',
+  );
 
   const filtersRef = useRef<HTMLDivElement>(null);
 
-  const endpoint = 
+  const endpoint =
     `/${apiEndpoint}` +
-    `${pagination ? `?page=${pageNo}&limit=${cardsPerPage}` : ""}` +
-    `${selectFields ? `${pagination ? "&" : "?"}${selectFields}` : "" }`;
+    `${pagination ? `?page=${pageNo}&limit=${cardsPerPage}` : ''}` +
+    `${selectFields ? `${pagination ? '&' : '?'}${selectFields}` : ''}`;
   const api = useApi(endpoint, { auto: false });
 
   useEffect(() => {
@@ -116,91 +121,100 @@ const CardList = <T extends BaseCardProps>({
   }, [pageNo, apiEndpoint]);
 
   const handleInternalDelete = (id: string) => {
-    setData(prev => prev.filter(d => d.id !== id));
+    setData((prev) => prev.filter((d) => d.id !== id));
     handleDelete?.(id);
-  }
+  };
 
   const toggleSortOptions = () => {
-    if(showSortOptions) {
-      setSelectedSortOption("createdAt");
-      sessionStorage.removeItem("showSortOptions");
+    if (showSortOptions) {
+      setSelectedSortOption('createdAt');
+      sessionStorage.removeItem('showSortOptions');
     } else {
-      sessionStorage.setItem("showSortOptions", "true");
+      sessionStorage.setItem('showSortOptions', 'true');
     }
     setShowSortOptions(!showSortOptions);
-  }
+  };
 
   const toggleFilters = () => {
     if (showFilters) {
       setSelectedFilters({});
-      sessionStorage.removeItem("showFilters");
+      sessionStorage.removeItem('showFilters');
     } else {
-      sessionStorage.setItem("showFilters", "true");
+      sessionStorage.setItem('showFilters', 'true');
     }
     setShowFilters(!showFilters);
-  }
+  };
 
   const toCamelCase = (str: string) => {
     str = str.toLowerCase();
-    return str.split(" ")[0] + str.split(" ").slice(1).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join("");
-  }
+    return (
+      str.split(' ')[0] +
+      str
+        .split(' ')
+        .slice(1)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join('')
+    );
+  };
 
   useEffect(() => {
     const fetchFilteredData = async () => {
-      let queryString = 
-      Object.entries(selectedFilters).filter(
-        entry => entry[1].length > 0
-      ).map(
-        entry => `${toCamelCase(entry[0])}s=${entry[1].map(
-          v => v.value
-        ).join(",")}`
-      ).join("&");
+      let queryString = Object.entries(selectedFilters)
+        .filter((entry) => entry[1].length > 0)
+        .map(
+          (entry) =>
+            `${toCamelCase(entry[0])}s=${entry[1]
+              .map((v) => v.value)
+              .join(',')}`,
+        )
+        .join('&');
 
-      queryString += (queryString ? "&" : "") + `sortBy=${selectedSortOption}&orderBy=${order}`;
+      queryString +=
+        (queryString ? '&' : '') +
+        `sortBy=${selectedSortOption}&orderBy=${order}`;
       await api.refetch({
-        endpoint: 
+        endpoint:
           endpoint +
-          `${queryString ? `${pagination ? "&" : `${selectFields ? "&" : "?"}`}${queryString}` : ""}`,
-        method: "GET"
+          `${queryString ? `${pagination ? '&' : `${selectFields ? '&' : '?'}`}${queryString}` : ''}`,
+        method: 'GET',
       });
-    }
+    };
 
-    if (Object.values(selectedFilters).some(f => f.length > 0)) {
-      sessionStorage.setItem("filters", JSON.stringify(selectedFilters));
+    if (Object.values(selectedFilters).some((f) => f.length > 0)) {
+      sessionStorage.setItem('filters', JSON.stringify(selectedFilters));
     } else {
-      sessionStorage.removeItem("filters");
+      sessionStorage.removeItem('filters');
     }
 
     fetchFilteredData();
   }, [selectedFilters, selectedSortOption, order]);
 
   useEffect(() => {
-    if(selectedSortOption === "createdAt") {
-      sessionStorage.removeItem("sortOption");
+    if (selectedSortOption === 'createdAt') {
+      sessionStorage.removeItem('sortOption');
     } else {
-      sessionStorage.setItem("sortOption", selectedSortOption);
+      sessionStorage.setItem('sortOption', selectedSortOption);
     }
   }, [selectedSortOption]);
 
   useEffect(() => {
-    if(order === "asc") {
-      sessionStorage.setItem("orderBy", "asc");
+    if (order === 'asc') {
+      sessionStorage.setItem('orderBy', 'asc');
     } else {
-      sessionStorage.removeItem("orderBy");
+      sessionStorage.removeItem('orderBy');
     }
   }, [order]);
 
   useEffect(() => {
     if (api.data) {
       setData(
-        api.data[dataKey].map(
-          (d: Omit<T, "handleEdit" | "handleDelete">) => ({
-            handleEdit, handleDelete: handleInternalDelete, ...d
-          })
-        )
+        api.data[dataKey].map((d: Omit<T, 'handleEdit' | 'handleDelete'>) => ({
+          handleEdit,
+          handleDelete: handleInternalDelete,
+          ...d,
+        })),
       );
     }
-
   }, [api.data]);
 
   const totalPages = api.data?.totalPages;
@@ -208,7 +222,7 @@ const CardList = <T extends BaseCardProps>({
   const handlePageChange = (val: string) => {
     const num = parseInt(val);
     if (!val) {
-      setPageNo("");
+      setPageNo('');
       return;
     }
     if (isNaN(num)) return;
@@ -218,24 +232,22 @@ const CardList = <T extends BaseCardProps>({
     setPageNo(num.toString());
   };
 
-  const handleArrows = (action: "+" | "-") => {
+  const handleArrows = (action: '+' | '-') => {
     const num = parseInt(pageNo);
-    if (isNaN(num)) return setPageNo("1");
-    if (action === "-") {
-      if (num - 1 < 1) return setPageNo("1");
+    if (isNaN(num)) return setPageNo('1');
+    if (action === '-') {
+      if (num - 1 < 1) return setPageNo('1');
       setPageNo((num - 1).toString());
     } else {
       if (num + 1 > totalPages) return setPageNo(totalPages.toString());
-      setPageNo((num + 1).toString())
+      setPageNo((num + 1).toString());
     }
-  }
+  };
 
   return (
     <div className="w-full flex flex-col gap-5">
       <div className="w-2/3 flex items-center justify-between mx-auto">
-
-        {
-          searchBar && 
+        {searchBar && (
           <div className="w-2/3 flex items-center gap-2">
             <input
               className="w-full rounded-2xl bg-white p-2"
@@ -243,46 +255,40 @@ const CardList = <T extends BaseCardProps>({
               type="text"
             />
           </div>
-        }
-        
+        )}
+
         <div className="flex gap-2 items-center">
-          {
-            filterGroups && 
+          {filterGroups && (
             <div className="text-primary">
-              {
-                showFilters ?
-                  <MdFilterAltOff
-                    className="hover:scale-110 transition-all cursor-pointer"
-                    size={"35px"}
-                    onClick={toggleFilters}
-                  /> :
-                  <MdFilterAlt
-                    className="hover:scale-110 transition-all cursor-pointer"
-                    size={"35px"}
-                    onClick={toggleFilters}
-                  />
-              }
+              {showFilters ? (
+                <MdFilterAltOff
+                  className="hover:scale-110 transition-all cursor-pointer"
+                  size={'35px'}
+                  onClick={toggleFilters}
+                />
+              ) : (
+                <MdFilterAlt
+                  className="hover:scale-110 transition-all cursor-pointer"
+                  size={'35px'}
+                  onClick={toggleFilters}
+                />
+              )}
             </div>
-          }
+          )}
           <div className="text-primary cursor-pointer hover:scale-110 transition-all">
-            {
-              sortOptions &&
-              <FaSortAmountDown
-                size={"25px"}
-                onClick={toggleSortOptions}
-              />
-            }
+            {sortOptions && (
+              <FaSortAmountDown size={'25px'} onClick={toggleSortOptions} />
+            )}
           </div>
         </div>
       </div>
 
-      {
-        filterGroups &&
+      {filterGroups && (
         <div
           className="w-2/3 mx-auto overflow-hidden transition-all flex flex-col"
           ref={filtersRef}
           style={{
-            height: showFilters ? "auto" : "0"
+            height: showFilters ? 'auto' : '0',
           }}
         >
           <div className="text-primary text-[1.25rem] text-left">Filters:</div>
@@ -293,14 +299,13 @@ const CardList = <T extends BaseCardProps>({
             ref={filtersRef}
           />
         </div>
-      }
+      )}
 
-      {
-        sortOptions &&
+      {sortOptions && (
         <div
           className="w-2/3 mx-auto overflow-hidden transition-all flex flex-col"
           style={{
-            height: showSortOptions ? "auto" : "0"
+            height: showSortOptions ? 'auto' : '0',
           }}
         >
           <div className="text-primary text-[1.25rem] text-left">Sort:</div>
@@ -312,63 +317,54 @@ const CardList = <T extends BaseCardProps>({
             setOrder={setOrder}
           />
         </div>
-      }
+      )}
 
-      {
-        pagination && (
-          api.loading ?
-            <PaginationSkeleton /> : (
-              data.length > 0 &&
-              <Pagination
-                pageNo={pageNo}
-                totalPages={totalPages}
-                handleArrows={handleArrows}
-                handlePageChange={handlePageChange}
-              />
-            )
-        )
-      }
+      {pagination &&
+        (api.loading ? (
+          <PaginationSkeleton />
+        ) : (
+          data.length > 0 && (
+            <Pagination
+              pageNo={pageNo}
+              totalPages={totalPages}
+              handleArrows={handleArrows}
+              handlePageChange={handlePageChange}
+            />
+          )
+        ))}
 
       <div
         className="w-full my-10 flex flex-wrap gap-10 items-center justify-center"
         style={{
-          flexDirection: orientation
+          flexDirection: orientation,
         }}
       >
-        {
-          api.loading ? (
-            Array.from({ length: pagination ? cardsPerPage! : data.length }).map((_, id) => (
-              <SkeletonCard key={id} />
-            ))
-          ) : (
-            data.length > 0
-              ?
-                data.map((cardProps, id) => (
-                  <Card {...cardProps} key={id} />
-                ))
-              : (
-                <p className="text-gray-400">No Data available</p>
-              )
+        {api.loading ? (
+          Array.from({ length: pagination ? cardsPerPage! : data.length }).map(
+            (_, id) => <SkeletonCard key={id} />,
           )
-        }
+        ) : data.length > 0 ? (
+          data.map((cardProps, id) => <Card {...cardProps} key={id} />)
+        ) : (
+          <p className="text-gray-400">No Data available</p>
+        )}
       </div>
 
-      {
-        pagination && (
-          api.loading ?
-            <PaginationSkeleton /> : (
-              data.length > 0 &&
-              <Pagination
-                pageNo={pageNo}
-                totalPages={totalPages}
-                handleArrows={handleArrows}
-                handlePageChange={handlePageChange}
-              />
-            )
-        )
-      }
+      {pagination &&
+        (api.loading ? (
+          <PaginationSkeleton />
+        ) : (
+          data.length > 0 && (
+            <Pagination
+              pageNo={pageNo}
+              totalPages={totalPages}
+              handleArrows={handleArrows}
+              handlePageChange={handlePageChange}
+            />
+          )
+        ))}
     </div>
   );
-}
+};
 
 export default CardList;

@@ -1,47 +1,60 @@
-import mongoose, { Schema } from "mongoose";
-import { ILocation } from "../types/globals.js";
-import { User } from "./User.js";
-import { validateExistence } from "../utils/db.js";
+import mongoose, { Schema } from 'mongoose';
+import { ILocation } from '../types/globals.js';
+import { User } from './User.js';
+import { validateExistence } from '../utils/db.js';
 
-export const locationSchema = new Schema<ILocation>({
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    validate: validateExistence(User)
+const locationSchema = new Schema<ILocation>(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      validate: validateExistence(User),
+    },
+    type: {
+      type: String,
+      enum: ['Point'],
+      required: true,
+      default: 'Point',
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+    },
+    district: {
+      type: String,
+      required: true,
+    },
+    taluk: {
+      type: String,
+    },
+    maagane: {
+      type: String,
+    },
+    village: {
+      type: String,
+      required: true,
+    },
+    attachments: {
+      type: [String],
+    },
+    likes: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    comments: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
-  type: {
-    type: String,
-    enum: ["Point"],
-    required: true,
-    default: "Point"
-  },
-  name: {
-    type: String,
-    required: true
-  },
-  coordinates: {
-    type: [Number],
-    required: true
-  },
-  district: {
-    type: String,
-    required: true
-  },
-  taluk: {
-    type: String,
-  },
-  maagane: {
-    type: String,
-  },
-  village: {
-    type: String,
-    required: true
-  },
-  attachments: {
-    type: [String]
-  }
-}, { timestamps: true });
-locationSchema.index({ district: 1 })
+  { timestamps: true },
+);
+locationSchema.index({ district: 1 });
 
-export const Location = mongoose.model<ILocation>("Location", locationSchema);
+export const Location = mongoose.model<ILocation>('Location', locationSchema);

@@ -1,14 +1,15 @@
-import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import crypto from "crypto";
-import { User } from "../models/User.js";
+import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { User } from '../models/User.js';
+import { IUser } from '../types/globals.js';
 
 const generateUsernameHash = async (name: string) => {
   let username;
 
   while (true) {
-    const hash = crypto.randomBytes(3).toString("hex");
+    const hash = crypto.randomBytes(3).toString('hex');
     username = `${name}_${hash}`;
 
     const exists = await User.findOne({ uname: username });
@@ -16,55 +17,68 @@ const generateUsernameHash = async (name: string) => {
     if (!exists) break;
   }
 
-  return username.toLowerCase().replace(/\s+/g, "");
+  return username.toLowerCase().replace(/\s+/g, '');
 };
 
 export const signup = async (req: Request, res: Response) => {
   try {
-    const { name, uname, email, phone, password } = req.body;
+    const { name, uname, email, phone, password, image } = req.body;
     const finalUname = uname ? uname : await generateUsernameHash(name);
 
     if (!name || !email || !password) {
-      return res.status(400).json({ msg: "Missing Required Field" });
+      return res.status(400).json({ msg: 'Missing Required Field' });
     }
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ msg: "An account with this email already exists." });
+      return res
+        .status(409)
+        .json({ msg: 'An account with this email already exists.' });
     }
 
     const takenUsername = await User.findOne({ uname: finalUname });
-    if(takenUsername) {
-      return res.status(409).json({ msg: "Username already taken by another user" });
+    if (takenUsername) {
+      return res
+        .status(409)
+        .json({ msg: 'Username already taken by another user' });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const userFields = 
-      (!phone?.dialCode || !phone?.number) ?
-      { name, uname: finalUname, email, password: hashedPassword } :
-      { name, uname: finalUname, email, phone, password: hashedPassword }
+    let userFields: Partial<IUser> = {
+      name,
+      uname: finalUname,
+      email,
+      password: hashedPassword,
+      image,
+    };
+
+    if (phone?.dialCode && phone?.number) {
+      userFields = {
+        ...userFields,
+        phone,
+      };
+    }
 
     const newUser = await User.create(userFields);
-
     const accessToken = jwt.sign(
       { id: newUser._id },
       process.env.JWT_ACCESS_TOKEN_SECRET!,
-      { expiresIn: "10m" }
+      { expiresIn: '10m' },
     );
 
     const refreshToken = jwt.sign(
       { id: newUser._id },
       process.env.JWT_REFRESH_TOKEN_SECRET!,
-      { expiresIn: "7d" }
-    )
+      { expiresIn: '7d' },
+    );
 
-    res.cookie("jwt", refreshToken, {
+    res.cookie('jwt', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production" ? true : false,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 24 * 60 * 60 * 1000
+      secure: process.env.NODE_ENV === 'production' ? true : false,
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     return res.status(201).json({
@@ -76,82 +90,87 @@ export const signup = async (req: Request, res: Response) => {
         phone: newUser.phone,
         email: newUser.email,
         role: newUser.role,
-        verified: newUser.verified
-      }
+        image: newUser.image,
+        verified: newUser.verified,
+      },
     });
   } catch (err: any) {
-    console.error("Signup Error:", err.message);
-    return res.status(500).json({ msg: "Something went wrong..." });
+    console.error('Signup Error:', err.message);
+    return res.status(500).json({ msg: 'Something went wrong...' });
   }
 };
 
-export const login = async (req: Request,res: Response) => {
-  const {email, password} = req.body;
+export const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
 
-  if(!email || !password) {
-    return res.status(400).json({msg: "Email and Password are required"});
+  if (!email || !password) {
+    return res.status(400).json({ msg: 'Email and Password are required' });
   }
 
   const user = await User.findOne({ email });
-  if(!user) {
-    return res.status(404).json({ msg: "User Not Found" });
+  if (!user) {
+    return res.status(404).json({ msg: 'User Not Found' });
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
-  if(!isMatch) {
-    return res.status(401).json({ msg: "Invlaid Credentials" });
+  if (!isMatch) {
+    return res.status(401).json({ msg: 'Invlaid Credentials' });
   }
 
   const accessToken = jwt.sign(
     { id: user._id },
     process.env.JWT_ACCESS_TOKEN_SECRET!,
-    { expiresIn: "10m" }
+    { expiresIn: '10m' },
   );
 
   const refreshToken = jwt.sign(
     { id: user._id },
     process.env.JWT_REFRESH_TOKEN_SECRET!,
-    { expiresIn: "7d" }
-  )
+    { expiresIn: '7d' },
+  );
 
-  res.cookie("jwt", refreshToken, {
+  res.cookie('jwt', refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production" ? true : false,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    maxAge: 24 * 60 * 60 * 1000
+    secure: process.env.NODE_ENV === 'production' ? true : false,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000,
   });
 
   return res.status(200).json({
     accessToken,
-    user : {
+    user: {
       id: user._id,
       uname: user.uname,
       name: user.name,
       phone: user.phone,
       email: user.email,
       role: user.role,
-      verified: user.verified
-    }
+      image: user.image,
+      verified: user.verified,
+    },
   });
-}
+};
 
 export const refresh = async (req: Request, res: Response) => {
   const token = req.cookies?.jwt;
-  if (!token) return res.status(401).json({ msg: "Unauthorized" });
+  if (!token) return res.status(401).json({ msg: 'Unauthorized' });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_REFRESH_TOKEN_SECRET!) as { id: string };
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_REFRESH_TOKEN_SECRET!,
+    ) as { id: string };
 
     const user = await User.findById(decoded.id).lean();
-    if (!user) return res.status(404).json({ msg: "User not found" });
+    if (!user) return res.status(404).json({ msg: 'User not found' });
 
     const accessToken = jwt.sign(
       { id: user._id },
       process.env.JWT_ACCESS_TOKEN_SECRET!,
-      { expiresIn: "10m" }
+      { expiresIn: '10m' },
     );
 
-    console.log("Token Refreshed")
+    console.log('Token Refreshed');
     return res.status(200).json({
       accessToken,
       user: {
@@ -161,24 +180,25 @@ export const refresh = async (req: Request, res: Response) => {
         phone: user.phone,
         email: user.email,
         role: user.role,
-        verified: user.verified
-      }
+        image: user.image,
+        verified: user.verified,
+      },
     });
   } catch (err) {
-    console.error("Refresh Error:", err);
-    return res.status(403).json({ msg: "Invalid token" });
+    console.error('Refresh Error:', err);
+    return res.status(403).json({ msg: 'Invalid token' });
   }
 };
 
 export const logout = async (req: Request, res: Response) => {
   const token = req.cookies?.jwt;
-  if(!token) return res.status(401).json({ msg: "Unauthorized" });
+  if (!token) return res.status(401).json({ msg: 'Unauthorized' });
 
-  res.clearCookie("jwt", {
+  res.clearCookie('jwt', {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false
+    sameSite: 'lax',
+    secure: false,
   });
 
-  res.status(200).json({ message: "Logged out" });
-}
+  res.status(200).json({ message: 'Logged out' });
+};

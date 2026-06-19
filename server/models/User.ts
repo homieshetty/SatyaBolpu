@@ -1,52 +1,55 @@
-import mongoose, { Schema } from "mongoose";
-import { IPhone, IUser } from "../types/globals.js";
+import mongoose, { Schema } from 'mongoose';
+import { IPhone, IUser } from '../types/globals.js';
 
 const phoneSchema = new Schema<IPhone>({
   dialCode: {
     type: Number,
-    required: true
+    required: true,
   },
   number: {
     type: Number,
-    required: true
-  }
+    required: true,
+  },
 });
 
-const userSchema = new Schema<IUser>({
-  name: {
-    type: String,
-    required: true,
+const userSchema = new Schema<IUser>(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    uname: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    email: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    phone: {
+      type: phoneSchema,
+      required: false,
+    },
+    image: {
+      type: String,
+    },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
   },
-  uname: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-  },
-  phone: {
-    type: phoneSchema,
-    required: false
-  },
-  image: {
-    type: String
-  },
-  role: {
-    type: String,
-    enum: ["user", "admin"],
-    default: "user"
-  },
-  verified: {
-    type: Boolean,
-    default: false
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-},{ timestamps: true });
+  { timestamps: true },
+);
 
-export const User = mongoose.model<IUser>("User",userSchema);
+export const User = mongoose.model<IUser>('User', userSchema);

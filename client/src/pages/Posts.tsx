@@ -56,7 +56,7 @@ const Posts = () => {
     if(!id) return;
     const res = await postsApi.refetch({ endpoint: `/drafts/post/${id}`, method: "POST" });
     if(!res) return;
-    navigate(`/add/post/${res._id}`);
+    navigate(`/create/post/${res._id}`);
   }
 
   useEffect(() => {

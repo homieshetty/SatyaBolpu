@@ -1,12 +1,18 @@
-import React, { ChangeEvent, SubmitEvent, useEffect, useRef, useState } from "react";
-import { FaUpload } from "react-icons/fa";
-import Button from "./Button";
-import { FormField, FormFieldOption, FormProps } from "../types/globals";
-import { MdCancel } from "react-icons/md";
-import { BASE_URL } from "../App";
-import useApi from "../hooks/useApi";
-import { toast } from "react-toastify";
-import { cn } from "../utils/merge";
+import React, {
+  ChangeEvent,
+  SubmitEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { FaUpload } from 'react-icons/fa';
+import Button from './Button';
+import { FormField, FormFieldOption, FormProps } from '../types/globals';
+import { MdCancel } from 'react-icons/md';
+import { BASE_URL } from '../App';
+import useApi from '../hooks/useApi';
+import { toast } from 'react-toastify';
+import { cn } from '../utils/merge';
 
 const Form = <T extends {}>({
   fields,
@@ -14,18 +20,21 @@ const Form = <T extends {}>({
   submitEndpoint,
   onSubmit,
   error,
-  submitText = "Submit",
-  toastMsg = "Saved successfully",
-  loadingText = "Submitting",
-  className = "",
+  submitText = 'Submit',
+  toastMsg = 'Saved successfully',
+  loadingText = 'Submitting',
+  className = '',
 }: FormProps<T>) => {
-
   const pageSize = 10;
   const formRef = useRef<HTMLFormElement>(null);
   const [formData, setFormData] = useState<T>(state);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [allowedOptions, setAllowedOptions] = useState<Record<string, FormFieldOption[]>>({});
-  const [activeOption, setActiveOption] = useState<Record<string, string | null>>({});
+  const [allowedOptions, setAllowedOptions] = useState<
+    Record<string, FormFieldOption[]>
+  >({});
+  const [activeOption, setActiveOption] = useState<
+    Record<string, string | null>
+  >({});
   const [activeIndex, setActiveIndex] = useState<Record<string, number>>({});
   const [visibleStart, setVisibleStart] = useState<Record<string, number>>({});
   const [showOptions, setShowOptions] = useState<Record<string, boolean>>({});
@@ -34,34 +43,30 @@ const Form = <T extends {}>({
   const textAreaRefs = useRef<Record<string, HTMLTextAreaElement>>({});
   const optionRefs = useRef<Record<string, HTMLInputElement>>({});
 
-  const submitApi = typeof submitEndpoint === "string" ? useApi(submitEndpoint, { auto: false }) : submitEndpoint;
+  const submitApi =
+    typeof submitEndpoint === 'string'
+      ? useApi(submitEndpoint, { auto: false })
+      : submitEndpoint;
   const uploadSingleApi = useApi('/upload/single', { auto: false });
   const uploadMultipleApi = useApi('/upload/multiple', { auto: false });
 
   useEffect(() => {
-    Object.values(textAreaRefs.current).forEach(ref => {
+    Object.values(textAreaRefs.current).forEach((ref) => {
       if (ref) {
-        ref.style.height = "auto";
+        ref.style.height = 'auto';
         ref.style.height = `${ref.scrollHeight}px`;
       }
-    })
+    });
   }, [textAreaRefs.current]);
 
-  const getValue = (
-    obj: Record<string, any> | T,
-    path: string
-  ): any => {
+  const getValue = (obj: Record<string, any> | T, path: string): any => {
     return path
-      .split(".")
+      .split('.')
       .reduce((current, key) => (current as any)?.[key], obj);
   };
 
-  const setValue = (
-    obj: Record<string, any>,
-    path: string,
-    value: any
-  ) => {
-    const keys = path.split(".");
+  const setValue = (obj: Record<string, any>, path: string, value: any) => {
+    const keys = path.split('.');
 
     const result = { ...obj };
 
@@ -76,23 +81,27 @@ const Form = <T extends {}>({
     return result;
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value, type } = e.target;
 
-    setErrors(prev => setValue(prev, name, ""))
-    if (type === "file") {
+    setErrors((prev) => setValue(prev, name, ''));
+    if (type === 'file') {
       const fileInput = e.target as HTMLInputElement;
       const file = fileInput.files?.[0] || null;
-      setFormData(prev => setValue(prev, name, file) as T);
+      setFormData((prev) => setValue(prev, name, file) as T);
     } else {
-      if (type === "textarea") {
+      if (type === 'textarea') {
         const el = textAreaRefs.current[name];
         if (el) {
-          el.style.height = "auto";
+          el.style.height = 'auto';
           el.style.height = `${el.scrollHeight}px`;
         }
       }
-      setFormData(prev => setValue(prev, name, value) as T);
+      setFormData((prev) => setValue(prev, name, value) as T);
     }
   };
 
@@ -100,19 +109,25 @@ const Form = <T extends {}>({
     if (!fields.length) return;
     let allowed: Record<string, FormFieldOption[]> = {};
 
-    fields.forEach(field => {
-      if (field.type === "select" || field.type === "multi-select") {
+    fields.forEach((field) => {
+      if (field.type === 'select' || field.type === 'multi-select') {
         const rawValue = getValue(formData, field.name);
-        const selectedValues = Array.isArray(rawValue) ? rawValue : (rawValue ? [rawValue] : []);
-        const searchVal = getValue(activeOption, field.name) || "";
+        const selectedValues = Array.isArray(rawValue)
+          ? rawValue
+          : rawValue
+            ? [rawValue]
+            : [];
+        const searchVal = getValue(activeOption, field.name) || '';
 
         allowed = setValue(
           allowed,
           field.name,
-          (field.options ?? []).filter(opt =>
-            !selectedValues.includes(opt.value) &&
-            (!searchVal || opt.label?.toLowerCase().startsWith(searchVal.toLowerCase()))
-          )
+          (field.options ?? []).filter(
+            (opt) =>
+              !selectedValues.includes(opt.value) &&
+              (!searchVal ||
+                opt.label?.toLowerCase().startsWith(searchVal.toLowerCase())),
+          ),
         );
       }
     });
@@ -123,84 +138,88 @@ const Form = <T extends {}>({
     const { name, files } = e.target;
     if (!files) return;
 
-    setErrors(prev => setValue(prev, name, ""))
+    setErrors((prev) => setValue(prev, name, ''));
     setFormData(
-      prev =>
-        setValue(
-          prev,
-          name,
-          [
-            ...((prev as any)[name] as File[] | string[]),
-            ...Array.from(files)
-          ]
-        ) as T
+      (prev) =>
+        setValue(prev, name, [
+          ...((prev as any)[name] as File[] | string[]),
+          ...Array.from(files),
+        ]) as T,
     );
 
-    setTimeout(() => e.target.value = "", 0);
+    setTimeout(() => (e.target.value = ''), 0);
   };
 
-  const handleOptionChange = (e: ChangeEvent<HTMLInputElement>, name: string) => {
+  const handleOptionChange = (
+    e: ChangeEvent<HTMLInputElement>,
+    name: string,
+  ) => {
     const { value } = e.target;
-    setActiveOption(prev => setValue(prev, name, value));
-    setActiveIndex(prev => setValue(prev, name, 0));
-    setVisibleStart(prev => setValue(prev, name, 0));
+    setActiveOption((prev) => setValue(prev, name, value));
+    setActiveIndex((prev) => setValue(prev, name, 0));
+    setVisibleStart((prev) => setValue(prev, name, 0));
   };
 
-  const handleSelectOption = (name: string, option: FormFieldOption, fieldType: string) => {
-    setErrors(prev => setValue(prev, name, ""))
+  const handleSelectOption = (
+    name: string,
+    option: FormFieldOption,
+    fieldType: string,
+  ) => {
+    setErrors((prev) => setValue(prev, name, ''));
 
-    if (fieldType === "select") {
-      setFormData(prev => setValue(prev, name, option.value) as T);
+    if (fieldType === 'select') {
+      setFormData((prev) => setValue(prev, name, option.value) as T);
     } else {
       const currentSelection = getValue(formData, name) || [];
       if (!currentSelection.includes(option.value)) {
         setFormData(
-          prev =>
-            setValue(
-              prev,
-              name,
-              [...(prev as any)[name], option.value]
-            ) as T
+          (prev) =>
+            setValue(prev, name, [...(prev as any)[name], option.value]) as T,
         );
       }
     }
 
-    setActiveOption(prev => setValue(prev, name, null));
+    setActiveOption((prev) => setValue(prev, name, null));
 
     if (optionRefs.current[name]) {
-      optionRefs.current[name].value = "";
+      optionRefs.current[name].value = '';
     }
 
-    setActiveIndex(prev => setValue(prev, name, 0));
-    setVisibleStart(prev => setValue(prev, name, 0));
+    setActiveIndex((prev) => setValue(prev, name, 0));
+    setVisibleStart((prev) => setValue(prev, name, 0));
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, name: string, fieldType: string) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent,
+    name: string,
+    fieldType: string,
+  ) => {
     const options = getValue(allowedOptions, name);
     if (!options) return;
     const curIndex = getValue(activeIndex, name) ?? 0;
     const curStart = getValue(visibleStart, name) ?? 0;
     const total = options.length;
 
-    if (e.key === "ArrowDown") {
+    if (e.key === 'ArrowDown') {
       e.preventDefault();
       const newIndex = (curIndex + 1) % total;
-      setActiveIndex(prev => setValue(prev, name, newIndex));
-      if (newIndex === 0) 
-        setVisibleStart(prev => setValue(prev, name, 0));
+      setActiveIndex((prev) => setValue(prev, name, newIndex));
+      if (newIndex === 0) setVisibleStart((prev) => setValue(prev, name, 0));
       else if (newIndex >= curStart + pageSize)
-        setVisibleStart(prev => setValue(prev, name, curStart + 1));
+        setVisibleStart((prev) => setValue(prev, name, curStart + 1));
     }
-    if (e.key === "ArrowUp") {
+    if (e.key === 'ArrowUp') {
       e.preventDefault();
       const newIndex = (curIndex - 1 + total) % total;
-      setActiveIndex(prev => setValue(prev, name, newIndex));
+      setActiveIndex((prev) => setValue(prev, name, newIndex));
       if (newIndex === total - 1)
-        setVisibleStart(prev => setValue(prev, name, Math.max(0, total - pageSize)));
+        setVisibleStart((prev) =>
+          setValue(prev, name, Math.max(0, total - pageSize)),
+        );
       else if (newIndex < curStart)
-        setVisibleStart(prev => setValue(prev, name, curStart - 1));
+        setVisibleStart((prev) => setValue(prev, name, curStart - 1));
     }
-    if (e.key === "Enter" && options[curIndex]) {
+    if (e.key === 'Enter' && options[curIndex]) {
       e.preventDefault();
       handleSelectOption(name, options[curIndex], fieldType);
     }
@@ -208,86 +227,139 @@ const Form = <T extends {}>({
 
   const handleRemoveImage = (name: string, index: number) => {
     setFormData(
-      prev =>
-        setValue (
-          prev,
-          name,
-          ((prev as any)[name] as File[] | string[]).filter((_, id) => id !== index)
-        ) as T
-    )
-  }
-
-  const handleRemoveOption = (name: string, index: number) => {
-    setFormData(
-      prev =>
+      (prev) =>
         setValue(
           prev,
           name,
-          (prev as any)[name].filter((_: any, id: number) => id !== index)
-        ) as T
+          ((prev as any)[name] as File[] | string[]).filter(
+            (_, id) => id !== index,
+          ),
+        ) as T,
     );
-  }
+  };
+
+  const handleRemoveOption = (name: string, index: number) => {
+    setFormData(
+      (prev) =>
+        setValue(
+          prev,
+          name,
+          (prev as any)[name].filter((_: any, id: number) => id !== index),
+        ) as T,
+    );
+  };
 
   const validateForm = () => {
     let newErrors: Record<string, string> = {};
 
-    fields.forEach(field => {
+    fields.forEach((field) => {
       const name = field.name;
       const value = getValue(formData, name);
 
-      if (field.required && (!value || (typeof value === "string" && !value.trim()))) {
+      if (
+        field.required &&
+        (!value || (typeof value === 'string' && !value.trim()))
+      ) {
         newErrors = setValue(newErrors, name, `${field.label} is required.`);
         return;
       }
 
-      if (field.type === "file" && !(value instanceof File) && typeof value !== "string") {
-        newErrors = setValue(newErrors, name, `Uploaded attachment is not a file.`);
+      if (
+        field.type === 'file' &&
+        !(value instanceof File) &&
+        typeof value !== 'string'
+      ) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `Uploaded attachment is not a file.`,
+        );
         return;
       }
 
-      if (field.maxValue && (value > field.maxValue)) {
-        newErrors = setValue(newErrors, name, `${field.label} cant be greater than ${field.maxValue}.`);
+      if (field.maxValue && value > field.maxValue) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `${field.label} cant be greater than ${field.maxValue}.`,
+        );
         return;
       }
 
-      if (field.minValue && (value < field.minValue)) {
-        newErrors = setValue(newErrors, name, `${field.label} should be greate than ${field.minValue}.`);
+      if (field.minValue && value < field.minValue) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `${field.label} should be greate than ${field.minValue}.`,
+        );
         return;
       }
 
-      if (field.maxLength && (value.length > field.maxLength)) {
-        newErrors = setValue(newErrors, name, `${field.label} can be at most ${field.maxLength} characters long.`);
+      if (field.maxLength && value.length > field.maxLength) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `${field.label} can be at most ${field.maxLength} characters long.`,
+        );
         return;
       }
 
-      if (field.minLength && (value.length < field.minLength)) {
-        newErrors = setValue(newErrors, name, `${field.label} should be at least ${field.minLength} characters long.`);
+      if (field.minLength && value.length < field.minLength) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `${field.label} should be at least ${field.minLength} characters long.`,
+        );
         return;
       }
 
-      if (field.maxWords && (value.split(" ").length > field.maxWords)) {
-        newErrors = setValue(newErrors, name, `${field.label} can be at most ${field.maxWords} words long.`);
+      if (field.maxWords && value.split(' ').length > field.maxWords) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `${field.label} can be at most ${field.maxWords} words long.`,
+        );
         return;
       }
 
-      if (field.minWords && (value.split(" ").length < field.minWords)) {
-        newErrors = setValue(newErrors, name, `${field.label} should be at least ${field.minWords} words long.`);
+      if (field.minWords && value.split(' ').length < field.minWords) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `${field.label} should be at least ${field.minWords} words long.`,
+        );
         return;
       }
 
-      if (field.maxItems && (value.length > field.maxItems)) {
-        newErrors = setValue(newErrors, name, `There can be at most ${field.maxItems} ${field.label}.`);
+      if (field.maxItems && value.length > field.maxItems) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `There can be at most ${field.maxItems} ${field.label}.`,
+        );
         return;
       }
 
-      if (field.minItems && (value.length < field.minItems)) {
-        newErrors = setValue(newErrors, name, `Add at least ${field.minItems} ${field.label}.`);
+      if (field.minItems && value.length < field.minItems) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `Add at least ${field.minItems} ${field.label}.`,
+        );
         return;
       }
 
-      if(field.unique && field.existingValues && 
-        field.existingValues.length > 0 && field.existingValues.includes(value)) {
-        newErrors = setValue(newErrors, name, `${field.label} '${value}' already exists.`);
+      if (
+        field.unique &&
+        field.existingValues &&
+        field.existingValues.length > 0 &&
+        field.existingValues.includes(value)
+      ) {
+        newErrors = setValue(
+          newErrors,
+          name,
+          `${field.label} '${value}' already exists.`,
+        );
       }
 
       if (field.validation && value) {
@@ -315,28 +387,28 @@ const Form = <T extends {}>({
     const finalFormData = { ...formData };
 
     for (const field of fields) {
-      if (field.type === "file") {
+      if (field.type === 'file') {
         const file = getValue(formData, field.name);
         if (file instanceof File) {
           const fd = new FormData();
-          fd.append("file", file);
+          fd.append('file', file);
           const res = await uploadSingleApi.post(fd);
           (finalFormData as any)[field.name] = res.path;
         }
       }
 
-      if (field.type === "files") {
-        const files = getValue(formData, field.name)
+      if (field.type === 'files') {
+        const files = getValue(formData, field.name);
         const finalFiles: string[] = [];
         const fd = new FormData();
         for (const file of files) {
           if (file instanceof File) {
-            fd.append("files", file);
+            fd.append('files', file);
           } else {
             finalFiles.push(file);
           }
         }
-        if (fd.has("files")) {
+        if (fd.has('files')) {
           const res = await uploadMultipleApi.post(fd);
           finalFiles.push(...res.paths);
         }
@@ -345,9 +417,9 @@ const Form = <T extends {}>({
     }
 
     const res = await submitApi.post({ formData: finalFormData });
-    if(!res) { 
-      setSaving(false); 
-      return; 
+    if (!res) {
+      setSaving(false);
+      return;
     }
     toast.success(toastMsg);
     setErrors({});
@@ -358,44 +430,51 @@ const Form = <T extends {}>({
   const renderField = (field: FormField) => {
     const fieldError = getValue(errors, field.name);
     const fieldValue = getValue(formData, field.name);
-    if(!(field.renderCondition?.(formData) ?? true)) return;
+    if (!(field.renderCondition?.(formData) ?? true)) return;
 
     switch (field.type) {
-      case "textarea":
+      case 'textarea':
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
-            <label htmlFor={field.name} className="text-primary font-semibold text-[1.5rem]">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+            <label
+              htmlFor={field.name}
+              className="text-primary font-semibold text-[1.5rem]"
+            >
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
             </label>
             <textarea
               id={field.name}
               name={field.name}
               rows={field.rows || 4}
-              value={fieldValue ?? ""}
+              value={fieldValue ?? ''}
               ref={(el) => {
-                if (el)
-                  textAreaRefs.current[field.name] = el;
+                if (el) textAreaRefs.current[field.name] = el;
               }}
               onChange={handleInputChange}
               className="text-black font-semibold p-2 bg-white overflow-hidden resize-none disabled:bg-gray-400"
               placeholder={field.placeholder}
               disabled={field.disabled}
             />
-            {fieldError && (
-              <p className="text-red-500">{fieldError}</p>
-            )}
+            {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
         );
 
-      case "select": {
+      case 'select': {
         const curStart = getValue(visibleStart, field.name) ?? 0;
         const curActive = getValue(activeIndex, field.name) ?? 0;
-        const selectedLabel = field.options?.find(opt => opt.value === fieldValue)?.label;
+        const selectedLabel = field.options?.find(
+          (opt) => opt.value === fieldValue,
+        )?.label;
         const searchValue = getValue(activeOption, field.name);
         return (
           <div key={field.name} className="w-full relative flex flex-col gap-3">
-            <label htmlFor={field.name} className="text-primary font-semibold text-[1.5rem]">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+            <label
+              htmlFor={field.name}
+              className="text-primary font-semibold text-[1.5rem]"
+            >
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
             </label>
             <input
               className="text-black w-1/2 font-semibold bg-white p-2 overflow-hidden resize-none disabled:bg-gray-400"
@@ -404,28 +483,27 @@ const Form = <T extends {}>({
               disabled={field.disabled}
               name={field.name}
               ref={(el) => {
-                if (el)
-                  optionRefs.current[field.name] = el;
+                if (el) optionRefs.current[field.name] = el;
               }}
               autoComplete="off"
               onKeyDown={(e) => handleKeyDown(e, field.name, field.type)}
               onFocus={(e) => {
-                setShowOptions(prev => setValue(prev, field.name, true));
+                setShowOptions((prev) => setValue(prev, field.name, true));
                 e.target.select();
               }}
               onBlur={() => {
-                setShowOptions(prev => setValue(prev, field.name, false));
-                setActiveOption(prev => setValue(prev, field.name, null));
-                setActiveIndex(prev => setValue(prev, field.name, 0));
-                setVisibleStart(prev => setValue(prev, field.name, 0));
+                setShowOptions((prev) => setValue(prev, field.name, false));
+                setActiveOption((prev) => setValue(prev, field.name, null));
+                setActiveIndex((prev) => setValue(prev, field.name, 0));
+                setVisibleStart((prev) => setValue(prev, field.name, 0));
               }}
-              value={searchValue ?? (fieldValue ? selectedLabel ?? "" : "")}
+              value={searchValue ?? (fieldValue ? (selectedLabel ?? '') : '')}
               onChange={(e) => handleOptionChange(e, field.name)}
               placeholder={field.placeholder}
             />
             <div
               className={`bg-white w-1/2 flex flex-col items-center justify-center absolute top-full z-10
-                ${getValue(showOptions, field.name) ? "visible" : "hidden"}`}
+                ${getValue(showOptions, field.name) ? 'visible' : 'hidden'}`}
             >
               {getValue(allowedOptions, field.name)
                 ?.slice(curStart, curStart + pageSize)
@@ -435,7 +513,7 @@ const Form = <T extends {}>({
                     <div
                       key={globalIndex}
                       className={`w-full flex items-center justify-center cursor-pointer hover:bg-primary
-                        ${globalIndex === curActive ? "bg-primary" : ""}`}
+                        ${globalIndex === curActive ? 'bg-primary' : ''}`}
                       onMouseDown={(e) => {
                         e.preventDefault();
                         handleSelectOption(field.name, option, field.type);
@@ -446,42 +524,50 @@ const Form = <T extends {}>({
                   );
                 })}
             </div>
-            {fieldError && (
-              <p className="text-red-500">{fieldError}</p>
-            )}
+            {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
         );
       }
 
-      case "date":
+      case 'date':
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
-            <label className="text-primary font-semibold text-[1.5rem]" htmlFor={field.name}>
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+            <label
+              className="text-primary font-semibold text-[1.5rem]"
+              htmlFor={field.name}
+            >
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
             </label>
             <input
               className={`text-black font-semibold p-2 cursor-pointer bg-white disabled:bg-gray-400`}
               type="date"
               id={field.name}
               name={field.name}
-              value={fieldValue?.toString() ?? ""}
+              value={fieldValue?.toString() ?? ''}
               onChange={handleInputChange}
             />
             {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
         );
 
-      case "file":
+      case 'file':
         const singleFileVal = fieldValue || null;
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
-            <label className="text-primary font-semibold text-[1.5rem]" htmlFor={field.name}>
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+            <label
+              className="text-primary font-semibold text-[1.5rem]"
+              htmlFor={field.name}
+            >
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
             </label>
             <label htmlFor={field.name} className="w-fit">
-              <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
+              <div
+                className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
                 justify-center border-3 border-solid border-primary  
-                ${field.disabled ? "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
+                ${field.disabled ? 'bg-white/70 cursor-not-allowed' : 'bg-white hover:bg-white/70 cursor-pointer'}`}
+              >
                 <FaUpload />
                 <p>Upload File</p>
               </div>
@@ -491,7 +577,7 @@ const Form = <T extends {}>({
               type="file"
               id={field.name}
               name={field.name}
-              accept={field.accept ?? "*"}
+              accept={field.accept ?? '*'}
               onChange={handleInputChange}
               disabled={field.disabled}
             />
@@ -499,27 +585,32 @@ const Form = <T extends {}>({
               <div className="w-1/2 border-2 border-solid border-white flex">
                 <img
                   className="w-full aspect-square object-cover object-center"
-                  src={singleFileVal instanceof File ? URL.createObjectURL(singleFileVal) : `${BASE_URL}${singleFileVal}`}
+                  src={
+                    singleFileVal instanceof File
+                      ? URL.createObjectURL(singleFileVal)
+                      : `${BASE_URL}${singleFileVal}`
+                  }
                   alt="Preview"
                 />
               </div>
             )}
-            {fieldError && (
-              <p className="text-red-500">{fieldError}</p>
-            )}
+            {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
         );
 
-      case "files":
+      case 'files':
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label className="text-primary font-semibold text-[1.5rem]">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
             </label>
             <label htmlFor={field.name} className="w-fit">
-              <div className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
+              <div
+                className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
                 justify-center border-3 border-solid border-primary  
-                ${field.disabled ? "bg-white/70 cursor-not-allowed" : "bg-white hover:bg-white/70 cursor-pointer"}`}>
+                ${field.disabled ? 'bg-white/70 cursor-not-allowed' : 'bg-white hover:bg-white/70 cursor-pointer'}`}
+              >
                 <FaUpload />
                 <p>Upload Files</p>
               </div>
@@ -527,15 +618,15 @@ const Form = <T extends {}>({
             <input
               className="hidden"
               type="file"
-              accept={field.accept ?? "*"}
+              accept={field.accept ?? '*'}
               id={field.name}
               name={field.name}
               multiple
               onChange={handleFileChange}
             />
             <div className="flex flex-wrap text-white">
-              {
-                fieldValue?.length > 0 && fieldValue.map((file: File | string, index: number) => {
+              {fieldValue?.length > 0 &&
+                fieldValue.map((file: File | string, index: number) => {
                   const isFile = file instanceof File;
                   const fileUrl = isFile
                     ? URL.createObjectURL(file)
@@ -544,27 +635,28 @@ const Form = <T extends {}>({
                   const fileType = isFile
                     ? file.type
                     : file.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)
-                      ? "image"
-                      : "other";
+                      ? 'image'
+                      : 'other';
                   return (
-                    <div className="w-1/6 border-2 border-solid border-white flex relative" key={index}>
-                      {
-                        fileType.startsWith("image") ? (
-                          <img
-                            className="w-full aspect-square object-cover object-center"
-                            src={fileUrl}
-                            alt={`file-${index}`}
-                          />
-                        ) : (
-                          <iframe
-                            style={{
-                              scrollbarWidth: "none"
-                            }}
-                            className="w-full aspect-square object-cover object-center"
-                            src={`${fileUrl}`}
-                          />
-                        )
-                      }
+                    <div
+                      className="w-1/6 border-2 border-solid border-white flex relative"
+                      key={index}
+                    >
+                      {fileType.startsWith('image') ? (
+                        <img
+                          className="w-full aspect-square object-cover object-center"
+                          src={fileUrl}
+                          alt={`file-${index}`}
+                        />
+                      ) : (
+                        <iframe
+                          style={{
+                            scrollbarWidth: 'none',
+                          }}
+                          className="w-full aspect-square object-cover object-center"
+                          src={`${fileUrl}`}
+                        />
+                      )}
                       {
                         <MdCancel
                           className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
@@ -572,34 +664,40 @@ const Form = <T extends {}>({
                         />
                       }
                     </div>
-                  )
-                })
-              }
+                  );
+                })}
             </div>
             {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
-        )
+        );
 
-      case "radio":
-        const currentRadioValue = fieldValue !== undefined
-          ? fieldValue
-          : field.defaultValue;
+      case 'radio':
+        const currentRadioValue =
+          fieldValue !== undefined ? fieldValue : field.defaultValue;
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label className="text-primary font-semibold text-[1.5rem]">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
             </label>
 
             <div className="flex gap-10">
               {field.options?.map((option) => (
-                <label key={option.value} className="text-white text-[1.5rem] cursor-pointer" htmlFor={`${field.name}-${option.value}`}>
+                <label
+                  key={option.value}
+                  className="text-white text-[1.5rem] cursor-pointer"
+                  htmlFor={`${field.name}-${option.value}`}
+                >
                   <input
                     className="cursor-pointer"
                     type="radio"
                     id={`${field.name}-${option.value}`}
                     name={field.name}
                     value={option.value}
-                    checked={currentRadioValue === option.value || String(currentRadioValue) === String(option.value)}
+                    checked={
+                      currentRadioValue === option.value ||
+                      String(currentRadioValue) === String(option.value)
+                    }
                     onChange={handleInputChange}
                     disabled={field.disabled}
                   />
@@ -607,23 +705,25 @@ const Form = <T extends {}>({
                 </label>
               ))}
             </div>
-            {fieldError && (
-              <p className="text-red-500">{fieldError}</p>
-            )}
+            {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
         );
 
-      case "number":
+      case 'number':
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
-            <label htmlFor={field.name} className="text-primary font-semibold text-[1.5rem]">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+            <label
+              htmlFor={field.name}
+              className="text-primary font-semibold text-[1.5rem]"
+            >
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
             </label>
             <input
               type="number"
               id={field.name}
               name={field.name}
-              value={fieldValue || ""}
+              value={fieldValue || ''}
               onChange={handleInputChange}
               className="text-black font-semibold p-2 disabled:bg-gray-400"
               placeholder={field.placeholder}
@@ -631,33 +731,43 @@ const Form = <T extends {}>({
               min={field.minValue}
               max={field.maxValue}
             />
-            {fieldError && (
-              <p className="text-red-500">{fieldError}</p>
-            )}
+            {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
         );
 
-      case "multi-select": {
+      case 'multi-select': {
         const curStart = getValue(visibleStart, field.name) ?? 0;
         const curActive = getValue(activeIndex, field.name) ?? 0;
         return (
           <div key={field.name} className="w-full relative flex flex-col gap-3">
-            <label htmlFor={field.name} className="text-primary font-semibold text-[1.5rem]">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+            <label
+              htmlFor={field.name}
+              className="text-primary font-semibold text-[1.5rem]"
+            >
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
             </label>
             <div className="w-full flex gap-1 flex-wrap">
-              {
-                fieldValue.length > 0 && (fieldValue as (string | number)[]).map((option, index) => (
-                  <div key={index} className="text-white max-w-full flex items-center justify-evenly gap-1 bg-gray-600 px-2 rounded-lg">
-                    <p className="max-w-full wrap-break-word">{field.options?.find(opt => opt.value === option)?.label}</p>
+              {fieldValue.length > 0 &&
+                (fieldValue as (string | number)[]).map((option, index) => (
+                  <div
+                    key={index}
+                    className="text-white max-w-full flex items-center justify-evenly gap-1 bg-gray-600 px-2 rounded-lg"
+                  >
+                    <p className="max-w-full wrap-break-word">
+                      {
+                        field.options?.find((opt) => opt.value === option)
+                          ?.label
+                      }
+                    </p>
                     {
                       <MdCancel
                         className="fill-gray-400 cursor-pointer hover:fill-white"
-                        onClick={() => handleRemoveOption(field.name, index)} />
+                        onClick={() => handleRemoveOption(field.name, index)}
+                      />
                     }
                   </div>
-                ))
-              }
+                ))}
             </div>
             <input
               className="text-black w-1/2 font-semibold bg-white p-2 overflow-hidden resize-none disabled:bg-gray-400"
@@ -666,19 +776,22 @@ const Form = <T extends {}>({
               disabled={field.disabled}
               name={field.name}
               ref={(el) => {
-                if (el)
-                  optionRefs.current[field.name] = el;
+                if (el) optionRefs.current[field.name] = el;
               }}
               autoComplete="off"
               onKeyDown={(e) => handleKeyDown(e, field.name, field.type)}
-              onFocus={() => setShowOptions(prev => setValue(prev, field.name, true))}
-              onBlur={() => setShowOptions(prev => setValue(prev, field.name, false))}
-              value={getValue(activeOption,field.name) ?? ""}
+              onFocus={() =>
+                setShowOptions((prev) => setValue(prev, field.name, true))
+              }
+              onBlur={() =>
+                setShowOptions((prev) => setValue(prev, field.name, false))
+              }
+              value={getValue(activeOption, field.name) ?? ''}
               onChange={(e) => handleOptionChange(e, field.name)}
             />
             <div
               className={`bg-white w-1/2 flex flex-col items-center justify-center absolute top-full z-10 
-                ${getValue(showOptions, field.name) ? "visible" : "hidden"}`}
+                ${getValue(showOptions, field.name) ? 'visible' : 'hidden'}`}
             >
               {getValue(allowedOptions, field.name)
                 ?.slice(curStart, curStart + pageSize)
@@ -688,10 +801,10 @@ const Form = <T extends {}>({
                     <div
                       key={globalIndex}
                       className={`w-full flex items-center justify-center cursor-pointer hover:bg-primary
-                        ${globalIndex === curActive ? "bg-primary" : ""}`}
+                        ${globalIndex === curActive ? 'bg-primary' : ''}`}
                       onMouseDown={(e) => {
                         e.preventDefault();
-                        handleSelectOption(field.name, option, field.type)
+                        handleSelectOption(field.name, option, field.type);
                       }}
                     >
                       {option.label}
@@ -700,28 +813,30 @@ const Form = <T extends {}>({
                 })}
             </div>
           </div>
-        )
+        );
       }
 
       default:
         return (
           <div key={field.name} className="flex flex-col w-full gap-3">
-            <label htmlFor={field.name} className="text-primary font-semibold text-[1.5rem]">
-              {field.label} {field.required && <span className="text-red-500">*</span>}
+            <label
+              htmlFor={field.name}
+              className="text-primary font-semibold text-[1.5rem]"
+            >
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
             </label>
             <input
               type={field.type}
               id={field.name}
               name={field.name}
-              value={fieldValue || ""}
+              value={fieldValue || ''}
               onChange={handleInputChange}
               className={`text-black font-semibold bg-white p-2 disabled:bg-gray-400`}
               placeholder={field.placeholder}
               disabled={field.disabled}
             />
-            {fieldError && (
-              <p className="text-red-500">{fieldError}</p>
-            )}
+            {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
         );
     }
@@ -732,15 +847,13 @@ const Form = <T extends {}>({
       ref={formRef}
       onSubmit={handleSubmit}
       className={cn(
-        "w-4/5 md:w-2/3 lg:w-1/2 flex flex-col gap-20 mx-auto py-10 justify-center", 
-        className
+        'w-4/5 md:w-2/3 lg:w-1/2 flex flex-col gap-20 mx-auto py-10 justify-center',
+        className,
       )}
     >
-      {fields.map(field => renderField(field) )}
+      {fields.map((field) => renderField(field))}
 
-      {error && (
-        <p className="text-red-500">{error}</p>
-      )}
+      {error && <p className="text-red-500">{error}</p>}
 
       <Button
         content={submitText}

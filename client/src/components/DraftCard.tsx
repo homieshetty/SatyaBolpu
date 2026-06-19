@@ -1,6 +1,6 @@
-import { BaseCardProps } from "../types/globals";
-import { RiEdit2Fill } from "react-icons/ri";
-import { MdDelete } from "react-icons/md";
+import { BaseCardProps } from '../types/globals';
+import { RiEdit2Fill } from 'react-icons/ri';
+import { MdDelete } from 'react-icons/md';
 
 export type DraftCardProps = BaseCardProps & {
   title: string;
@@ -14,7 +14,13 @@ export const DraftSkeletonCard = () => (
   </div>
 );
 
-const DraftCard = ({ id, title, type, handleEdit, handleDelete }: DraftCardProps) => {
+const DraftCard = ({
+  id,
+  title,
+  type,
+  handleEdit,
+  handleDelete,
+}: DraftCardProps) => {
   return (
     <div
       className="w-[90%] lg:w-1/2 flex items-center justify-between p-4 px-6
@@ -22,7 +28,9 @@ const DraftCard = ({ id, title, type, handleEdit, handleDelete }: DraftCardProps
         hover:border-primary/30 hover:bg-white/[0.07] transition-all duration-300"
     >
       <div className="flex items-center gap-3">
-        <span className="text-primary font-bold text-lg">{title || "Untitled Draft"}</span>
+        <span className="text-primary font-bold text-lg">
+          {title || 'Untitled Draft'}
+        </span>
         {type && (
           <span className="text-white/40 text-xs uppercase tracking-wider bg-white/5 px-2 py-0.5 rounded">
             {type}

@@ -1,19 +1,33 @@
-import { CSSProperties, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { MdOutlineMenu } from "react-icons/md";
-import { MdOutlineHorizontalRule } from "react-icons/md";
-import { useAuth } from "../context/AuthContext";
-import { CgProfile } from "react-icons/cg";
-import { IoIosArrowDropdownCircle } from "react-icons/io";
+import {
+  CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
+import { MdOutlineMenu } from 'react-icons/md';
+import { MdOutlineHorizontalRule } from 'react-icons/md';
+import { useAuth } from '../context/AuthContext';
+import { CgProfile } from 'react-icons/cg';
+import { IoIosArrowDropdownCircle } from 'react-icons/io';
 
-const AuthLinks = ({ extraClass = "", pathname, onCloseMenu }: { extraClass?: string; pathname: string; onCloseMenu: () => void }) => {
+const AuthLinks = ({
+  extraClass = '',
+  pathname,
+  onCloseMenu,
+}: {
+  extraClass?: string;
+  pathname: string;
+  onCloseMenu: () => void;
+}) => {
   const { state } = useAuth();
 
   if (!state.token) {
     return (
       <div
-        className={`flex rounded-3xl overflow-hidden cursor-pointer text-sm p-0.75 sm:p-0 sm:text-xl
-          ${pathname !== "/" ? "bg-white text-black" : "bg-black text-white"}
+        className={`flex rounded-3xl overflow-hidden cursor-pointer text-sm sm:text-xl
+          ${pathname !== '/' ? 'bg-white text-black' : 'bg-black text-white'}
           ${extraClass}`}
       >
         <NavLink to="/login" className="hover:bg-primary p-1 sm:p-2">
@@ -28,17 +42,23 @@ const AuthLinks = ({ extraClass = "", pathname, onCloseMenu }: { extraClass?: st
 
   return (
     <NavLink
-      to={"/profile"}
+      to={'/profile'}
       onClick={onCloseMenu}
       className={`text-[2rem] cursor-pointer hover:text-primary hover:scale-110
-        transition-all duration-200 ${pathname === "/profile" ? "text-primary" : ""}`}
+        transition-all duration-200 ${pathname === '/profile' ? 'text-primary' : ''}`}
     >
       <CgProfile />
     </NavLink>
   );
 };
 
-const NavLinks = ({ pathname, onCloseMenu }: { pathname: string; onCloseMenu: () => void }) => {
+const NavLinks = ({
+  pathname,
+  onCloseMenu,
+}: {
+  pathname: string;
+  onCloseMenu: () => void;
+}) => {
   const { state } = useAuth();
 
   return (
@@ -47,8 +67,8 @@ const NavLinks = ({ pathname, onCloseMenu }: { pathname: string; onCloseMenu: ()
        lg:flex-row items-center justify-center h-screen lg:h-auto gap-5`}
     >
       <NavLink
-        style={{ textShadow: "1px 1px 6px black" }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/" ? "text-primary" : ""}`}
+        style={{ textShadow: '1px 1px 6px black' }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/' ? 'text-primary' : ''}`}
         to="/"
         onClick={onCloseMenu}
       >
@@ -56,35 +76,35 @@ const NavLinks = ({ pathname, onCloseMenu }: { pathname: string; onCloseMenu: ()
       </NavLink>
       {state.token && (
         <NavLink
-          style={{ textShadow: "1px 1px 6px black" }}
-          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/dashboard" ? "text-primary" : ""}`}
+          style={{ textShadow: '1px 1px 6px black' }}
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/dashboard' ? 'text-primary' : ''}`}
           to="/dashboard"
           onClick={onCloseMenu}
         >
           Dashboard
         </NavLink>
       )}
-      {state.token && state.user?.role === "admin" && (
+      {state.token && (
         <NavLink
-          style={{ textShadow: "1px 1px 6px black" }}
-          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/add" ? "text-primary" : ""}`}
-          to="/add"
+          style={{ textShadow: '1px 1px 6px black' }}
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/create' ? 'text-primary' : ''}`}
+          to="/create"
           onClick={onCloseMenu}
         >
-          Add
+          Create
         </NavLink>
       )}
       <NavLink
-        style={{ textShadow: "1px 1px 6px black" }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/explore" ? "text-primary" : ""}`}
+        style={{ textShadow: '1px 1px 6px black' }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/explore' ? 'text-primary' : ''}`}
         to="/explore"
         onClick={onCloseMenu}
       >
         Explore
       </NavLink>
       <NavLink
-        style={{ textShadow: "1px 1px 6px black" }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === "/map" ? "text-primary" : ""}`}
+        style={{ textShadow: '1px 1px 6px black' }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/map' ? 'text-primary' : ''}`}
         to="/map"
         onClick={onCloseMenu}
       >
@@ -95,61 +115,61 @@ const NavLinks = ({ pathname, onCloseMenu }: { pathname: string; onCloseMenu: ()
 };
 
 const Navbar = () => {
-  const [isCollapsed,setCollapsed] = useState<boolean>(false);
+  const [isCollapsed, setCollapsed] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const navbarRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
-  const [navbarStyles,setNavbarStyles] = useState<CSSProperties>({
-    position: "relative",
-    backgroundColor: "black",
+  const [navbarStyles, setNavbarStyles] = useState<CSSProperties>({
+    position: 'relative',
+    backgroundColor: 'black',
   });
 
   useLayoutEffect(() => {
-    if(pathname === "/") {
+    if (pathname === '/') {
       setNavbarStyles({
-        position: "fixed",
-        backgroundColor: "transparent",
-      })
+        position: 'fixed',
+        backgroundColor: 'transparent',
+      });
     } else {
       setNavbarStyles({
-        position: "relative",
-        backgroundColor: "black",
-      })
+        position: 'relative',
+        backgroundColor: 'black',
+      });
     }
-  },[pathname]);
+  }, [pathname]);
 
   useEffect(() => {
-    if(!navbarRef.current) return;
+    if (!navbarRef.current) return;
 
-    if(pathname !== "/") {
+    if (pathname !== '/') {
       setCollapsed(false);
       return;
-    };
+    }
 
     const handleScroll = () => {
-      if(window.scrollY > 30) {
+      if (window.scrollY > 30) {
         setCollapsed(true);
       } else {
         setCollapsed(false);
       }
-    }
-    
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [navbarRef, pathname]);
 
   useEffect(() => {
     if (isMenuOpen) {
-      document.body.style.height = "100vh";
-      document.body.style.overflow = "hidden";
+      document.body.style.height = '100vh';
+      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflowY = "auto";
+      document.body.style.overflowY = 'auto';
     }
 
     return () => {
-      document.body.style.height = "";
-      document.body.style.overflowY = "";
+      document.body.style.height = '';
+      document.body.style.overflowY = '';
     };
   }, [isMenuOpen]);
 
@@ -157,22 +177,28 @@ const Navbar = () => {
     <>
       <nav
         className={`z-9999 text-white w-screen flex p-3 md:p-7 items-center justify-between transition-transform duration-500
-          ${isCollapsed ? "-translate-y-full" : "translate-y-0"}`}
+          ${isCollapsed ? '-translate-y-full' : 'translate-y-0'}`}
         style={navbarStyles}
         ref={navbarRef}
       >
         <div className="flex gap-1 md:gap-2 items-center justify-center">
           <NavLink to="/">
-            <img src="/assets/logoen.png" alt="logo" className="logo w-10 sm:w-14 aspect-square" />
+            <img
+              src="/assets/logoen.png"
+              alt="logo"
+              className="logo w-10 sm:w-14 aspect-square"
+            />
           </NavLink>
-          <NavLink to="/" style={{ textShadow: "1px 1px 6px black" }}>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">SatyaBolpu</h1>
+          <NavLink to="/" style={{ textShadow: '1px 1px 6px black' }}>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
+              SatyaBolpu
+            </h1>
           </NavLink>
         </div>
 
         <div className="flex gap-1 sm:gap-3 font-semibold items-center justify-center">
           <div className="lg:hidden">
-            <AuthLinks 
+            <AuthLinks
               pathname={pathname}
               onCloseMenu={() => setIsMenuOpen(false)}
             />
@@ -194,12 +220,15 @@ const Navbar = () => {
         </div>
 
         <div className="hidden links lg:flex gap-5 font-semibold items-center justify-center text-xl">
-          <NavLinks pathname={pathname} onCloseMenu={() => setIsMenuOpen(false)} />
+          <NavLinks
+            pathname={pathname}
+            onCloseMenu={() => setIsMenuOpen(false)}
+          />
           <AuthLinks
             pathname={pathname}
             onCloseMenu={() => setIsMenuOpen(false)}
             extraClass={`hidden lg:flex ${
-              pathname !== "/" ? "bg-white text-black" : "bg-black text-white"
+              pathname !== '/' ? 'bg-white text-black' : 'bg-black text-white'
             }`}
           />
         </div>
@@ -208,28 +237,31 @@ const Navbar = () => {
       <div
         className={`links lg:hidden text-xl font-semibold text-white text-center bg-black w-screen
             overflow-hidden flex flex-col items-center justify-center gap-3 fixed top-0 right-0 z-9998
-            transition-all duration-500 ${isMenuOpen ? "h-screen" : "h-0"}`}
+            transition-all duration-500 ${isMenuOpen ? 'h-screen' : 'h-0'}`}
         ref={menuRef}
       >
-        <NavLinks pathname={pathname} onCloseMenu={() => setIsMenuOpen(false)} />
+        <NavLinks
+          pathname={pathname}
+          onCloseMenu={() => setIsMenuOpen(false)}
+        />
       </div>
 
-      {
-        isCollapsed &&
-          <div
-            className='fixed bg-primary h-4 z-9999 flex justify-center'
-            style={{
-              width: 'calc(100% + 8px)'
-            }}
-            onClick={() => setCollapsed(false)}
-          >
-            <IoIosArrowDropdownCircle size={"30px"} className="bg-primary rounded-full cursor-pointer"/>
-          </div>
-      }
-
+      {isCollapsed && (
+        <div
+          className="fixed bg-primary h-4 z-9999 flex justify-center"
+          style={{
+            width: 'calc(100% + 8px)',
+          }}
+          onClick={() => setCollapsed(false)}
+        >
+          <IoIosArrowDropdownCircle
+            size={'30px'}
+            className="bg-primary rounded-full cursor-pointer"
+          />
+        </div>
+      )}
     </>
   );
 };
 
 export default Navbar;
-

@@ -21,7 +21,10 @@ import Drafts from "./pages/Admin/Drafts"
 import Others from "./pages/Admin/Others"
 import Events from "./pages/Events"
 import Blogs from "./pages/Blogs"
-import Add from "./pages/Admin/Add"
+import Create from "./pages/Create"
+import Contact from "./pages/Contact"
+import About from "./pages/About"
+import FAQ from "./pages/FAQ"
 import New from "./pages/Admin/New"
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -81,17 +84,20 @@ function App() {
         <Route path="/posts/:postId" element={<Post />} />
         <Route path="/events" element={<Events />} />
         <Route path="/blogs" element={<Blogs />} />
-        <Route path="/add" element={<Add />} />
-        <Route path="/add/others" element={<Others />} />
-        <Route path="/add/draft" element={<Drafts />} />
-        <Route path="/add/post/:id" element={<New type="post" />} />
-        <Route path="/add/culture/:id" element={<New type="culture" />} />
-        <Route path="/add/event/:id" element={<New type="event" />} />
-        <Route path="/add/location/:id" element={<New type="location" />} />
-        <Route path="/add/tag" element={<New type="tag" />} />
-        <Route path="/add/post-type" element={<New type="post-type" />} />
-        <Route path="/add/post-group" element={<New type="post-group" />} />
+        <Route path="/create" element={<Create />} />
+        <Route path="/create/others" element={<Others />} />
+        <Route path="/create/draft" element={<Drafts />} />
+        <Route path="/create/post/:id" element={<New type="post" />} />
+        <Route path="/create/culture/:id" element={<New type="culture" />} />
+        <Route path="/create/event/:id" element={<New type="event" />} />
+        <Route path="/create/location/:id" element={<New type="location" />} />
+        <Route path="/create/tag" element={<New type="tag" />} />
+        <Route path="/create/post-type" element={<New type="post-type" />} />
+        <Route path="/create/post-group" element={<New type="post-group" />} />
         <Route path="/map" element={<Map />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/faq" element={<FAQ />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

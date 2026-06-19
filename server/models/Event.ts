@@ -1,59 +1,72 @@
-import mongoose, { Schema } from "mongoose";
-import { IDuration, IEvent } from "../types/globals.js";
-import { Culture } from "./Culture.js";
-import { Location } from "./Location.js";
-import { User } from "./User.js";
-import { validateExistence } from "../utils/db.js";
+import mongoose, { Schema } from 'mongoose';
+import { IDuration, IEvent } from '../types/globals.js';
+import { Culture } from './Culture.js';
+import { Location } from './Location.js';
+import { User } from './User.js';
+import { validateExistence } from '../utils/db.js';
 
 export const durationSchema = new Schema<IDuration>({
   start: {
     type: Date,
-    required: true
+    required: true,
   },
   end: {
     type: Date,
-    required: true
-  }
+    required: true,
+  },
 });
 
-const eventSchema = new Schema<IEvent>({
-  userId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    validate: validateExistence(User)
+const eventSchema = new Schema<IEvent>(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      validate: validateExistence(User),
+    },
+    title: {
+      type: String,
+      minLength: 5,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    culture: {
+      type: Schema.Types.ObjectId,
+      ref: 'Culture',
+      required: true,
+      validate: validateExistence(Culture),
+    },
+    duration: {
+      type: durationSchema,
+      required: true,
+    },
+    coverImage: {
+      type: String,
+    },
+    files: {
+      type: [String],
+    },
+    location: {
+      type: Schema.Types.ObjectId,
+      ref: 'Location',
+      required: true,
+      validate: validateExistence(Location),
+    },
+    likes: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    comments: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
   },
-  title: {
-    type: String,
-    minLength: 5,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  culture: {
-    type: Schema.Types.ObjectId,
-    ref: "Culture",
-    required: true,
-    validate: validateExistence(Culture)
-  },
-  duration: {
-    type: durationSchema,
-    required: true
-  },
-  coverImage: {
-    type: String
-  },
-  files: {
-    type: [String]
-  },
-  location: {
-    type: Schema.Types.ObjectId,
-    ref: "Location",
-    required: true,
-    validate: validateExistence(Location)
-  }
-}, { timestamps: true });
+  { timestamps: true },
+);
 
-export const Event = mongoose.model<IEvent>("Event", eventSchema);
+export const Event = mongoose.model<IEvent>('Event', eventSchema);

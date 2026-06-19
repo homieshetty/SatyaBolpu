@@ -1,33 +1,33 @@
-import { FaHashtag } from "react-icons/fa6";
-import { Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import Title from "../../components/Title";
-import { VscGroupByRefType, VscTypeHierarchySub } from "react-icons/vsc";
+import { FaHashtag } from 'react-icons/fa6';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import Title from '../../components/Title';
+import { VscGroupByRefType, VscTypeHierarchySub } from 'react-icons/vsc';
 
 const cards = [
   {
-    label: "Tag",
-    desc: "Organize content with labels",
+    label: 'Tag',
+    desc: 'Organize content with labels',
     icon: FaHashtag,
-    path: "/add/tag",
-    accent: "from-cyan-500/20 to-cyan-600/5",
-    iconColor: "text-cyan-400",
+    path: '/create/tag',
+    accent: 'from-cyan-500/20 to-cyan-600/5',
+    iconColor: 'text-cyan-400',
   },
   {
-    label: "Post Type",
-    desc: "Define categories for posts",
+    label: 'Post Type',
+    desc: 'Define categories for posts',
     icon: VscTypeHierarchySub,
-    path: "/add/post-type",
-    accent: "from-lime-500/20 to-lime-600/5",
-    iconColor: "text-lime-400",
+    path: '/create/post-type',
+    accent: 'from-lime-500/20 to-lime-600/5',
+    iconColor: 'text-lime-400',
   },
   {
-    label: "Post Group",
-    desc: "Cluster related posts together",
+    label: 'Post Group',
+    desc: 'Cluster related posts together',
     icon: VscGroupByRefType,
-    path: "/add/post-group",
-    accent: "text-fuchsia-500/20 to-fuchsia-600/5",
-    iconColor: "text-fuchsia-400",
+    path: '/create/post-group',
+    accent: 'text-fuchsia-500/20 to-fuchsia-600/5',
+    iconColor: 'text-fuchsia-400',
   },
 ];
 
@@ -36,8 +36,8 @@ const Others = () => {
 
   const { state: authState } = useAuth();
 
-  if (!authState.token || authState.user?.role !== "admin")
-    return <Navigate to={"/404"} replace />;
+  if (!authState.token || authState.user?.role !== 'admin')
+    return <Navigate to={'/404'} replace />;
 
   return (
     <div className="w-screen min-h-screen py-20 flex flex-col items-center">
@@ -48,7 +48,7 @@ const Others = () => {
           <div
             key={label}
             className={`group relative flex flex-col items-center justify-center gap-3
-              bg-gradient-to-br ${accent} border border-white/10 rounded-2xl p-8
+              bg-linear-to-br ${accent} border border-white/10 rounded-2xl p-8
               cursor-pointer hover:border-primary/50 hover:scale-[1.03] hover:shadow-lg hover:shadow-primary/10
               transition-all duration-300`}
             onClick={() => navigate(path)}

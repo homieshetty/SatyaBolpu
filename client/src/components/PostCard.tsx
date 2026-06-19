@@ -1,8 +1,8 @@
-import { useNavigate } from "react-router-dom";
-import { BaseCardProps } from "../types/globals";
-import { BASE_URL } from "../App";
-import { RiEdit2Fill } from "react-icons/ri";
-import { useAuth } from "../context/AuthContext";
+import { useNavigate } from 'react-router-dom';
+import { BaseCardProps } from '../types/globals';
+import { BASE_URL } from '../App';
+import { RiEdit2Fill } from 'react-icons/ri';
+import { useAuth } from '../context/AuthContext';
 
 export type PostCardProps = BaseCardProps & {
   title: string;
@@ -21,7 +21,13 @@ export const PostSkeletonCard = () => (
   </div>
 );
 
-const PostCard = ({ id, title, description, coverImage, handleEdit }: PostCardProps) => {
+const PostCard = ({
+  id,
+  title,
+  description,
+  coverImage,
+  handleEdit,
+}: PostCardProps) => {
   const navigate = useNavigate();
   const { state: authState } = useAuth();
 
@@ -38,20 +44,23 @@ const PostCard = ({ id, title, description, coverImage, handleEdit }: PostCardPr
           alt={title}
         />
       </div>
-      <div className="w-[60%] p-6 flex flex-col gap-4 justify-center bg-gradient-to-br from-white/5 to-transparent">
+      <div className="w-[60%] p-6 flex flex-col gap-4 justify-center bg-linear-to-br from-white/5 to-transparent">
         <h1 className="text-primary text-xl font-bold">{title}</h1>
-        <p
-          className="text-white/70 text-sm leading-relaxed line-clamp-4"
-        >
+        <p className="text-white/70 text-sm leading-relaxed line-clamp-4">
           {description}
         </p>
         <div className="flex items-center gap-2">
-          <span className="text-primary text-sm font-semibold group-hover:underline">Read more</span>
-          {authState.user?.role === "admin" && (
+          <span className="text-primary text-sm font-semibold group-hover:underline">
+            Read more
+          </span>
+          {authState.user?.role === 'admin' && (
             <div
               className="border border-primary/30 text-primary rounded-lg p-1.5 hover:bg-primary hover:text-black
                 cursor-pointer transition-all"
-              onClick={(e) => { e.stopPropagation(); handleEdit?.(id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit?.(id);
+              }}
             >
               <RiEdit2Fill className="text-lg" />
             </div>

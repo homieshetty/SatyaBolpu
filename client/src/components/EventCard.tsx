@@ -48,7 +48,7 @@ const EventCard = ({ id, title, description, image, duration, handleEdit }: Even
           alt={title}
         />
       </div>
-      <div className="w-[60%] p-6 flex flex-col gap-3 justify-center bg-gradient-to-br from-white/5 to-transparent">
+      <div className="w-[60%] p-6 flex flex-col gap-3 justify-center bg-linear-to-br from-white/5 to-transparent">
         <h1 className="text-primary text-xl font-bold">{title}</h1>
         {duration && (
           <div className="flex items-center gap-2 text-white/50 text-sm">

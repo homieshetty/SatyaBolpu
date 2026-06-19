@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import { BaseCardProps } from "../types/globals";
-import { BASE_URL } from "../App";
+import { useNavigate } from 'react-router-dom';
+import { BaseCardProps } from '../types/globals';
+import { BASE_URL } from '../App';
 
 export type BlogCardProps = BaseCardProps & {
   title: string;
@@ -16,7 +16,7 @@ export type BlogCardProps = BaseCardProps & {
 
 export const BlogSkeletonCard = () => (
   <div className="w-full flex items-center gap-5 bg-white/5 border border-white/10 rounded-2xl p-4 animate-pulse">
-    <div className="w-24 h-24 rounded-xl bg-white/10 flex-shrink-0" />
+    <div className="w-24 h-24 rounded-xl bg-white/10 shrink-0" />
     <div className="flex-1 flex flex-col gap-3">
       <div className="w-3/4 h-6 rounded bg-white/10" />
       <div className="w-full h-4 rounded bg-white/5" />
@@ -29,7 +29,14 @@ export const BlogSkeletonCard = () => (
   </div>
 );
 
-const BlogCard = ({ id, title, subtitle, image, user, createdAt }: BlogCardProps) => {
+const BlogCard = ({
+  id,
+  title,
+  subtitle,
+  image,
+  user,
+  createdAt,
+}: BlogCardProps) => {
   const navigate = useNavigate();
 
   return (
@@ -38,7 +45,7 @@ const BlogCard = ({ id, title, subtitle, image, user, createdAt }: BlogCardProps
         hover:border-primary/30 hover:bg-white/[0.07] transition-all duration-300 cursor-pointer group"
       onClick={() => navigate(id)}
     >
-      <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0">
+      <div className="w-24 h-24 rounded-xl overflow-hidden shrink-0">
         <img
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           src={`${BASE_URL}${image}`}
@@ -56,7 +63,7 @@ const BlogCard = ({ id, title, subtitle, image, user, createdAt }: BlogCardProps
         <div className="flex items-center gap-2 mt-1">
           {user && (
             <>
-              <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 bg-white/10">
+              <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-white/10">
                 {user.image ? (
                   <img
                     className="w-full h-full object-cover"
@@ -69,11 +76,17 @@ const BlogCard = ({ id, title, subtitle, image, user, createdAt }: BlogCardProps
                   </div>
                 )}
               </div>
-              <span className="text-white/40 text-xs truncate">{user.name}</span>
+              <span className="text-white/40 text-xs truncate">
+                {user.name}
+              </span>
             </>
           )}
-          <span className="text-white/30 text-xs ml-auto flex-shrink-0">
-            {new Date(createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+          <span className="text-white/30 text-xs ml-auto shrink-0">
+            {new Date(createdAt).toLocaleDateString('en-IN', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+            })}
           </span>
         </div>
       </div>

@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { PostGroupProps } from "../types/globals";
-import { IoIosArrowDown } from "react-icons/io";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { PostGroupProps } from '../types/globals';
+import { IoIosArrowDown } from 'react-icons/io';
+import { useNavigate } from 'react-router-dom';
 
 export const PostGroupSkeleton = () => {
   return (
     <div className="w-2/3 h-16 bg-gray-400 opacity-50 animate-pulse"></div>
-  )
-}
+  );
+};
 
-const PostGroupCard = ({ name, posts } : PostGroupProps) => {
+const PostGroupCard = ({ name, posts }: PostGroupProps) => {
   const [dropped, setDropped] = useState<boolean>(false);
   const navigate = useNavigate();
 
@@ -20,15 +20,11 @@ const PostGroupCard = ({ name, posts } : PostGroupProps) => {
           p-2 text-[2rem] font-bold cursor-pointer hover:bg-primary hover:text-black relative"
         onClick={() => setDropped(!dropped)}
       >
-        <p
-          className="mx-auto"
-        >
-          {name}
-        </p>
-        <IoIosArrowDown 
+        <p className="mx-auto">{name}</p>
+        <IoIosArrowDown
           className="transition-all absolute right-5"
           style={{
-            rotate: dropped ? "180deg" : "0deg"
+            rotate: dropped ? '180deg' : '0deg',
           }}
         />
       </div>
@@ -36,24 +32,21 @@ const PostGroupCard = ({ name, posts } : PostGroupProps) => {
       <div
         className="transition-all overflow-hidden border border-primary"
         style={{
-          height: dropped ? "auto" : "0"
+          height: dropped ? 'auto' : '0',
         }}
       >
-        {
-          posts.map((post, id) => (
-            <div 
-              className="w-full p-2 cursor-pointer hover:bg-white flex items-center justify-center"
-              key={id}
-              onClick={() => navigate(`/posts/${post.id}`)}
-            >
-              {post.title}
-            </div>
-          ))
-        }
+        {posts.map((post, id) => (
+          <div
+            className="w-full p-2 cursor-pointer hover:bg-white flex items-center justify-center"
+            key={id}
+            onClick={() => navigate(`/posts/${post.id}`)}
+          >
+            {post.title}
+          </div>
+        ))}
       </div>
-
     </div>
   );
-}
+};
 
 export default PostGroupCard;
