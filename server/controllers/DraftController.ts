@@ -3,22 +3,12 @@ import {
   CreateData,
   CreateType,
   AuthRequest,
-  IDraft,
   ILocation,
 } from '../types/globals.js';
 import { validateData } from '../utils/validate.js';
 import { validateForeignFields } from '../utils/validate.js';
-import {
-  CultureDraft,
-  Draft,
-  LocationDraft,
-  PostDraft,
-} from '../models/Draft.js';
+import { Draft } from '../models/Draft.js';
 import { Model } from 'mongoose';
-import { Post } from '../models/Post.js';
-import { Culture } from '../models/Culture.js';
-import { Blog } from '../models/Blog.js';
-import { Location } from '../models/Location.js';
 import { DraftModelMap, ModelMap } from '../utils/constants.js';
 
 const fields = {
@@ -166,7 +156,7 @@ export const getDraft = async (req: Request, res: Response) => {
             ? Object.fromEntries(
                 fieldKeys.map((fieldKey) => [fieldKey, draft[fieldKey]]),
               )
-            : null,
+            : draft[fieldKeys[0]],
         ]),
       ),
     });
@@ -180,33 +170,40 @@ export const updateDraft = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?._id;
     const { id, type, step } = req.params;
-    const { formData } = req.body;
+    const { data }: { data: CreateData } = req.body;
 
     if (!id || !type || !step) {
       return res.status(400).json({ msg: 'Missing required field.' });
+    }
+
+    if (!data) {
+      return res.status(400).json({ msg: 'Missing body.' });
     }
 
     if (!userId) {
       return res.json(404).json({ msg: 'Missing user id.' });
     }
 
-    const data: CreateData = {
-      userId,
-      ...formData,
-    };
-
     const validator = validateData[type as CreateType] as Record<
       string,
-      (data: CreateData) => boolean
+      (
+        data:
+          | CreateData['details']
+          | CreateData['content']
+          | CreateData['location'],
+      ) => boolean
     >;
     if (!validator[step](data)) {
       return res.status(404).json({ msg: 'Validation failed.' });
     }
 
     const foreignValidator = validateForeignFields[type as CreateType] as (
-      data: CreateData,
+      data:
+        | CreateData['details']
+        | CreateData['content']
+        | CreateData['location'],
     ) => Promise<boolean>;
-    if (!(await foreignValidator(data))) {
+    if (data.details && !(await foreignValidator(data))) {
       return res.status(404).json({ msg: 'Foreign validation failed.' });
     }
 
@@ -214,10 +211,20 @@ export const updateDraft = async (req: AuthRequest, res: Response) => {
       return res.json(404).json({ msg: 'Missing draft id.' });
     }
 
+    let finalData = { ...data };
+    if (data.details) {
+      finalData = {
+        userId,
+        ...finalData,
+      } as CreateData & { userId: string };
+    }
     const DraftModel = DraftModelMap[
       type as keyof typeof DraftModelMap
     ] as Model<any>;
-    const draft = await DraftModel.findByIdAndUpdate(id, data, { new: true });
+    const draft = await DraftModel.findByIdAndUpdate(id, finalData, {
+      new: true,
+    });
+
     if (!draft) {
       return res.status(500).json({ msg: 'Error whie updating draft.' });
     }

@@ -187,6 +187,7 @@ const Form = <T extends {}>({
 
     setActiveIndex((prev) => setValue(prev, name, 0));
     setVisibleStart((prev) => setValue(prev, name, 0));
+    setShowOptions((prev) => setValue(prev, name, false));
   };
 
   const handleKeyDown = (
@@ -416,7 +417,11 @@ const Form = <T extends {}>({
       }
     }
 
-    const res = await submitApi.post({ formData: finalFormData });
+    const res = await submitApi.post({
+      data: {
+        details: finalFormData,
+      },
+    });
     if (!res) {
       setSaving(false);
       return;

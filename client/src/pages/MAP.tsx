@@ -1,29 +1,48 @@
-import { MapContainer, TileLayer, GeoJSON, useMap,  Marker } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
-import React, { ChangeEvent, ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { Layer, LeafletMouseEvent, Map, Marker as MarkerType, Polygon, Tooltip } from "leaflet";
-import { GestureHandling } from "leaflet-gesture-handling";
-import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
-import { useLoading } from "../context/LoadingContext";
-import Button from "../components/Button";
-import { MdCancel } from "react-icons/md";
-import { FaMagnifyingGlassLocation } from "react-icons/fa6";
-import { IoMdDoneAll } from "react-icons/io";
-import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
-import { EventState, ILocation, Location, LocationState, PostState } from "../types/globals";
-import { FaLock, FaLockOpen, FaPlus, FaMinus } from "react-icons/fa";
-import { IoLocationSharp } from "react-icons/io5";
+import {
+  MapContainer,
+  TileLayer,
+  GeoJSON,
+  useMap,
+  Marker,
+} from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
+import React, {
+  ChangeEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  Layer,
+  LeafletMouseEvent,
+  Map,
+  Marker as MarkerType,
+  Polygon,
+  Tooltip,
+} from 'leaflet';
+import { GestureHandling } from 'leaflet-gesture-handling';
+import { AiOutlineFullscreen, AiOutlineFullscreenExit } from 'react-icons/ai';
+import { useLoading } from '../context/LoadingContext';
+import Button from '../components/Button';
+import { MdCancel } from 'react-icons/md';
+import { FaMagnifyingGlassLocation } from 'react-icons/fa6';
+import { IoMdDoneAll } from 'react-icons/io';
+import { toast } from 'react-toastify';
+import { useParams } from 'react-router-dom';
+import { ILocation, Location, LocationState, MapProps } from '../types/globals';
+import { FaLock, FaLockOpen, FaPlus, FaMinus } from 'react-icons/fa';
+import { IoLocationSharp } from 'react-icons/io5';
 
 //this is beacuse icons dont load in prod, some bs idk
-import L from "leaflet";
+import L from 'leaflet';
 
-import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
-import markerIcon from "leaflet/dist/images/marker-icon.png";
-import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import useApi from "../hooks/useApi";
-import { validateLocationFields } from "../utils/validate";
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import useApi from '../hooks/useApi';
+import { validateLocationFields } from '../utils/validate';
 
 //the below line is because someone caches something
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -40,8 +59,8 @@ const blueMarker = new L.Icon({
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
-  className: 'marker'
-})
+  className: 'marker',
+});
 
 const orangeMarker = new L.Icon({
   iconUrl: '/assets/Map/orange-marker.png',
@@ -50,7 +69,7 @@ const orangeMarker = new L.Icon({
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
-  className: 'marker'
+  className: 'marker',
 });
 
 type coordinatesErrorType = {
@@ -72,26 +91,22 @@ const MAP = ({
   ref,
   editMode = false,
   state,
-  setState
-}: {
-  minimal?: boolean;
-  children?: ReactNode;
-  ref?: React.RefObject<HTMLDivElement | null>;
-  editMode?: boolean;
-  state?: PostState | EventState | LocationState;
-  setState?: React.Dispatch<React.SetStateAction<EventState | PostState | LocationState>>
-}) => {
+  setState,
+}: MapProps) => {
   const { id } = useParams();
 
   const [map, setMap] = useState<Map | null>(null);
   const [lock, setLock] = useState<boolean>(false);
   const [zoom, setZoom] = useState<number>(MAP_INITIAL_ZOOM);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
-  const [activeVillage, setActiveVillage] = useState<GeoJSON.Feature | null>(null);
+  const [activeVillage, setActiveVillage] = useState<GeoJSON.Feature | null>(
+    null,
+  );
   const [activeLocation, setActiveLocation] = useState<ILocation | null>(null);
   const [newLocation, setNewLocation] = useState<Location | null>(null);
   const [askForCoordinates, setAskForCoordinates] = useState<boolean>(false);
-  const [coordinateErrors, setCoordinateErrors] = useState<coordinatesErrorType>({ lat: "", lng: "" });
+  const [coordinateErrors, setCoordinateErrors] =
+    useState<coordinatesErrorType>({ lat: '', lng: '' });
   const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
   const [existingLocations, setExistingLocations] = useState<ILocation[]>([]);
 
@@ -102,20 +117,26 @@ const MAP = ({
 
   const { startLoading, stopLoading } = useLoading();
 
-  const locationsApi = useApi("/locations?fields=name,coordinates,district,taluk,village", { auto: !minimal });
-  const locationSubmitApi = useApi("/locations", { auto: false });
+  const locationsApi = useApi(
+    '/locations?fields=name,coordinates,district,taluk,village',
+    { auto: !minimal },
+  );
+  const locationSubmitApi = useApi('/drafts//location', { auto: false });
 
   useEffect(() => {
-    if(locationsApi.data) {
+    if (locationsApi.data) {
       setExistingLocations(locationsApi.data.locations);
     }
   }, [locationsApi.data]);
 
   useEffect(() => {
-    markers.current = existingLocations.reduce((acc: any, loc: ILocation) => ({
-      ...acc,
-      [loc.name]: null
-    }), {});
+    markers.current = existingLocations.reduce(
+      (acc: any, loc: ILocation) => ({
+        ...acc,
+        [loc.name]: null,
+      }),
+      {},
+    );
   }, [existingLocations]);
 
   useEffect(() => {
@@ -125,7 +146,7 @@ const MAP = ({
         const response = await fetch(`/assets/Map/${name}.geojson`);
         if (!response.ok) throw new Error(`Failed to fetch ${name}`);
         const data = await response.json();
-        setGeoJsonData(prev => ({ ...prev, [name]: data }));
+        setGeoJsonData((prev) => ({ ...prev, [name]: data }));
       } catch (error) {
         console.error(`Error loading ${name} GeoJSON:`, error);
       } finally {
@@ -134,23 +155,18 @@ const MAP = ({
     };
 
     const geoJsonFiles = minimal
-      ? ["districts"]
-      : ["districts", "dakshina_kannada", "udupi", "kasaragod"];
+      ? ['districts']
+      : ['districts', 'dakshina_kannada', 'udupi', 'kasaragod'];
     geoJsonFiles.forEach(fetchGeoJson);
   }, []);
 
   useEffect(() => {
     return () => {
       if (toolTipPane.current) {
-        toolTipPane.current.innerHTML = "";
+        toolTipPane.current.innerHTML = '';
       }
     };
   }, [map]);
-
-  // useEffect(() => {
-  //   if (map && zoom > 15)
-  //     setActiveVillage(null);
-  // }, [zoom]);
 
   useEffect(() => {
     const handleFullScreenChange = () => {
@@ -158,8 +174,9 @@ const MAP = ({
       setFullScreen(isFs);
     };
 
-    document.addEventListener("fullscreenchange", handleFullScreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullScreenChange);
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () =>
+      document.removeEventListener('fullscreenchange', handleFullScreenChange);
   }, []);
 
   useEffect(() => {
@@ -175,44 +192,44 @@ const MAP = ({
   const handleMapReady = (mapInstance: Map) => {
     setMap(mapInstance);
 
-    const tooltips = document.querySelector(".leaflet-tooltip-pane");
+    const tooltips = document.querySelector('.leaflet-tooltip-pane');
     if (tooltips) {
       toolTipPane.current = tooltips;
     }
 
-    mapInstance.on("zoomstart", () => {
+    mapInstance.on('zoomstart', () => {
       if (toolTipPane.current) {
-        toolTipPane.current.innerHTML = "";
+        toolTipPane.current.innerHTML = '';
       }
     });
   };
 
   const styles = {
     default: {
-      color: "black",
+      color: 'black',
       weight: 1,
-      fillColor: "transparent",
+      fillColor: 'transparent',
       opacity: 0.5,
     },
     hover: {
-      color: "red",
+      color: 'red',
       weight: 2,
-      fillColor: "pink",
+      fillColor: 'pink',
       fillOpacity: 0.5,
       opacity: 1,
     },
     click: {
-      color: "red",
+      color: 'red',
       weight: 2,
-      fillColor: "blue",
+      fillColor: 'blue',
       fillOpacity: 0.5,
       opacity: 1,
     },
     viewMore: {
-      color: "#E87E36",
+      color: '#E87E36',
       weight: 4,
-      fillColor: "transparent"
-    }
+      fillColor: 'transparent',
+    },
   };
 
   const onEachVillage = (feature: GeoJSON.Feature, layer: Layer) => {
@@ -223,8 +240,8 @@ const MAP = ({
           if (feature.properties?.VILLAGE && layer !== activeLayerRef.current) {
             const tooltip = new Tooltip({
               permanent: false,
-              direction: "top",
-              className: `global-tooltip village-name-tooltip ${feature.properties?.VILLAGE.split(" ").join("-")}`
+              direction: 'top',
+              className: `global-tooltip village-name-tooltip ${feature.properties?.VILLAGE.split(' ').join('-')}`,
             })
               .setContent(feature.properties.VILLAGE)
               .setLatLng(layer.getCenter());
@@ -241,9 +258,11 @@ const MAP = ({
 
         mouseout: () => {
           if (!toolTipPane.current) return;
-          
-          const tooltip = toolTipPane.current.querySelector(`.${feature.properties?.VILLAGE.split(" ").join("-")}`);
-          if(tooltip) tooltip.remove();
+
+          const tooltip = toolTipPane.current.querySelector(
+            `.${feature.properties?.VILLAGE.split(' ').join('-')}`,
+          );
+          if (tooltip) tooltip.remove();
           if (layer !== activeLayerRef.current) {
             layer.setStyle(styles.default);
           }
@@ -263,15 +282,18 @@ const MAP = ({
           } else {
             layer.setStyle(styles.click);
             activeLayerRef.current = layer;
-            setActiveVillage(feature)
+            setActiveVillage(feature);
           }
         },
       });
     }
   };
 
-  const districtKeys = ["dakshina_kannada", "udupi", "kasaragod"];
-  const onEachUniteractiveVillage = (feature: GeoJSON.Feature, layer: Layer) => {
+  const districtKeys = ['dakshina_kannada', 'udupi', 'kasaragod'];
+  const onEachUniteractiveVillage = (
+    feature: GeoJSON.Feature,
+    layer: Layer,
+  ) => {
     if (editMode) {
       layer.on({
         click: (e: LeafletMouseEvent) => {
@@ -280,52 +302,60 @@ const MAP = ({
             taluk: feature.properties?.TALUK,
             maagane: feature.properties?.MAAGANE,
             village: feature.properties?.VILLAGE,
-            coordinates: [e.latlng.lat, e.latlng.lng]
+            coordinates: [e.latlng.lat, e.latlng.lng],
           });
-        }
-      })
+        },
+      });
     }
-  }
+  };
 
-  const uninteractiveVillageLayers = useMemo(() => (
-    <>
-      {districtKeys.map((key) =>
-        geoJsonData[key] && (
-          <GeoJSON
-            key={`u${key}`}
-            data={geoJsonData[key]}
-            style={{
-              color: "black",
-              weight: 1,
-              fillColor: "transparent",
-              opacity: 0.5
-            }}
-            onEachFeature={onEachUniteractiveVillage}
-          />
-        )
-      )}
-    </>
-  ), [geoJsonData]);
+  const uninteractiveVillageLayers = useMemo(
+    () => (
+      <>
+        {districtKeys.map(
+          (key) =>
+            geoJsonData[key] && (
+              <GeoJSON
+                key={`u${key}`}
+                data={geoJsonData[key]}
+                style={{
+                  color: 'black',
+                  weight: 1,
+                  fillColor: 'transparent',
+                  opacity: 0.5,
+                }}
+                onEachFeature={onEachUniteractiveVillage}
+              />
+            ),
+        )}
+      </>
+    ),
+    [geoJsonData],
+  );
 
-  const villageLayers = useMemo(() => (
-    <>
-      {districtKeys.map((key) =>
-        geoJsonData[key] && (
-          <GeoJSON
-            key={key}
-            data={geoJsonData[key]}
-            style={{
-              color: "black",
-              weight: 1,
-              fillColor: "transparent",
-              opacity: 0.5
-            }}
-            onEachFeature={onEachVillage}
-          />
-        )
-      )}
-    </>
-  ), [geoJsonData]);
+  const villageLayers = useMemo(
+    () => (
+      <>
+        {districtKeys.map(
+          (key) =>
+            geoJsonData[key] && (
+              <GeoJSON
+                key={key}
+                data={geoJsonData[key]}
+                style={{
+                  color: 'black',
+                  weight: 1,
+                  fillColor: 'transparent',
+                  opacity: 0.5,
+                }}
+                onEachFeature={onEachVillage}
+              />
+            ),
+        )}
+      </>
+    ),
+    [geoJsonData],
+  );
 
   // const handleView = () => {
   //   if (map && activeVillage && activeLayerRef.current) {
@@ -338,29 +368,31 @@ const MAP = ({
   const handleCoordinateChange = (e: ChangeEvent<HTMLInputElement>) => {
     setCoordinateErrors((prev) => ({
       ...prev,
-      [name]: ""
-    }))
+      [name]: '',
+    }));
 
     const { name, value } = e.target;
 
-    if (isNaN(Number(value)))
-      return
+    if (isNaN(Number(value))) return;
 
-    setActiveLocation(prev => ({
+    setActiveLocation((prev) => ({
       ...prev!,
-      [name]: value
-    }))
+      [name]: value,
+    }));
   };
 
   const pointInPolygon = (point: number[], polygon: number[][]) => {
-    const x = point[0], y = point[1];
+    const x = point[0],
+      y = point[1];
     let inside = false;
 
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-      const xi = polygon[i][0], yi = polygon[i][1];
-      const xj = polygon[j][0], yj = polygon[j][1];
+      const xi = polygon[i][0],
+        yi = polygon[i][1];
+      const xj = polygon[j][0],
+        yj = polygon[j][1];
 
-      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
         inside = !inside;
       }
     }
@@ -368,9 +400,13 @@ const MAP = ({
     return inside;
   };
 
-  const findLayerContainingCoordinates = (lat: number, lng: number, geoJsonData: any) => {
+  const findLayerContainingCoordinates = (
+    lat: number,
+    lng: number,
+    geoJsonData: any,
+  ) => {
     const point = [lng, lat];
-    const districtKeys = ["dakshina_kannada", "udupi", "kasaragod"];
+    const districtKeys = ['dakshina_kannada', 'udupi', 'kasaragod'];
 
     for (const key of districtKeys) {
       const data = geoJsonData[key];
@@ -381,23 +417,23 @@ const MAP = ({
 
         const { geometry } = feature;
 
-        if (geometry.type === "Polygon") {
+        if (geometry.type === 'Polygon') {
           const coordinates = geometry.coordinates[0];
           if (pointInPolygon(point, coordinates)) {
             return {
               layerKey: key,
               feature: feature,
-              properties: feature.properties
+              properties: feature.properties,
             };
           }
-        } else if (geometry.type === "MultiPolygon") {
+        } else if (geometry.type === 'MultiPolygon') {
           for (const polygon of geometry.coordinates) {
             const coordinates = polygon[0];
             if (pointInPolygon(point, coordinates)) {
               return {
                 layerKey: key,
                 feature: feature,
-                properties: feature.properties
+                properties: feature.properties,
               };
             }
           }
@@ -408,76 +444,88 @@ const MAP = ({
     return null;
   };
 
-  const handleCoordinatesSubmit = (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
+  const handleCoordinatesSubmit = (
+    e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>,
+  ) => {
     e.preventDefault();
 
     const newErrors = {
-      lat: "",
-      lng: ""
-    }
+      lat: '',
+      lng: '',
+    };
 
     const lat = newLocation?.coordinates?.[0];
     const lng = newLocation?.coordinates?.[1];
     if (!lat) {
-      newErrors.lat = "Latitude is required."
+      newErrors.lat = 'Latitude is required.';
     }
 
     if (!lng) {
-      newErrors.lng = "Longitude is required."
+      newErrors.lng = 'Longitude is required.';
     }
 
     if (lat && (lat! > MAP_MAX_BOUNDS[0][0] || lat! < MAP_MAX_BOUNDS[1][0])) {
-      newErrors.lat = "Latitude exceeds max bounds."
+      newErrors.lat = 'Latitude exceeds max bounds.';
     }
 
     if (lng && (lng! > MAP_MAX_BOUNDS[1][1] || lng! < MAP_MAX_BOUNDS[0][1])) {
-      newErrors.lng = "Longitude exceeds max bounds."
+      newErrors.lng = 'Longitude exceeds max bounds.';
     }
 
     setCoordinateErrors(newErrors);
-    const hasError = Object.values(newErrors).some(err => err !== "");
-    if (hasError)
-      return
+    const hasError = Object.values(newErrors).some((err) => err !== '');
+    if (hasError) return;
 
     const containingLayer = findLayerContainingCoordinates(
       lat,
       lng,
-      geoJsonData
+      geoJsonData,
     );
 
     if (!containingLayer) {
-      toast.error("Somethig went wrong! Try again later");
+      toast.error('Somethig went wrong! Try again later');
     }
 
     map?.flyTo([lat, lng], 18);
-    setNewLocation(prev => ({
+    setNewLocation((prev) => ({
       ...prev!,
       district: containingLayer?.properties.DISTRICT,
       taluk: containingLayer?.properties.TALUK,
       village: containingLayer?.properties.VILLAGE,
-      maagane: containingLayer?.properties.MAAGANE
+      maagane: containingLayer?.properties.MAAGANE,
     }));
   };
 
   const handleSubmit = async () => {
-    if(!editMode) return;
+    if (!editMode) return;
 
     if (editMode && !(state as LocationState)?.location?.district) {
-      toast.error("You need to submit the location details first.")
+      toast.error('You need to submit the location details first.');
       return;
     }
 
-    await locationSubmitApi.refetch({ endpoint: `/drafts/location/${id}/location`, method: "POST", body: { location: state?.location } })
-    setState?.(prev => ({
-      ...prev,
-      location: {
-        ...(prev as LocationState).location,
-        ...newLocation
-      }
-    }) as LocationState);
+    await locationSubmitApi.refetch({
+      endpoint: `/drafts/location/${id}/location`,
+      method: 'POST',
+      body: {
+        data: {
+          location: state?.location,
+        },
+      },
+    });
+    setState?.(
+      (prev) =>
+        ({
+          ...prev,
+          location: {
+            ...(prev as LocationState).location,
+            ...newLocation,
+          },
+        }) as LocationState,
+    );
 
-    toast.success("Location stored successfully.");
-  }
+    toast.success('Location stored successfully.');
+  };
 
   const handleZoomChange = (delta: number) => map && map.setZoom(zoom + delta);
 
@@ -488,8 +536,8 @@ const MAP = ({
       setMap(leafletMap);
       handleMapReady(leafletMap);
 
-      if (!leafletMap.hasEventListeners("gestureHandling")) {
-        leafletMap.addHandler("gestureHandling", GestureHandling);
+      if (!leafletMap.hasEventListeners('gestureHandling')) {
+        leafletMap.addHandler('gestureHandling', GestureHandling);
       }
 
       if (minimal || !fullScreen) {
@@ -506,9 +554,9 @@ const MAP = ({
     useEffect(() => {
       if (leafletMap) {
         const handleZoom = () => setZoom(leafletMap.getZoom());
-        leafletMap.on("zoomend", handleZoom);
+        leafletMap.on('zoomend', handleZoom);
         return () => {
-          leafletMap.off("zoomend", handleZoom);
+          leafletMap.off('zoomend', handleZoom);
         };
       }
     }, [leafletMap]);
@@ -530,11 +578,11 @@ const MAP = ({
         }
       };
 
-      window.addEventListener("keydown", handleKeyDown);
-      window.addEventListener("keyup", handleKeyUp);
+      window.addEventListener('keydown', handleKeyDown);
+      window.addEventListener('keyup', handleKeyUp);
       return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-        window.removeEventListener("keyup", handleKeyUp);
+        window.removeEventListener('keydown', handleKeyDown);
+        window.removeEventListener('keyup', handleKeyUp);
       };
     }, [leafletMap]);
 
@@ -559,52 +607,54 @@ const MAP = ({
   };
 
   const handleMarkerHover = (loc: ILocation) => {
-    if(!map) return;
+    if (!map) return;
 
     const tooltip = new Tooltip({
       permanent: false,
-      direction: "top",
+      direction: 'top',
       offset: [0, -41],
-      className: `global-tooltip location-tooltip ${loc.name.split(" ").join("-")}`
+      className: `global-tooltip location-tooltip ${loc.name.split(' ').join('-')}`,
     })
       .setContent(loc.name)
       .setLatLng([loc.coordinates?.[0], loc.coordinates?.[1]]);
 
     tooltip.addTo(map);
-  }
+  };
 
   const handleMarkerOut = (loc: ILocation) => {
-    if(!map || !toolTipPane.current) return;
+    if (!map || !toolTipPane.current) return;
 
-    const tooltip = toolTipPane.current.querySelector(`.${loc.name.split(" ").join("-")}`);
-    if(tooltip) tooltip.remove();
-  }
+    const tooltip = toolTipPane.current.querySelector(
+      `.${loc.name.split(' ').join('-')}`,
+    );
+    if (tooltip) tooltip.remove();
+  };
 
   const handleMarkerClick = (e: LeafletMouseEvent, loc: ILocation) => {
-    if(!map || !toolTipPane.current) return;
-    if(editMode) return;
+    if (!map || !toolTipPane.current) return;
+    if (editMode) return;
 
-    if(activeLocation?.name) {
+    if (activeLocation?.name) {
       const selectedMarker = markers.current[activeLocation.name];
-      if(selectedMarker) {
+      if (selectedMarker) {
         selectedMarker.setIcon(orangeMarker);
       }
     }
 
     const marker = e.target as L.Marker;
     marker.setIcon(blueMarker);
-    if(editMode !== undefined) {
+    if (editMode !== undefined) {
       setActiveLocation(loc);
       return;
     }
-
-  }
+  };
 
   return (
     <div
-      className={minimal
-        ? "w-full h-full relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden"
-        : "w-screen h-screen relative"
+      className={
+        minimal
+          ? 'w-full h-full relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden'
+          : 'w-screen h-screen relative'
       }
       ref={minimal ? ref : mapRef}
     >
@@ -636,8 +686,10 @@ const MAP = ({
       )}
 
       {!minimal && (
-        <div className="z-10 absolute flex flex-col justify-center items-center
-          gap-2 right-0 top-16 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
+        <div
+          className="z-10 absolute flex flex-col justify-center items-center
+          gap-2 right-0 top-16 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+        >
           {fullScreen ? (
             <AiOutlineFullscreenExit
               className="text-white text-[2.5rem] stroke-2 hover:scale-110"
@@ -649,120 +701,146 @@ const MAP = ({
               onClick={() => setFullScreen(true)}
             />
           )}
-          {
-            editMode !== undefined && location &&
+          {editMode !== undefined && location && (
             <IoMdDoneAll
               className={`text-[2.5rem] 
-                  ${activeLocation?.district || newLocation?.district ? "text-white hover:scale-110" : "cursor-not-allowed text-gray-400"}`}
+                  ${activeLocation?.district || newLocation?.district ? 'text-white hover:scale-110' : 'cursor-not-allowed text-gray-400'}`}
               onClick={handleSubmit}
             />
-          }
+          )}
         </div>
       )}
 
-      {!minimal && editMode && (
-        !askForCoordinates ?
-          (
-            <div
-              className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white hover:scale-105 
+      {!minimal &&
+        editMode &&
+        (!askForCoordinates ? (
+          <div
+            className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white hover:scale-105 
                 p-2 rounded-xl hover:bg-primary text-back cursor-pointer text-[2rem]"
-              onClick={() => setAskForCoordinates(true)}
-            >
-              <FaMagnifyingGlassLocation className="" />
-            </div>
-          ) :
-
-          (
-            <form
-              className="absolute w-1/3 flex flex-col gap-3 left-5 top-1/2 -translate-y-1/2 z-10 bg-black
+            onClick={() => setAskForCoordinates(true)}
+          >
+            <FaMagnifyingGlassLocation className="" />
+          </div>
+        ) : (
+          <form
+            className="absolute w-1/3 flex flex-col gap-3 left-5 top-1/2 -translate-y-1/2 z-10 bg-black
                 p-6 rounded-xl text-back cursor-pointer"
-              onSubmit={handleCoordinatesSubmit}>
-              <MdCancel
-                size={"25px"}
-                className="absolute top-3 right-3 fill-white hover:fill-primary"
-                onClick={() => setAskForCoordinates(false)}
+            onSubmit={handleCoordinatesSubmit}
+          >
+            <MdCancel
+              size={'25px'}
+              className="absolute top-3 right-3 fill-white hover:fill-primary"
+              onClick={() => setAskForCoordinates(false)}
+            />
+            <div className="w-full flex flex-col items-center justify-between gap-2">
+              <label className="text-white" htmlFor="lat">
+                Latitude
+              </label>
+              <input
+                className="p-1 bg-white w-4/5"
+                type="text"
+                id="lat"
+                name="lat"
+                autoComplete="off"
+                value={newLocation?.coordinates[0] ?? ''}
+                onChange={handleCoordinateChange}
               />
-              <div className="w-full flex flex-col items-center justify-between gap-2">
-                <label className="text-white" htmlFor="lat">Latitude</label>
-                <input
-                  className="p-1 bg-white w-4/5"
-                  type="text"
-                  id="lat"
-                  name="lat"
-                  autoComplete="off"
-                  value={newLocation?.coordinates[0] ?? ""}
-                  onChange={handleCoordinateChange}
-                />
-                {coordinateErrors.lat && <p className="text-red-500">{coordinateErrors.lat}</p>}
-              </div>
-              <div className="w-full flex flex-col items-center justify-between gap-2">
-                <label className="text-white" htmlFor="lng">Longitude</label>
-                <input
-                  className="p-1 bg-white w-4/5"
-                  type="text"
-                  id="lng"
-                  name="lng"
-                  autoComplete="off"
-                  value={newLocation?.coordinates[1] ?? ""}
-                  onChange={handleCoordinateChange}
-                />
-                {coordinateErrors.lng && <p className="text-red-500">{coordinateErrors.lng}</p>}
-              </div>
-              <Button content="Find" type="submit" className="w-fit mx-auto" />
-            </form>
-          )
-      )}
+              {coordinateErrors.lat && (
+                <p className="text-red-500">{coordinateErrors.lat}</p>
+              )}
+            </div>
+            <div className="w-full flex flex-col items-center justify-between gap-2">
+              <label className="text-white" htmlFor="lng">
+                Longitude
+              </label>
+              <input
+                className="p-1 bg-white w-4/5"
+                type="text"
+                id="lng"
+                name="lng"
+                autoComplete="off"
+                value={newLocation?.coordinates[1] ?? ''}
+                onChange={handleCoordinateChange}
+              />
+              {coordinateErrors.lng && (
+                <p className="text-red-500">{coordinateErrors.lng}</p>
+              )}
+            </div>
+            <Button content="Find" type="submit" className="w-fit mx-auto" />
+          </form>
+        ))}
 
       {!minimal && activeVillage && (
-        <div className="absolute bottom-0 m-5 p-5 text-white z-1000
+        <div
+          className="absolute bottom-0 m-5 p-5 text-white z-1000
            flex flex-col rounded-2xl"
         >
           <p
             style={{
-              textShadow: "1px 1px 10px black"
+              textShadow: '1px 1px 10px black',
             }}
-            className="text-primary font-bold mb-1">
+            className="text-primary font-bold mb-1"
+          >
             {activeVillage.properties?.VILLAGE}
           </p>
           <p
             style={{
-              textShadow: "1px 1px 10px black"
+              textShadow: '1px 1px 10px black',
             }}
-            className="text-sm text-gray-300">
+            className="text-sm text-gray-300"
+          >
             {activeVillage.properties?.DISTRICT}
           </p>
           <p
             style={{
-              textShadow: "1px 1px 10px black"
+              textShadow: '1px 1px 10px black',
             }}
-            className="text-sm text-gray-300">
-            {activeVillage.properties?.TALUK || "Unknown"}
+            className="text-sm text-gray-300"
+          >
+            {activeVillage.properties?.TALUK || 'Unknown'}
           </p>
           <p
             style={{
-              textShadow: "1px 1px 10px black"
+              textShadow: '1px 1px 10px black',
             }}
-            className="text-sm text-gray-300">
-            {activeVillage.properties?.MAAGANE || "Unknown"}
+            className="text-sm text-gray-300"
+          >
+            {activeVillage.properties?.MAAGANE || 'Unknown'}
           </p>
           {/* <Button content="View More" className="mx-auto text-sm" onClick={handleView} /> */}
         </div>
       )}
 
-      <div ref={minimal ? undefined : ref} className="z-0 relative w-full h-full">
+      <div
+        ref={minimal ? undefined : ref}
+        className="z-0 relative w-full h-full"
+      >
         <div className="z-10 absolute flex flex-col justify-center items-center gap-2 left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
-          <div className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md ${lock ? "pointer-events-none" : ""}`}>
-            <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(1)}>
-              <FaPlus className={`${lock ? "text-slate-300" : "text-black"}`} />
+          <div
+            className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md ${lock ? 'pointer-events-none' : ''}`}
+          >
+            <div
+              className="h-1/2 p-1 pl-2 pr-2"
+              onClick={() => handleZoomChange(1)}
+            >
+              <FaPlus className={`${lock ? 'text-slate-300' : 'text-black'}`} />
             </div>
-            <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(-1)}>
-              <FaMinus className={`${lock ? "text-slate-300" : "text-black"}`} />
+            <div
+              className="h-1/2 p-1 pl-2 pr-2"
+              onClick={() => handleZoomChange(-1)}
+            >
+              <FaMinus
+                className={`${lock ? 'text-slate-300' : 'text-black'}`}
+              />
             </div>
           </div>
           <IoLocationSharp
-            className={`${lock ? "text-slate-300 pointer-events-none" : "text-red-500"}`}
+            className={`${lock ? 'text-slate-300 pointer-events-none' : 'text-red-500'}`}
             size={32}
-            onClick={() => map && map.setView(MAP_CENTER, MAP_INITIAL_ZOOM, { animate: true })}
+            onClick={() =>
+              map &&
+              map.setView(MAP_CENTER, MAP_INITIAL_ZOOM, { animate: true })
+            }
           />
 
           {lock ? (
@@ -801,61 +879,64 @@ const MAP = ({
           {geoJsonData?.districts && (
             <GeoJSON
               data={geoJsonData.districts}
-              style={{ color: "var(--primary)", fillColor: "transparent", opacity: 0.5 }}
+              style={{
+                color: 'var(--primary)',
+                fillColor: 'transparent',
+                opacity: 0.5,
+              }}
             />
           )}
 
-          {
-            !minimal && zoom >= 11 && (
-              zoom > 15 ?
-                uninteractiveVillageLayers
-                :
-                villageLayers
-          )}
+          {!minimal &&
+            zoom >= 11 &&
+            (zoom > 15 ? uninteractiveVillageLayers : villageLayers)}
 
-          {
-            !minimal && editMode !== undefined && state?.location && validateLocationFields(state.location as ILocation) &&
+          {!minimal &&
+            editMode !== undefined &&
+            state?.location &&
+            validateLocationFields(state.location as ILocation) && (
               <Marker
                 eventHandlers={{
-                  mouseover: () => handleMarkerHover(state?.location as ILocation)
+                  mouseover: () =>
+                    handleMarkerHover(state?.location as ILocation),
                 }}
                 position={[
-                  activeLocation?.coordinates?.[0] || newLocation?.coordinates?.[0], 
-                  activeLocation?.coordinates?.[1] || newLocation?.coordinates?.[1]
+                  activeLocation?.coordinates?.[0] ||
+                    newLocation?.coordinates?.[0],
+                  activeLocation?.coordinates?.[1] ||
+                    newLocation?.coordinates?.[1],
                 ]}
               />
-          }
-          {
-            !minimal && activeVillage && zoom >= 14 && existingLocations?.length > 0 && (
-              existingLocations.filter(loc => loc.village === activeVillage.properties?.VILLAGE).map(loc => (
+            )}
+          {!minimal &&
+            activeVillage &&
+            zoom >= 14 &&
+            existingLocations?.length > 0 &&
+            existingLocations
+              .filter(
+                (loc) => loc.village === activeVillage.properties?.VILLAGE,
+              )
+              .map((loc) => (
                 <Marker
                   key={loc.id}
                   ref={(el) => {
-                    if(el) {
+                    if (el) {
                       markers.current[loc.name] = el;
-                    } 
+                    }
                   }}
-                  position={[
-                    loc.coordinates?.[0],
-                    loc.coordinates?.[1]
-                  ]}
+                  position={[loc.coordinates?.[0], loc.coordinates?.[1]]}
                   eventHandlers={{
                     mouseover: () => handleMarkerHover(loc),
                     mouseout: () => handleMarkerOut(loc),
-                    mousedown: (e) => handleMarkerClick(e, loc)
+                    mousedown: (e) => handleMarkerClick(e, loc),
                   }}
-                  icon={
-                    orangeMarker
-                  }
+                  icon={orangeMarker}
                 />
-              ))
-            )
-          }
+              ))}
 
           {React.Children.toArray(children)}
         </MapContainer>
       </div>
-
     </div>
   );
 };

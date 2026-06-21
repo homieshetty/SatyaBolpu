@@ -96,7 +96,7 @@ export const getEvent = async (req: Request, res: Response) => {
 export const uploadEvent = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user._id;
-    const { formData: eventData } = req.body;
+    const { details: eventData } = req.body?.data;
     if (!eventData || !validateData['event'](eventData)) {
       return res.status(400).json({ msg: 'Missing required field.' });
     }

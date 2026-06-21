@@ -46,8 +46,16 @@ export const buildAnimationProps = (
   // buttonRefs: React.RefObject<HTMLButtonElement[]>,
   isMobile: boolean,
 ): PropsType[] => {
-  const upcomingEventRefsAnimations: PropsType[] =
-    upcomingEventRefs.current.map((ref, index) => ({
+  // Helper function to check if a ref exists
+  const refExists = (ref: any) => {
+    if (!ref) return false;
+    if (Array.isArray(ref))
+      return ref.length > 0 && ref.some((r) => r !== null);
+    return true;
+  };
+
+  const upcomingEventRefsAnimations: PropsType[] = upcomingEventRefs.current
+    .map((ref, index) => ({
       name: `upcoming-event-${index}`,
       ref,
       fromVars: {
@@ -60,11 +68,12 @@ export const buildAnimationProps = (
         scrollTrigger: {
           trigger: ref,
           scrub: true,
-          start: 'top 45%',
-          end: 'top 25%',
+          start: 'center center',
+          end: 'bottom center',
         },
       },
-    }));
+    }))
+    .filter(({ ref }) => refExists(ref));
 
   return [
     {
@@ -485,7 +494,6 @@ export const buildAnimationProps = (
         scrollTrigger: {
           trigger: scrollWatcherRef.current[5],
           start: '-10% center',
-          markers: true,
         },
       },
     },
@@ -500,8 +508,8 @@ export const buildAnimationProps = (
         ease: 'none',
         scrollTrigger: {
           trigger: scrollWatcherRef.current[5],
-          start: 'top 60%',
-          end: 'bottom 60%',
+          start: 'top center',
+          end: 'bottom center+=10%',
           scrub: true,
         },
       },
@@ -525,13 +533,13 @@ export const buildAnimationProps = (
       name: 'cta-bgs',
       ref: bgRefs.current,
       fromVars: {
-        clipPath: (index) =>
+        clipPath: (index: number) =>
           isMobile
             ? initalMobileClipPaths[index]
             : initalDesktopClipPaths[index],
       },
       toVars: {
-        clipPath: (index) =>
+        clipPath: (index: number) =>
           isMobile ? finalMobileClipPaths[index] : finalDesktopClipPaths[index],
         duration: 0.25,
         stagger: 0.1,
@@ -543,5 +551,5 @@ export const buildAnimationProps = (
         },
       },
     },
-  ];
+  ].filter(({ ref }) => refExists(ref));
 };

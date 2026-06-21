@@ -192,7 +192,6 @@ const blogSchema = new Schema<IBlog>(
   {
     title: {
       type: String,
-      required: true,
       minLength: 5,
     },
     description: {
@@ -206,7 +205,6 @@ const blogSchema = new Schema<IBlog>(
     },
     content: {
       type: String,
-      required: true,
     },
     location: {
       type: Schema.Types.ObjectId,

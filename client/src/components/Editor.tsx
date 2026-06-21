@@ -237,6 +237,10 @@ const Editor = ({
 
   const handleSave = useCallback(async () => {
     if (!editor || !state) return;
+    if (editor.getHTML().split(' ').length < 20) {
+      toast.error('Content is too short to be saved.');
+      return;
+    }
 
     const content = await uploadFiles(editor.getHTML());
     if (title !== state.details?.title) {
@@ -255,7 +259,11 @@ const Editor = ({
     const res = await api.refetch({
       endpoint,
       method: 'POST',
-      body: { content },
+      body: {
+        data: {
+          content,
+        },
+      },
     });
 
     if (!res) {

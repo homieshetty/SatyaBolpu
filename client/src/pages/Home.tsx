@@ -19,7 +19,6 @@ import { buildAnimationProps } from '../constants/Animations';
 import { useNavigate } from 'react-router-dom';
 import { Marker, Popup } from 'react-leaflet';
 import SVGHeader2 from '../constants/SVGHeader2';
-import { IEvent } from '../types/globals';
 import { PostCardProps } from '../components/PostCard';
 import useApi from '../hooks/useApi';
 import PostCard from '../components/PostCard';
@@ -150,19 +149,28 @@ const Home = () => {
           isMobile,
         );
 
-        animations.forEach(({ ref, fromVars, toVars }) => {
+        // Filter out animations with invalid/null refs
+        const validAnimations = animations.filter(({ ref }) => {
+          if (!ref) return false;
+          if (Array.isArray(ref)) {
+            return (
+              ref.length > 0 && ref.some((r) => r !== null && r !== undefined)
+            );
+          }
+          return true;
+        });
+
+        validAnimations.forEach(({ ref, fromVars, toVars }) => {
           gsap.fromTo(ref, fromVars, toVars);
         });
 
         // console.table(
-        //   animations.map(anim => ({
+        //   validAnimations.map((anim) => ({
         //     name: anim.name,
         //     exists: !!anim.ref,
         //     isArray: Array.isArray(anim.ref),
-        //     length: Array.isArray(anim.ref)
-        //       ? anim.ref.length
-        //       : 'single'
-        //   }))
+        //     length: Array.isArray(anim.ref) ? anim.ref.length : 'single',
+        //   })),
         // );
       };
 
@@ -536,9 +544,6 @@ const Home = () => {
           className="w-screen flex flex-col items-center justify-start gap-20 py-20 px-6"
           ref={(el) => {
             if (el) scrollWatcherRef.current[5] = el;
-          }}
-          style={{
-            minHeight: `${upcomingEvents.length * 100}vh`,
           }}
         >
           <div

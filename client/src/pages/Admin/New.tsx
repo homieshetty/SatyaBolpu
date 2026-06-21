@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useState } from 'react';
 import {
   NewType,
   CultureState,
@@ -76,6 +76,9 @@ const New = ({ type }: { type: NewType }) => {
           onSubmit={(_, setFormData, res) => {
             if (!draftable) {
               setFormData(getDetails(null, type) as DetailsType);
+              if (type === 'event') {
+                navigate('/create');
+              }
             } else
               setState((prev) => ({
                 ...prev,
@@ -97,7 +100,7 @@ const New = ({ type }: { type: NewType }) => {
                     React.SetStateAction<PostState | CultureState>
                   >
                 }
-                endpoint={`/drafts/${type}/${id}`}
+                endpoint={`/drafts/${type}/${id}/content`}
               />
             ),
           }
@@ -119,7 +122,7 @@ const New = ({ type }: { type: NewType }) => {
     };
   }, [state, data]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (Object.keys(steps).length <= 0) return;
     setShowStep(
       Object.keys(steps)[
@@ -133,7 +136,7 @@ const New = ({ type }: { type: NewType }) => {
     if (!res) return;
     if (
       type === 'culture' ||
-      type === 'event' ||
+      type === 'blog' ||
       type === 'post' ||
       type === 'location'
     )

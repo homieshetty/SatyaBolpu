@@ -368,6 +368,17 @@ type NewDataMap = {
   };
 };
 
-export type NewData<T extends NewProps['type']> = NewDataMap[T] & {
+export type NewData<T extends NewType> = NewDataMap[T] & {
   submitApi: ApiState<any>;
+};
+
+export type MapProps = {
+  minimal?: boolean;
+  children?: ReactNode;
+  ref?: React.RefObject<HTMLDivElement | null>;
+  editMode?: boolean;
+  state?: PostState | EventState | LocationState;
+  setState?: React.Dispatch<
+    React.SetStateAction<EventState | PostState | LocationState>
+  >;
 };
