@@ -1,6 +1,19 @@
 import { Request } from 'express';
 import { Schema, Document } from 'mongoose';
 
+export interface AuthRequest extends Request {
+  user?: any;
+}
+
+export interface IDonation extends Document {
+  userId: Schema.Types.ObjectId;
+  amount: number;
+  paymentId: string;
+  orderId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IPhone extends Document {
   dialCode: number;
   number: number;

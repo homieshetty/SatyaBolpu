@@ -10,6 +10,7 @@ import feedRoutes from "./routes/FeedRoutes.js";
 import blogRoutes from "./routes/BlogRoutes.js";
 import locationRoutes from "./routes/LocationRoutes.js";
 import userRoutes from "./routes/UserRoutes.js";
+import donationRoutes from "./routes/donation.routes.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./utils/db.js";
@@ -56,5 +57,6 @@ app.use("/api/others", otherRoutes);
 app.use("/api/drafts", draftRoutes);
 app.use("/api/locations", locationRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/donate", donationRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
